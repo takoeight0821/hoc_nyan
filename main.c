@@ -25,13 +25,15 @@ int main()
 
   scanf("%d+%d", &a, &b);
 
+  Node* ast = new_plus_node(new_int_node(a), new_int_node(b));
+
   puts(".intel_syntax noprefix");
   puts(".text");
   puts(".global main");
   puts("main:");
   emit_mov("rax", "0");
-  emit_add_const("rax", a);
-  emit_add_const("rax", b);
+  emit_add_const("rax", ast->lhs->integer);
+  emit_add_const("rax", ast->rhs->integer);
   puts("\tret");
 
   return 0;
