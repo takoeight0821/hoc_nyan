@@ -1,14 +1,5 @@
 #include <stdio.h>
-
-typedef struct {
-  void **data;
-  int capacity;
-  int len;
-} Vector;
-
-Vector *new_vec(void);
-void vec_push(Vector* v, void* elem);
-void *vec_pop(Vector *v);
+#include "hoc.h"
 
 void emit_mov(const char * dst, const char * src)
 {
