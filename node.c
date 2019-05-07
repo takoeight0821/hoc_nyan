@@ -1,5 +1,6 @@
 #include "hoc.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 Node* new_node(enum NodeTag tag) {
   Node* node = malloc(sizeof(Node));

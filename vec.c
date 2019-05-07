@@ -1,4 +1,5 @@
 #include "hoc.h"
+#include <stdlib.h>
 
 void vec_extend(Vector* v, size_t new_capacity) {
   if (new_capacity <= v->capacity)

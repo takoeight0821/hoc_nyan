@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <stdio.h>
 
 typedef struct {
   void **ptr;
@@ -43,3 +43,10 @@ Node* new_node(enum NodeTag tag);
 Node* new_plus_node(Node* lhs, Node* rhs);
 Node* new_int_node(int integer);
 void dump_node(Node* node, int level);
+
+// utils.c
+char* format(const char* fmt, ...);
+
+// emit.c
+void emit_mov(char* dst, char* src);
+void emit_add(char* dst, char* src);
