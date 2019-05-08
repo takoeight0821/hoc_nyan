@@ -1,4 +1,8 @@
 #include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 typedef struct {
   void **ptr;
@@ -49,7 +53,7 @@ void dump_node(Node* node, int level);
 
 // utils.c
 char* format(const char* fmt, ...);
-void error(const char* fmt, ...);
+void error(const char* fmt, ...)__attribute__((noreturn));
 
 // emit.c
 void emit_mov(char* dst, char* src);

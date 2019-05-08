@@ -12,7 +12,7 @@ char *format(const char *fmt, ...) {
   return strdup(buf);
 }
 
-void error(const char *fmt, ...) {
+void error(const char *fmt, ...) __attribute__((noreturn)) {
   va_list ap;
   va_start(ap, fmt);
   fprintf(stderr, fmt, ap);
