@@ -54,6 +54,7 @@ void error(const char* fmt, ...);
 // emit.c
 void emit_mov(char* dst, char* src);
 void emit_add(char* dst, char* src);
+void compile(Node* node);
 
 // lex.c
 Vector* lex(FILE* file);
