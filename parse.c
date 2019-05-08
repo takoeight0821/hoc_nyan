@@ -1,50 +1,36 @@
 #include "hoc.h"
-#include <stdbool.h>
 
-Vector* tokens;
-size_t current;
-Node* node;
+static Token* lookahead;
+static size_t p = 0; // 次の字句のインデックス
 
-void setup_parser(Vector* t) {
-  tokens = t;
-  current = 0;
+static void consume() {
+  p++;
 }
 
-void next() {
-  current++;
+static Token lt(size_t i) {
+  return lookahead[p + i];
 }
 
-Token* peek() {
-  return (Token*)vec_get(tokens, current);
+static enum TokenTag la(size_t i) {
+  return lt(i).tag;
 }
 
-bool consume(enum TokenTag tag) {
-  if (tag == peek()->tag) {
-    next();
-    return true;
-  }
-  return false;
+static void match(enum TokenTag tag) {
+  if (la(0) == tag) consume();
+  else error("match error\n");
 }
 
-void except(enum TokenTag tag) {
-  if (!consume(tag)) {
-    error("expect: unexpected token");
-  }
+static Node* integer() {
+  Node* n = new_int_node(lt(0).integer);
+  match(TINT);
+  return n;
 }
 
-Node* integer() {
-  if (TINT == peek()->tag) {
-    int i = peek()->integer;
-    except(TINT);
-    return new_int_node(i);
-  }
-  error("bad token");
-}
-
-Node* add() {
+static Node* add() {
   Node* lhs = integer();
   for (;;) {
-    if (consume(TPLUS)) {
+    if (la(0) == TPLUS) {
+      consume();
       lhs = new_plus_node(lhs, integer());
     } else {
       return lhs;
@@ -53,6 +39,10 @@ Node* add() {
 }
 
 Node* parse(Vector* tokens) {
-  setup_parser(tokens);
+  lookahead = calloc(tokens->length, sizeof(Token));
+  for (size_t i = 0; i < tokens->length; i++) {
+    lookahead[i] = *(Token*)vec_get(tokens, i);
+  }
+
   return add();
 }
