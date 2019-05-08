@@ -1,6 +1,8 @@
 # Vagrant
 .vagrant/
 
+tmp/
+
 # Prerequisites
 *.d
 
