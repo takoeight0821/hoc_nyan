@@ -39,6 +39,7 @@ void dump_node(Node* node, int level) {
   } else if (node->tag == NPLUS) {
     printf("+:\n");
     dump_node(node->lhs, level+1); puts("");
+    fflush(stdout);
     dump_node(node->rhs, level+1); puts("");
   }
 }

@@ -1,6 +1,14 @@
 #include "hoc.h"
 #include <stdlib.h>
 
+Vector* new_vec() {
+  Vector* v = malloc(sizeof(Vector));
+  v->ptr = malloc(sizeof(void*) * 16);
+  v->capacity = 16;
+  v->length = 0;
+  return v;
+}
+
 void vec_extend(Vector* v, size_t new_capacity) {
   if (new_capacity <= v->capacity)
     return;
@@ -20,9 +28,9 @@ void vec_set(Vector* v, size_t i, void* elem) {
 }
 
 void vec_push(Vector* v, void* elem) {
+  v->ptr[v->length] = elem;
   vec_extend(v, v->length + 1);
   v->length++;
-  v->ptr[v->length] = elem;
 }
 
 void* vec_pop(Vector* v) {

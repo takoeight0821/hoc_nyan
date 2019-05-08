@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include "hoc.h"
 
-int main()
+int main(int argc, char** argv)
 {
-  int a;
-  int b;
+  FILE* fp = fopen(argv[1], "r");
 
-  scanf("%d+%d", &a, &b);
+  Vector* tokens = lex(fp);
 
-  Node* ast = new_plus_node(new_int_node(a), new_int_node(b));
+  fclose(fp);
+
+  Node* ast = parse(tokens);
 
   puts(".intel_syntax noprefix");
   puts(".text");

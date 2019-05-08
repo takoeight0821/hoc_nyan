@@ -7,6 +7,7 @@ typedef struct {
 } Vector;
 
 // vec.c
+Vector* new_vec();
 void* vec_get(Vector* v, size_t i);
 void vec_set(Vector* v, size_t i, void* elem);
 void vec_push(Vector* v, void* elem);
@@ -46,7 +47,15 @@ void dump_node(Node* node, int level);
 
 // utils.c
 char* format(const char* fmt, ...);
+void error(const char* fmt, ...);
 
 // emit.c
 void emit_mov(char* dst, char* src);
 void emit_add(char* dst, char* src);
+
+// lex.c
+Vector* lex(FILE* file);
+void dump_token(Token tok);
+
+// parse.c
+Node* parse(Vector* tokens);
