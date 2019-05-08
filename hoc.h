@@ -14,6 +14,7 @@ void vec_push(Vector* v, void* elem);
 void* vec_pop(Vector* v);
 
 enum TokenTag {
+  TEOF,
   TINT,
   TPLUS,
 };
@@ -26,6 +27,7 @@ typedef struct {
 enum NodeTag {
     NINT,
     NPLUS,
+    NERROR,
 };
 
 typedef struct Node Node;

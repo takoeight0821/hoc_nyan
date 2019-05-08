@@ -7,10 +7,12 @@ long prev; // 直前にreadcしたファイル位置
 
 void dump_token(Token tok) {
   switch (tok.tag) {
-  case NINT:
+  case TEOF:
+    break;
+  case TINT:
     printf("[INT %d]", tok.integer);
     break;
-  case NPLUS:
+  case TPLUS:
     printf("[PLUS]");
     break;
   }
@@ -37,7 +39,7 @@ char* to_string(Vector* v) {
   char* str = calloc(v->length+1, sizeof(char));
   size_t len = v->length;
   for (int i = 0; i < len; i++) {
-    char c = *(char*)vec_pop(v);
+    char c = *(char*)v->ptr[i];
     str[i] = c;
   }
   str[len] = '\0';
@@ -57,6 +59,7 @@ Vector* lex(FILE* file) {
   Vector* tokens = new_vec();
 
   while ((c = readc()) != EOF) {
+    text->length = 0;
     switch (c) {
     case '0':
     case '1':
@@ -85,5 +88,6 @@ Vector* lex(FILE* file) {
     }
     }
   }
+  vec_push(tokens, new_token(TEOF));
   return tokens;
 }

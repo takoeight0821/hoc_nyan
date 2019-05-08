@@ -3,6 +3,7 @@
 
 Vector* tokens;
 size_t current;
+Node* node;
 
 void setup_parser(Vector* t) {
   tokens = t;
@@ -17,7 +18,7 @@ Token* peek() {
   return (Token*)vec_get(tokens, current);
 }
 
-bool accept(enum TokenTag tag) {
+bool consume(enum TokenTag tag) {
   if (tag == peek()->tag) {
     next();
     return true;
@@ -26,22 +27,29 @@ bool accept(enum TokenTag tag) {
 }
 
 void except(enum TokenTag tag) {
-  if (!accept(tag)) {
+  if (!consume(tag)) {
     error("expect: unexpected token");
   }
 }
 
 Node* integer() {
-  int i = peek()->integer;
-  except(TINT);
-  return new_int_node(i);
+  if (TINT == peek()->tag) {
+    int i = peek()->integer;
+    except(TINT);
+    return new_int_node(i);
+  }
+  error("bad token");
 }
 
 Node* add() {
   Node* lhs = integer();
-  except(TPLUS);
-  Node* rhs = integer();
-  return new_plus_node(lhs, rhs);
+  for (;;) {
+    if (consume(TPLUS)) {
+      lhs = new_plus_node(lhs, integer());
+    } else {
+      return lhs;
+    }
+  }
 }
 
 Node* parse(Vector* tokens) {

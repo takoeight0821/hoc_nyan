@@ -25,21 +25,21 @@ Node* new_int_node(int integer) {
   return node;
 }
 
-void indent(int level) {
-  for (int i = 0; i < level; i++) {
-    printf(" ");
-  }
-}
+/* void indent(int level) { */
+/*   for (int i = 0; i < level; i++) { */
+/*     printf(" "); */
+/*   } */
+/* } */
 
 void dump_node(Node* node, int level) {
-  indent(level);
+  /* indent(level); */
 
   if (node->tag == NINT) {
     printf("%d", node->integer);
   } else if (node->tag == NPLUS) {
-    printf("+:\n");
-    dump_node(node->lhs, level+1); puts("");
-    fflush(stdout);
-    dump_node(node->rhs, level+1); puts("");
+    printf("(+ ");
+    dump_node(node->lhs, level+1); printf(" ");
+    dump_node(node->rhs, level+1);
+    printf(")");
   }
 }
