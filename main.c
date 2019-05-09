@@ -3,7 +3,10 @@
 
 int main(int argc, char** argv)
 {
-  FILE* fp = fopen(argv[1], "r");
+  FILE* fp;
+  if ((fp = fopen(argv[1], "r")) == NULL) {
+    return -1;
+  }
 
   Vector* tokens = lex(fp);
 
@@ -23,9 +26,6 @@ int main(int argc, char** argv)
   puts("main:");
   emit_enter(0, 0);
   compile(ast);
-  /* emit_mov("rax", "0"); */
-  /* emit_add("rax", format("%d", ast->lhs->integer)); */
-  /* emit_add("rax", format("%d", ast->rhs->integer)); */
   emit_leave();
   puts("\tret");
 

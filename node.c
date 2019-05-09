@@ -8,8 +8,8 @@ Node* new_node(enum NodeTag tag) {
   return node;
 }
 
-Node* new_plus_node(Node* lhs, Node* rhs) {
-  Node* node = new_node(NPLUS);
+Node* new_binop_node(enum NodeTag tag, Node* lhs, Node* rhs) {
+  Node* node = new_node(tag);
 
   node->lhs = lhs;
   node->rhs = rhs;
@@ -34,12 +34,29 @@ Node* new_int_node(int integer) {
 void dump_node(Node* node, int level) {
   /* indent(level); */
 
-  if (node->tag == NINT) {
-    printf("%d", node->integer);
-  } else if (node->tag == NPLUS) {
-    printf("(+ ");
-    dump_node(node->lhs, level+1); printf(" ");
+  switch (node->tag) {
+  case NINT:
+    eprintf("%d", node->integer);
+    break;
+  case NPLUS:
+    eprintf("(+ ");
+    dump_node(node->lhs, level+1); eprintf(" ");
     dump_node(node->rhs, level+1);
-    printf(")");
+    eprintf(")");
+    break;
+  case NMINUS:
+    eprintf("(- ");
+    dump_node(node->lhs, level+1); eprintf(" ");
+    dump_node(node->rhs, level+1);
+    eprintf(")");
+    break;
+  case NMUL:
+    eprintf("(* ");
+    dump_node(node->lhs, level+1); eprintf(" ");
+    dump_node(node->rhs, level+1);
+    eprintf(")");
+    break;
+  default:
+    break;
   }
 }

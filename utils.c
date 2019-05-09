@@ -12,9 +12,16 @@ char *format(const char *fmt, ...) {
 void error(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  fprintf(stderr, fmt, ap);
+  vfprintf(stderr, fmt, ap);
   va_end(ap);
   exit(1);
+}
+
+void eprintf(const char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  va_end(ap);
 }
 
 Vector* new_vec() {

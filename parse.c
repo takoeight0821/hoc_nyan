@@ -26,12 +26,27 @@ static Node* integer() {
   return n;
 }
 
-static Node* add() {
+static Node* mul() {
   Node* lhs = integer();
+  for (;;) {
+    if (la(0) == TASTERISK) {
+      consume();
+      lhs = new_binop_node(NMUL, lhs, integer());
+    } else {
+      return lhs;
+    }
+  }
+}
+
+static Node* add() {
+  Node* lhs = mul();
   for (;;) {
     if (la(0) == TPLUS) {
       consume();
-      lhs = new_plus_node(lhs, integer());
+      lhs = new_binop_node(NPLUS, lhs, mul());
+    } else if (la(0) == TMINUS) {
+      consume();
+      lhs = new_binop_node(NMINUS, lhs, mul());
     } else {
       return lhs;
     }

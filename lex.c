@@ -23,8 +23,7 @@ static Token* new_token(enum TokenTag tag) {
 
 static Token* integer() {
   Token* t = new_token(TINT);
-  t->integer = c - '0';
-  consume();
+  t->integer = 0;
   while (isdigit(c)) {
     t->integer = t->integer * 10 + (c - '0');
     consume();
@@ -44,6 +43,12 @@ static Token* next_token() {
     case '+':
       consume();
       return new_token(TPLUS);
+    case '-':
+      consume();
+      return new_token(TMINUS);
+    case '*':
+      consume();
+      return new_token(TASTERISK);
     default:
       error("invalid character: %c\n", c);
     }
@@ -64,4 +69,24 @@ Vector* lex(FILE* file) {
 
   vec_push(v, t); // push EOF
   return v;
+}
+
+void dump_token(Token tok) {
+  switch (tok.tag) {
+  case TINT:
+    eprintf("[INT %d]", tok.integer);
+    break;
+  case TPLUS:
+    eprintf("[PLUS]");
+    break;
+  case TMINUS:
+    eprintf("[MINUS]");
+    break;
+  case TASTERISK:
+    eprintf("[ASTERISK]");
+    break;
+  case TEOF:
+    eprintf("[EOF]");
+    break;
+  }
 }

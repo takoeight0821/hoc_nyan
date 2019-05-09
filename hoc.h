@@ -22,6 +22,8 @@ enum TokenTag {
   TEOF,
   TINT,
   TPLUS,
+  TMINUS,
+  TASTERISK,
 };
 
 typedef struct {
@@ -32,6 +34,8 @@ typedef struct {
 enum NodeTag {
     NINT,
     NPLUS,
+    NMINUS,
+    NMUL,
     NERROR,
 };
 
@@ -48,13 +52,14 @@ typedef struct Node {
 
 // node.c
 Node* new_node(enum NodeTag tag);
-Node* new_plus_node(Node* lhs, Node* rhs);
+Node* new_binop_node(enum NodeTag tag, Node* lhs, Node* rhs);
 Node* new_int_node(int integer);
 void dump_node(Node* node, int level);
 
 // utils.c
 char* format(const char* fmt, ...);
 void error(const char* fmt, ...)__attribute__((noreturn));
+void eprintf(const char* fmt, ...);
 
 // emit.c
 void emit_enter(int size, int nest);
