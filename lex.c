@@ -49,6 +49,12 @@ static Token* next_token() {
     case '*':
       consume();
       return new_token(TASTERISK);
+    case '(':
+      consume();
+      return new_token(TLPAREN);
+    case ')':
+      consume();
+      return new_token(TRPAREN);
     default:
       error("invalid character: %c\n", c);
     }
@@ -84,6 +90,12 @@ void dump_token(Token tok) {
     break;
   case TASTERISK:
     eprintf("[ASTERISK]");
+    break;
+  case TLPAREN:
+    eprintf("[LPAREN]");
+    break;
+  case TRPAREN:
+    eprintf("[RPAREN]");
     break;
   case TEOF:
     eprintf("[EOF]");

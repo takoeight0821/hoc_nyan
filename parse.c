@@ -20,6 +20,25 @@ static void match(enum TokenTag tag) {
   else error("match error\n");
 }
 
+static Node* term();
+static Node* integer();
+static Node* add();
+static Node* mul();
+
+static Node* term() {
+  if (la(0) == TLPAREN) {
+    match(TLPAREN);
+    Node* node = add();
+    if (la(0) != TRPAREN) {
+      error("mismatch parens");
+    }
+    match(TRPAREN);
+    return node;
+  } else {
+    return integer();
+  }
+}
+
 static Node* integer() {
   Node* n = new_int_node(lt(0).integer);
   match(TINT);
@@ -27,11 +46,11 @@ static Node* integer() {
 }
 
 static Node* mul() {
-  Node* lhs = integer();
+  Node* lhs = term();
   for (;;) {
     if (la(0) == TASTERISK) {
-      consume();
-      lhs = new_binop_node(NMUL, lhs, integer());
+      match(TASTERISK);
+      lhs = new_binop_node(NMUL, lhs, term());
     } else {
       return lhs;
     }
@@ -42,10 +61,10 @@ static Node* add() {
   Node* lhs = mul();
   for (;;) {
     if (la(0) == TPLUS) {
-      consume();
+      match(TPLUS);
       lhs = new_binop_node(NPLUS, lhs, mul());
     } else if (la(0) == TMINUS) {
-      consume();
+      match(TMINUS);
       lhs = new_binop_node(NMINUS, lhs, mul());
     } else {
       return lhs;

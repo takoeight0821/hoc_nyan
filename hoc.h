@@ -24,6 +24,8 @@ enum TokenTag {
   TPLUS,
   TMINUS,
   TASTERISK,
+  TLPAREN,
+  TRPAREN,
 };
 
 typedef struct {
