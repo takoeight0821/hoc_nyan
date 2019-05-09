@@ -20,8 +20,12 @@ void emit_sub(char* dst, char* src) {
   printf("\tsub %s, %s\n", dst, src);
 }
 
-void emit_imul(char* dst, char* src) {
-  printf("\timul %s, %s\n", dst, src);
+void emit_imul(char* src) {
+  printf("\timul %s\n", src);
+}
+
+void emit_mul(char* src) {
+  printf("\tmul %s\n", src);
 }
 
 void emit_push(char* src) {
@@ -55,8 +59,8 @@ void compile(Node* node) {
     emit_push("rax");
     compile(node->rhs);
     emit_pop("rcx");
-    emit_imul("ecx", "eax");
-    emit_mov("rax", "rcx");
+    emit_imul("ecx");
+    /* emit_imul("ecx", "eax"); */
     break;
   case NINT:
     emit_mov("eax", format("%d", node->integer));
