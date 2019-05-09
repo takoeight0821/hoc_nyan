@@ -25,6 +25,14 @@ Node* new_int_node(int integer) {
   return node;
 }
 
+Node* new_return_node(Node* ret) {
+  Node* node = new_node(NRETURN);
+
+  node->ret = ret;
+
+  return node;
+}
+
 /* void indent(int level) { */
 /*   for (int i = 0; i < level; i++) { */
 /*     printf(" "); */
@@ -56,7 +64,10 @@ void dump_node(Node* node, int level) {
     dump_node(node->rhs, level+1);
     eprintf(")");
     break;
-  default:
+  case NRETURN:
+    eprintf("(return ");
+    dump_node(node->ret, level+1);
+    eprintf(")");
     break;
   }
 }

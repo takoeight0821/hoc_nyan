@@ -16,11 +16,15 @@ Vector* new_vec();
 void* vec_get(Vector* v, size_t i);
 void vec_set(Vector* v, size_t i, void* elem);
 void vec_push(Vector* v, void* elem);
+void vec_pushi(Vector* v, intptr_t elem);
 void* vec_pop(Vector* v);
+intptr_t vec_popi(Vector* v);
+char* vec_to_string(Vector* v);
 
 enum TokenTag {
   TEOF,
   TINT,
+  TIDENT,
   TPLUS,
   TMINUS,
   TASTERISK,
@@ -31,6 +35,7 @@ enum TokenTag {
 typedef struct {
   enum TokenTag tag;
   int integer;
+  char* ident;
 } Token;
 
 enum NodeTag {
@@ -38,7 +43,7 @@ enum NodeTag {
     NPLUS,
     NMINUS,
     NMUL,
-    NERROR,
+    NRETURN,
 };
 
 typedef struct Node Node;
@@ -50,12 +55,15 @@ typedef struct Node {
   Node* rhs;
 
   int integer;
+
+  Node* ret;
 } Node;
 
 // node.c
 Node* new_node(enum NodeTag tag);
 Node* new_binop_node(enum NodeTag tag, Node* lhs, Node* rhs);
 Node* new_int_node(int integer);
+Node* new_return_node(Node* ret);
 void dump_node(Node* node, int level);
 
 // utils.c
