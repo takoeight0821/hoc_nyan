@@ -64,10 +64,21 @@ void error(const char* fmt, ...)__attribute__((noreturn));
 void eprintf(const char* fmt, ...);
 
 // emit.c
+typedef enum {
+  AX = 0,
+  DI,
+  SI,
+  DX,
+  CX,
+  R8,
+  R9,
+  R10,
+  R11,
+} Reg;
+
 void emit_enter(int size, int nest);
 void emit_leave();
-void emit_mov(char* dst, char* src);
-void emit_add(char* dst, char* src);
+void emit_mov(Reg dst, Reg src);
 void compile(Node* node);
 
 // lex.c
