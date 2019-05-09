@@ -16,18 +16,18 @@ int main(int argc, char** argv)
 
   fclose(fp);
 
-  Node* ast = parse(tokens);
+  /* Node* ast = parse(tokens); */
 
-  dump_node(ast, 0);
+  /* dump_node(ast, 0); */
 
-  puts(".intel_syntax noprefix");
-  puts(".text");
-  puts(".global main");
-  puts("main:");
-  emit_enter(0, 0);
-  compile(ast);
-  emit_leave();
-  puts("\tret");
+  /* puts(".intel_syntax noprefix"); */
+  /* puts(".text"); */
+  /* puts(".global main"); */
+  /* puts("main:"); */
+  /* emit_enter(0, 0); */
+  /* compile(ast); */
+  /* emit_leave(); */
+  /* puts("\tret"); */
 
   return 0;
 }

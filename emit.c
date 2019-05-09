@@ -71,8 +71,5 @@ void compile(Node* node) {
   case NINT:
     emit_movi(AX, node->integer);
     break;
-  case NERROR:
-    error("compile NERROR");
-    break;
   }
 }

@@ -31,6 +31,22 @@ static Token* integer() {
   return t;
 }
 
+static Token* ident() {
+  Token* t = new_token(TIDENT);
+  Vector* ident = new_vec();
+  vec_pushi(ident, c);
+  consume();
+
+  while (isalnum(c) || c == '_') {
+    vec_pushi(ident, c);
+    consume();
+  }
+
+  t->ident = vec_to_string(ident);
+
+  return t;
+}
+
 static Token* next_token() {
   while (c != EOF) {
     switch (c) {
@@ -56,6 +72,9 @@ static Token* next_token() {
       consume();
       return new_token(TRPAREN);
     default:
+      if (isalpha(c) || c == '_') {
+        return ident();
+      }
       error("invalid character: %c\n", c);
     }
   }
@@ -81,6 +100,9 @@ void dump_token(Token tok) {
   switch (tok.tag) {
   case TINT:
     eprintf("[INT %d]", tok.integer);
+    break;
+  case TIDENT:
+    eprintf("[IDENT %s]", tok.ident);
     break;
   case TPLUS:
     eprintf("[PLUS]");
