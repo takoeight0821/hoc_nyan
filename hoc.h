@@ -11,16 +11,6 @@ typedef struct {
   size_t length;
 } Vector;
 
-// vec.c
-Vector* new_vec();
-void* vec_get(Vector* v, size_t i);
-void vec_set(Vector* v, size_t i, void* elem);
-void vec_push(Vector* v, void* elem);
-void vec_pushi(Vector* v, intptr_t elem);
-void* vec_pop(Vector* v);
-intptr_t vec_popi(Vector* v);
-char* vec_to_string(Vector* v);
-
 enum TokenTag {
   TEOF,
   TINT,
@@ -70,6 +60,15 @@ void dump_node(Node* node, int level);
 char* format(const char* fmt, ...);
 void error(const char* fmt, ...)__attribute__((noreturn));
 void eprintf(const char* fmt, ...);
+int streq(char* s0, char* s1);
+Vector* new_vec();
+void* vec_get(Vector* v, size_t i);
+void vec_set(Vector* v, size_t i, void* elem);
+void vec_push(Vector* v, void* elem);
+void vec_pushi(Vector* v, intptr_t elem);
+void* vec_pop(Vector* v);
+intptr_t vec_popi(Vector* v);
+char* vec_to_string(Vector* v);
 
 // emit.c
 typedef enum {

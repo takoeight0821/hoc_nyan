@@ -43,6 +43,10 @@ void emit_pop(Reg dst) {
   printf("\tpop %s\n", reg64[dst]);
 }
 
+void emit_ret() {
+  puts("\tret");
+}
+
 void compile(Node* node) {
   switch (node->tag) {
   case NPLUS:
@@ -70,6 +74,11 @@ void compile(Node* node) {
     break;
   case NINT:
     emit_movi(AX, node->integer);
+    break;
+  case NRETURN:
+    compile(node->ret);
+    emit_leave();
+    emit_ret();
     break;
   }
 }

@@ -24,6 +24,10 @@ void eprintf(const char *fmt, ...) {
   va_end(ap);
 }
 
+int streq(char* s0, char* s1) {
+  return strcmp(s0, s1) == 0;
+}
+
 Vector* new_vec() {
   Vector* v = malloc(sizeof(Vector));
   v->ptr = malloc(sizeof(void*) * 16);

@@ -72,11 +72,20 @@ static Node* add() {
   }
 }
 
+static Node* ret() {
+  if (la(0) == TIDENT && streq(lt(0).ident, "return")) {
+    match(TIDENT);
+    return new_return_node(add());
+  } else {
+    error("expect return but actual %s", lt(0).ident);
+  };
+}
+
 Node* parse(Vector* tokens) {
   lookahead = calloc(tokens->length, sizeof(Token));
   for (size_t i = 0; i < tokens->length; i++) {
     lookahead[i] = *(Token*)vec_get(tokens, i);
   }
 
-  return add();
+  return ret();
 }
