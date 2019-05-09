@@ -1,5 +1,13 @@
 #include "hoc.h"
 
+void emit_enter(int size, int nest) {
+  printf("\tenter %d, %d\n", size, nest);
+}
+
+void emit_leave() {
+  puts("\tleave");
+}
+
 void emit_mov(char* dst, char* src) {
   printf("\tmov %s, %s\n", dst, src);
 }

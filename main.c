@@ -21,10 +21,12 @@ int main(int argc, char** argv)
   puts(".text");
   puts(".global main");
   puts("main:");
+  emit_enter(0, 0);
   compile(ast);
   /* emit_mov("rax", "0"); */
   /* emit_add("rax", format("%d", ast->lhs->integer)); */
   /* emit_add("rax", format("%d", ast->rhs->integer)); */
+  emit_leave();
   puts("\tret");
 
   return 0;

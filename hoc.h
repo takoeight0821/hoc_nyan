@@ -57,6 +57,8 @@ char* format(const char* fmt, ...);
 void error(const char* fmt, ...)__attribute__((noreturn));
 
 // emit.c
+void emit_enter(int size, int nest);
+void emit_leave();
 void emit_mov(char* dst, char* src);
 void emit_add(char* dst, char* src);
 void compile(Node* node);
