@@ -2,6 +2,7 @@
 .vagrant/
 
 tmp/
+main
 
 # Prerequisites
 *.d
