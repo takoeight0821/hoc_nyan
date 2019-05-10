@@ -72,13 +72,27 @@ static Node* add() {
   }
 }
 
-static Node* ret() {
+static Node* statement() {
+  Node* node;
   if (la(0) == TIDENT && streq(lt(0).ident, "return")) {
     match(TIDENT);
-    return new_return_node(add());
+    node = new_return_node(add());
   } else {
-    error("expect return but actual %s", lt(0).ident);
+    node = add();
   };
+
+  match(TSEMICOLON);
+  return node;
+}
+
+static Node* statements() {
+  Vector* stmts = new_vec();
+  while (la(0) != TEOF) {
+    vec_push(stmts, statement());
+  }
+  Node* node = new_node(NSTMTS);
+  node->stmts = stmts;
+  return node;
 }
 
 Node* parse(Vector* tokens) {
@@ -87,5 +101,5 @@ Node* parse(Vector* tokens) {
     lookahead[i] = *(Token*)vec_get(tokens, i);
   }
 
-  return ret();
+  return statements();
 }

@@ -33,6 +33,14 @@ Node* new_return_node(Node* ret) {
   return node;
 }
 
+Node* new_stmts_node(Vector* stmts) {
+  Node* node = new_node(NSTMTS);
+
+  node->stmts = stmts;
+
+  return node;
+}
+
 /* void indent(int level) { */
 /*   for (int i = 0; i < level; i++) { */
 /*     printf(" "); */
@@ -69,5 +77,12 @@ void dump_node(Node* node, int level) {
     dump_node(node->ret, level+1);
     eprintf(")");
     break;
+  case NSTMTS: {
+    for (size_t i = 0; i < node->stmts->length; i++) {
+      dump_node(vec_get(node->stmts, i), level);
+      puts("");
+    }
+    break;
+  }
   }
 }

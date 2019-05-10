@@ -20,6 +20,7 @@ enum TokenTag {
   TASTERISK,
   TLPAREN,
   TRPAREN,
+  TSEMICOLON,
 };
 
 typedef struct {
@@ -34,6 +35,7 @@ enum NodeTag {
     NMINUS,
     NMUL,
     NRETURN,
+    NSTMTS,
 };
 
 typedef struct Node Node;
@@ -47,6 +49,8 @@ typedef struct Node {
   int integer;
 
   Node* ret;
+
+  Vector* stmts;
 } Node;
 
 // node.c
@@ -54,6 +58,7 @@ Node* new_node(enum NodeTag tag);
 Node* new_binop_node(enum NodeTag tag, Node* lhs, Node* rhs);
 Node* new_int_node(int integer);
 Node* new_return_node(Node* ret);
+Node* new_stmts_node(Vector* stmts);
 void dump_node(Node* node, int level);
 
 // utils.c

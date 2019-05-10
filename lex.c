@@ -71,6 +71,9 @@ static Token* next_token() {
     case ')':
       consume();
       return new_token(TRPAREN);
+    case ';':
+      consume();
+      return new_token(TSEMICOLON);
     default:
       if (isalpha(c) || c == '_') {
         return ident();
@@ -118,6 +121,9 @@ void dump_token(Token tok) {
     break;
   case TRPAREN:
     eprintf("[RPAREN]");
+    break;
+  case TSEMICOLON:
+    eprintf("[SEMICOLON]");
     break;
   case TEOF:
     eprintf("[EOF]");

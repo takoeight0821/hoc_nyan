@@ -80,5 +80,11 @@ void compile(Node* node) {
     emit_leave();
     emit_ret();
     break;
+  case NSTMTS: {
+    for (size_t i = 0; i < node->stmts->length; i++) {
+      compile(vec_get(node->stmts, i));
+    }
+    break;
+  }
   }
 }
