@@ -28,5 +28,8 @@ try 15 "return 5*(9-6);"
 try 4 "return (3+5)/2;"
 try 42 "a = 42; return a;"
 try 42 "var = 4; return var * 10 + 2;"
+try 0 "return 3 + -3;"
+try 0 "return 8 - (3 + 5);"
+try 0 "return 15 + (-3*+5);"
 
 echo OK

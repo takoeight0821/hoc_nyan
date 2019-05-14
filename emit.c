@@ -4,7 +4,9 @@ char* reg64[] = { "rax", "rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11" };
 char* reg32[] = { "eax", "edi", "esi", "edx", "ecx", "r8d", "r9d", "r10d", "r11d" };
 
 void emit_enter(int size, int nest) {
-  printf("\tenter %d, %d\n", size, nest);
+  printf("\tpush rbp\n");
+  printf("\tmov rbp, rsp\n");
+  printf("\tsub rsp, %d\n", size);
 }
 
 void emit_leave() {
@@ -55,6 +57,14 @@ void emit_ret() {
   puts("\tret");
 }
 
+void emit_load32(Reg dst, int offset) {
+  printf("\tmov %s, [rbp-%d]\n", reg32[dst], offset);
+}
+
+void emit_store32(Reg dst, int offset) {
+  printf("\tmov [rbp-%d], %s\n", offset, reg32[dst]);
+}
+
 void compile(Node* node, Map* vars) {
   switch (node->tag) {
   case NVAR: {
@@ -62,7 +72,7 @@ void compile(Node* node, Map* vars) {
     if (offset == 0) {
       error("%s is not defined\n", node->ident);
     }
-    printf("\tmov eax, [rbp-%d]\n", offset);
+    emit_load32(AX, offset);
     emit_push(AX);
     break;
   }
@@ -70,7 +80,7 @@ void compile(Node* node, Map* vars) {
     int offset = (int)map_get(vars, node->lhs->ident);
     compile(node->rhs, vars);
     emit_pop(AX);
-    printf("\tmov [rbp-%d], eax\n", offset);
+    emit_store32(AX, offset);
     emit_push(AX);
     break;
   }

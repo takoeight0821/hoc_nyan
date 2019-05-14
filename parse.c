@@ -38,6 +38,7 @@ static Node* integer();
 static Node* add();
 static Node* mul();
 static Node* variable();
+static Node* unary();
 
 static Node* term() {
   if (match(TLPAREN)) {
@@ -50,6 +51,17 @@ static Node* term() {
     return variable();
   } else {
     return integer();
+  }
+}
+
+static Node* unary() {
+  if (match(TPLUS)) {
+    return term();
+  } else if (match(TMINUS)) {
+    Node* node = new_binop_node(NMINUS, new_int_node(0), term());
+    return node;
+  } else {
+    return term();
   }
 }
 
@@ -70,12 +82,12 @@ static Node* integer() {
 }
 
 static Node* mul() {
-  Node* lhs = term();
+  Node* lhs = unary();
   for (;;) {
     if (match(TASTERISK)) {
-      lhs = new_binop_node(NMUL, lhs, term());
+      lhs = new_binop_node(NMUL, lhs, unary());
     } else if (match(TSLASH)) {
-      lhs = new_binop_node(NDIV, lhs, term());
+      lhs = new_binop_node(NDIV, lhs, unary());
     } else {
       return lhs;
     }
