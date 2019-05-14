@@ -61,7 +61,9 @@ int main(int argc, char** argv)
 
   fclose(fp);
 
-  Node* ast = parse(tokens);
+  Map* vmap = new_map();
+  size_t local_size = 0;
+  Node* ast = parse(tokens, vmap, &local_size);
 
   /* dump_node(ast, 0); */
 
@@ -69,8 +71,8 @@ int main(int argc, char** argv)
   puts(".text");
   puts(".global main");
   puts("main:");
-  emit_enter(0, 0);
-  compile(ast);
+  emit_enter(local_size, 0);
+  compile(ast, vmap);
 
   return 0;
 }

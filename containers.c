@@ -63,3 +63,11 @@ void *map_get(Map *map, char *key) {
   }
   return NULL;
 }
+
+int map_has_key(Map* map, char *key) {
+  for (int i = map->keys->length - 1; i >= 0; i--) {
+    if (streq(map->keys->ptr[i], key))
+      return 1;
+  }
+  return 0;
+}

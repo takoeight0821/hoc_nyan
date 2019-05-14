@@ -1,6 +1,4 @@
 #include "hoc.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 Node* new_node(enum NodeTag tag) {
   Node* node = malloc(sizeof(Node));
@@ -14,6 +12,22 @@ Node* new_binop_node(enum NodeTag tag, Node* lhs, Node* rhs) {
   node->lhs = lhs;
   node->rhs = rhs;
 
+  return node;
+}
+
+Node* new_assign_node(Node* lhs, Node* rhs) {
+  Node* node = new_node(NASSIGN);
+
+  node->lhs = lhs;
+  node->rhs = rhs;
+
+  return node;
+}
+
+Node* new_var_node(char* ident) {
+  Node* node = new_node(NVAR);
+  node->ident = calloc(sizeof(char), strlen(ident));
+  strcpy(node->ident, ident);
   return node;
 }
 
@@ -53,6 +67,15 @@ void dump_node(Node* node, int level) {
   switch (node->tag) {
   case NINT:
     eprintf("%d", node->integer);
+    break;
+  case NVAR:
+    eprintf("%s", node->ident);
+    break;
+  case NASSIGN:
+    eprintf("(= ");
+    dump_node(node->lhs, level+1); eprintf(" ");
+    dump_node(node->rhs, level+1);
+    eprintf(")");
     break;
   case NPLUS:
     eprintf("(+ ");

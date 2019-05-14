@@ -2,6 +2,8 @@
 
 static Token* lookahead;
 static size_t p = 0; // 次の字句のインデックス
+static Map* vmap;
+static size_t lsize = 0;
 
 static void consume() {
   p++;
@@ -35,6 +37,7 @@ static Node* term();
 static Node* integer();
 static Node* add();
 static Node* mul();
+static Node* variable();
 
 static Node* term() {
   if (match(TLPAREN)) {
@@ -43,9 +46,19 @@ static Node* term() {
       parse_error("[RPAREN]", lt(0));
     }
     return node;
+  } else if (la(0) == TIDENT) {
+    return variable();
   } else {
     return integer();
   }
+}
+
+static Node* variable() {
+  Node* n = new_var_node(lt(0).ident);
+  if (!match(TIDENT)) {
+    parse_error("variable", lt(0));
+  }
+  return n;
 }
 
 static Node* integer() {
@@ -87,6 +100,18 @@ static Node* statement() {
   if (la(0) == TIDENT && streq(lt(0).ident, "return")) {
     consume();
     node = new_return_node(add());
+  } else if (la(0) == TIDENT && la(1) == TEQUAL) {
+    Node* lhs = variable();
+    consume();
+    Node* rhs = add();
+
+    if (!map_has_key(vmap, lhs->ident)) {
+      lsize += 4; // sizeof(int)
+      map_put(vmap, lhs->ident, (void*)lsize);
+    }
+
+    node = new_assign_node(lhs, rhs);
+
   } else {
     node = add();
   };
@@ -108,11 +133,16 @@ static Node* statements() {
   return node;
 }
 
-Node* parse(Vector* tokens) {
+Node* parse(Vector* tokens, Map *vars, size_t *local_size) {
+  vmap = new_map();
+
   lookahead = calloc(tokens->length, sizeof(Token));
   for (size_t i = 0; i < tokens->length; i++) {
     lookahead[i] = *(Token*)(tokens->ptr[i]);
   }
 
-  return statements();
+  Node* ast = statements();
+  *vars = *vmap;
+  *local_size = lsize;
+  return ast;
 }

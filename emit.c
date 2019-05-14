@@ -55,35 +55,52 @@ void emit_ret() {
   puts("\tret");
 }
 
-void compile(Node* node) {
+void compile(Node* node, Map* vars) {
   switch (node->tag) {
+  case NVAR: {
+    int offset = (int)map_get(vars, node->ident);
+    if (offset == 0) {
+      error("%s is not defined\n", node->ident);
+    }
+    printf("\tmov eax, [rbp-%d]\n", offset);
+    emit_push(AX);
+    break;
+  }
+  case NASSIGN: {
+    int offset = (int)map_get(vars, node->lhs->ident);
+    compile(node->rhs, vars);
+    emit_pop(AX);
+    printf("\tmov [rbp-%d], eax\n", offset);
+    emit_push(AX);
+    break;
+  }
   case NPLUS:
-    compile(node->lhs);
-    compile(node->rhs);
+    compile(node->lhs, vars);
+    compile(node->rhs, vars);
     emit_pop(DI);
     emit_pop(AX);
     emit_add32(AX, DI);
     emit_push(AX);
     break;
   case NMINUS:
-    compile(node->lhs);
-    compile(node->rhs);
+    compile(node->lhs, vars);
+    compile(node->rhs, vars);
     emit_pop(DI);
     emit_pop(AX);
     emit_sub32(AX, DI);
     emit_push(AX);
     break;
   case NMUL:
-    compile(node->lhs);
-    compile(node->rhs);
+    compile(node->lhs, vars);
+    compile(node->rhs, vars);
     emit_pop(DI);
     emit_pop(AX);
     emit_imul32(DI);
     emit_push(AX);
     break;
   case NDIV:
-    compile(node->lhs);
-    compile(node->rhs);
+    compile(node->lhs, vars);
+    compile(node->rhs, vars);
     emit_pop(DI);
     emit_pop(AX);
     emit_movi(DX, 0);
@@ -94,14 +111,14 @@ void compile(Node* node) {
     emit_pushi(node->integer);
     break;
   case NRETURN:
-    compile(node->ret);
+    compile(node->ret, vars);
     emit_pop(AX);
     emit_leave();
     emit_ret();
     break;
   case NSTMTS: {
     for (size_t i = 0; i < node->stmts->length; i++) {
-      compile(node->stmts->ptr[i]);
+      compile(node->stmts->ptr[i], vars);
     }
     break;
   }
