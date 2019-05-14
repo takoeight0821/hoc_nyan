@@ -79,7 +79,7 @@ void dump_node(Node* node, int level) {
     break;
   case NSTMTS: {
     for (size_t i = 0; i < node->stmts->length; i++) {
-      dump_node(vec_get(node->stmts, i), level);
+      dump_node(node->stmts->ptr[i], level);
       puts("");
     }
     break;

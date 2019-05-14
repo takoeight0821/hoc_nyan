@@ -1,8 +1,11 @@
-CC := gcc
-CFLAGS = -Wall
+CFLAGS=-Wall -std=c11
+SRCS=$(wildcard *.c)
+OBJS=$(SRCS:.c=.o)
 
-main: main.c hoc.h node.c utils.c emit.c lex.c parse.c
-	$(CC) $(CFLAGS) main.c node.c utils.c emit.c lex.c parse.c -o main
+hoc: $(OBJS)
+	$(CC) -o hoc $(OBJS) $(LDFLAGS)
+
+$(OBJS): hoc.h
 
 clean:
-	$(RM) main
+	$(RM) hoc *.o

@@ -66,9 +66,9 @@ char* format(const char* fmt, ...);
 void error(const char* fmt, ...)__attribute__((noreturn));
 void eprintf(const char* fmt, ...);
 int streq(char* s0, char* s1);
+
+// containers.c
 Vector* new_vec();
-void* vec_get(Vector* v, size_t i);
-void vec_set(Vector* v, size_t i, void* elem);
 void vec_push(Vector* v, void* elem);
 void vec_pushi(Vector* v, intptr_t elem);
 void* vec_pop(Vector* v);

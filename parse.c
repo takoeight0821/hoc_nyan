@@ -98,7 +98,7 @@ static Node* statements() {
 Node* parse(Vector* tokens) {
   lookahead = calloc(tokens->length, sizeof(Token));
   for (size_t i = 0; i < tokens->length; i++) {
-    lookahead[i] = *(Token*)vec_get(tokens, i);
+    lookahead[i] = *(Token*)(tokens->ptr[i]);
   }
 
   return statements();

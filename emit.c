@@ -82,7 +82,7 @@ void compile(Node* node) {
     break;
   case NSTMTS: {
     for (size_t i = 0; i < node->stmts->length; i++) {
-      compile(vec_get(node->stmts, i));
+      compile(node->stmts->ptr[i]);
     }
     break;
   }
