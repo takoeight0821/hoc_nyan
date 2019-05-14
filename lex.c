@@ -65,6 +65,9 @@ static Token* next_token() {
     case '*':
       consume();
       return new_token(TASTERISK);
+    case '/':
+      consume();
+      return new_token(TSLASH);
     case '(':
       consume();
       return new_token(TLPAREN);
@@ -115,6 +118,9 @@ void dump_token(Token tok) {
     break;
   case TASTERISK:
     eprintf("[ASTERISK]");
+    break;
+  case TSLASH:
+    eprintf("[SLASH]");
     break;
   case TLPAREN:
     eprintf("[LPAREN]");

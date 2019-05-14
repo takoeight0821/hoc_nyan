@@ -35,6 +35,10 @@ void emit_mul32(Reg src) {
   printf("\tmul %s\n", reg32[src]);
 }
 
+void emit_div32(Reg src) {
+  printf("\tdiv %s\n", reg32[src]);
+}
+
 void emit_push(Reg src) {
   printf("\tpush %s\n", reg64[src]);
 }
@@ -75,6 +79,15 @@ void compile(Node* node) {
     emit_pop(DI);
     emit_pop(AX);
     emit_imul32(DI);
+    emit_push(AX);
+    break;
+  case NDIV:
+    compile(node->lhs);
+    compile(node->rhs);
+    emit_pop(DI);
+    emit_pop(AX);
+    emit_movi(DX, 0);
+    emit_div32(DI);
     emit_push(AX);
     break;
   case NINT:

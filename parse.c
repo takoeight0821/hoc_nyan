@@ -51,6 +51,9 @@ static Node* mul() {
     if (la(0) == TASTERISK) {
       match(TASTERISK);
       lhs = new_binop_node(NMUL, lhs, term());
+    } else if (la(0) == TSLASH) {
+      match(TSLASH);
+      lhs = new_binop_node(NDIV, lhs, term());
     } else {
       return lhs;
     }
