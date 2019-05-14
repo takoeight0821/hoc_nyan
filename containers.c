@@ -40,3 +40,26 @@ char* vec_to_string(Vector* v) {
 
   return str;
 }
+
+Map *new_map() {
+  Map *map = malloc(sizeof(Map));
+  map->keys = new_vec();
+  map->vals = new_vec();
+  return map;
+}
+
+void map_put(Map *map, char *key, void *val) {
+  vec_push(map->keys, key);
+  vec_push(map->vals, val);
+}
+
+void *map_get(Map *map, char *key) {
+  // iは負になりうる
+  // ptrdiff_tを使うべき？
+  for (int i = map->keys->length - 1; i >= 0; i--) {
+    if (streq(map->keys->ptr[i], key)) {
+      return map->vals->ptr[i];
+    }
+  }
+  return NULL;
+}

@@ -8,6 +8,7 @@ hoc: $(OBJS)
 $(OBJS): hoc.h
 
 test: hoc
+	./hoc -test
 	./test.sh
 
 clean:
