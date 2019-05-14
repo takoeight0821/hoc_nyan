@@ -39,6 +39,10 @@ void emit_push(Reg src) {
   printf("\tpush %s\n", reg64[src]);
 }
 
+void emit_pushi(int src) {
+  printf("\tpush %d\n", src);
+}
+
 void emit_pop(Reg dst) {
   printf("\tpop %s\n", reg64[dst]);
 }
@@ -51,32 +55,34 @@ void compile(Node* node) {
   switch (node->tag) {
   case NPLUS:
     compile(node->lhs);
-    emit_push(AX);
     compile(node->rhs);
     emit_pop(DI);
-    emit_add32(DI, AX);
-    emit_mov(AX, DI);
+    emit_pop(AX);
+    emit_add32(AX, DI);
+    emit_push(AX);
     break;
   case NMINUS:
     compile(node->lhs);
-    emit_push(AX);
     compile(node->rhs);
     emit_pop(DI);
-    emit_sub32(DI, AX);
-    emit_mov(AX, DI);
+    emit_pop(AX);
+    emit_sub32(AX, DI);
+    emit_push(AX);
     break;
   case NMUL:
     compile(node->lhs);
-    emit_push(AX);
     compile(node->rhs);
     emit_pop(DI);
+    emit_pop(AX);
     emit_imul32(DI);
+    emit_push(AX);
     break;
   case NINT:
-    emit_movi(AX, node->integer);
+    emit_pushi(node->integer);
     break;
   case NRETURN:
     compile(node->ret);
+    emit_pop(AX);
     emit_leave();
     emit_ret();
     break;
