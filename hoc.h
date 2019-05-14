@@ -18,6 +18,7 @@ enum TokenTag {
   TPLUS,
   TMINUS,
   TASTERISK,
+  TSLASH,
   TLPAREN,
   TRPAREN,
   TSEMICOLON,
@@ -34,6 +35,7 @@ enum NodeTag {
     NPLUS,
     NMINUS,
     NMUL,
+    NDIV,
     NRETURN,
     NSTMTS,
 };
