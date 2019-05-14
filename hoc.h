@@ -28,6 +28,12 @@ enum TokenTag {
   TLPAREN,
   TRPAREN,
   TSEMICOLON,
+  TEQ,
+  TNE,
+  TLE,
+  TGE,
+  TLT,
+  TGT,
 };
 
 typedef struct {

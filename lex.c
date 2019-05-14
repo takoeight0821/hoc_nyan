@@ -68,9 +68,43 @@ static Token* next_token() {
     case '/':
       consume();
       return new_token(TSLASH);
+    case '<':
+      consume();
+      switch (c) {
+      case '=':
+        consume();
+        return new_token(TLE);
+      default:
+        return new_token(TLT);
+      }
+    case '>':
+      consume();
+      switch (c) {
+      case '=':
+        consume();
+        return new_token(TLE);
+      default:
+        return new_token(TLT);
+      }
     case '=':
       consume();
-      return new_token(TEQUAL);
+      switch (c) {
+      case '=':
+        consume();
+        return new_token(TEQ);
+      default:
+        return new_token(TEQUAL);
+      }
+    case '!':
+      consume();
+      switch (c) {
+      case '=':
+        consume();
+        return new_token(TNE);
+      default:
+        // TODO `not` operator
+        error("invalid character: %c\n", c);
+      }
     case '(':
       consume();
       return new_token(TLPAREN);
@@ -112,6 +146,24 @@ void dump_token(Token tok) {
     break;
   case TIDENT:
     eprintf("[IDENT %s]", tok.ident);
+    break;
+  case TLE:
+    eprintf("[LE]");
+    break;
+  case TLT:
+    eprintf("[LT]");
+    break;
+  case TGE:
+    eprintf("[GE]");
+    break;
+  case TGT:
+    eprintf("[GT]");
+    break;
+  case TEQ:
+    eprintf("[EQ]");
+    break;
+  case TNE:
+    eprintf("[NE]");
     break;
   case TPLUS:
     eprintf("[PLUS]");
