@@ -39,6 +39,8 @@ static Node* add();
 static Node* mul();
 static Node* variable();
 static Node* unary();
+static Node* equality();
+static Node* relational();
 
 static Node* term() {
   if (match(TLPAREN)) {
@@ -81,6 +83,35 @@ static Node* integer() {
   return n;
 }
 
+static Node* equality() {
+  Node* lhs = relational();
+  for (;;) {
+    if (match(TEQ)) {
+      lhs = new_binop_node(NEQ, lhs, relational());
+    } else if (match(TNE)) {
+      lhs = new_binop_node(NNE, lhs, relational());
+    } else {
+      return lhs;
+    }
+  }
+}
+
+static Node* relational() {
+  Node* lhs = add();
+  for (;;) {
+    if (match(TLT)) {
+      lhs = new_binop_node(NLT, lhs, add());
+    } else if (match(TLE)) {
+      lhs = new_binop_node(NLE, lhs, add());
+    } else if (match(TGT)) {
+      lhs = new_binop_node(NGT, lhs, add());
+    } else if (match(TGE)) {
+      lhs = new_binop_node(NGE, lhs, add());
+    } else {
+      return lhs;
+    }
+  }
+}
 static Node* mul() {
   Node* lhs = unary();
   for (;;) {
@@ -107,15 +138,19 @@ static Node* add() {
   }
 }
 
+static Node* expr() {
+  return equality();
+}
+
 static Node* statement() {
   Node* node;
   if (la(0) == TIDENT && streq(lt(0).ident, "return")) {
     consume();
-    node = new_return_node(add());
+    node = new_return_node(expr());
   } else if (la(0) == TIDENT && la(1) == TEQUAL) {
     Node* lhs = variable();
     consume();
-    Node* rhs = add();
+    Node* rhs = expr();
 
     if (!map_has_key(vmap, lhs->ident)) {
       lsize += 4; // sizeof(int)
@@ -125,7 +160,7 @@ static Node* statement() {
     node = new_assign_node(lhs, rhs);
 
   } else {
-    node = add();
+    node = expr();
   };
 
   if (!match(TSEMICOLON)) {

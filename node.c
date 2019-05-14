@@ -96,7 +96,43 @@ void dump_node(Node* node, int level) {
     eprintf(")");
     break;
   case NDIV:
-    eprintf("(/");
+    eprintf("(/ ");
+    dump_node(node->lhs, level+1); eprintf(" ");
+    dump_node(node->rhs, level+1);
+    eprintf(")");
+    break;
+  case NLT:
+    eprintf("(< ");
+    dump_node(node->lhs, level+1); eprintf(" ");
+    dump_node(node->rhs, level+1);
+    eprintf(")");
+    break;
+  case NLE:
+    eprintf("(<= ");
+    dump_node(node->lhs, level+1); eprintf(" ");
+    dump_node(node->rhs, level+1);
+    eprintf(")");
+    break;
+  case NGT:
+    eprintf("(> ");
+    dump_node(node->lhs, level+1); eprintf(" ");
+    dump_node(node->rhs, level+1);
+    eprintf(")");
+    break;
+  case NGE:
+    eprintf("(>= ");
+    dump_node(node->lhs, level+1); eprintf(" ");
+    dump_node(node->rhs, level+1);
+    eprintf(")");
+    break;
+  case NEQ:
+    eprintf("(== ");
+    dump_node(node->lhs, level+1); eprintf(" ");
+    dump_node(node->rhs, level+1);
+    eprintf(")");
+    break;
+  case NNE:
+    eprintf("(!= ");
     dump_node(node->lhs, level+1); eprintf(" ");
     dump_node(node->rhs, level+1);
     eprintf(")");

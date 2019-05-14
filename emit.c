@@ -21,6 +21,10 @@ void emit_movi(Reg dst, long src) {
   printf("\tmov %s, %ld\n", reg64[dst], src);
 }
 
+void emit_cmp(Reg reg1, Reg reg2) {
+  printf("\tcmp %s, %s\n", reg64[reg1], reg64[reg2]);
+}
+
 void emit_add32(Reg dst, Reg src) {
   printf("\tadd %s, %s\n", reg32[dst], reg32[src]);
 }
@@ -115,6 +119,66 @@ void compile(Node* node, Map* vars) {
     emit_pop(AX);
     emit_movi(DX, 0);
     emit_div32(DI);
+    emit_push(AX);
+    break;
+  case NEQ:
+    compile(node->lhs, vars);
+    compile(node->rhs, vars);
+    emit_pop(DI);
+    emit_pop(AX);
+    printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
+    printf("\tsete al\n");
+    printf("\tmovzb eax, al\n");
+    emit_push(AX);
+    break;
+  case NNE:
+    compile(node->lhs, vars);
+    compile(node->rhs, vars);
+    emit_pop(DI);
+    emit_pop(AX);
+    printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
+    printf("\tsetne al\n");
+    printf("\tmovzb eax, al\n");
+    emit_push(AX);
+    break;
+  case NGE:
+    compile(node->lhs, vars);
+    compile(node->rhs, vars);
+    emit_pop(AX);
+    emit_pop(DI);
+    printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
+    printf("\tsetle al\n");
+    printf("\tmovzb eax, al\n");
+    emit_push(AX);
+    break;
+  case NGT:
+    compile(node->lhs, vars);
+    compile(node->rhs, vars);
+    emit_pop(AX);
+    emit_pop(DI);
+    printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
+    printf("\tsetl al\n");
+    printf("\tmovzb eax, al\n");
+    emit_push(AX);
+    break;
+  case NLE:
+    compile(node->lhs, vars);
+    compile(node->rhs, vars);
+    emit_pop(DI);
+    emit_pop(AX);
+    printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
+    printf("\tsetle al\n");
+    printf("\tmovzb eax, al\n");
+    emit_push(AX);
+    break;
+  case NLT:
+    compile(node->lhs, vars);
+    compile(node->rhs, vars);
+    emit_pop(DI);
+    emit_pop(AX);
+    printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
+    printf("\tsetl al\n");
+    printf("\tmovzb eax, al\n");
     emit_push(AX);
     break;
   case NINT:

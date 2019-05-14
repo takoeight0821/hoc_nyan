@@ -82,9 +82,9 @@ static Token* next_token() {
       switch (c) {
       case '=':
         consume();
-        return new_token(TLE);
+        return new_token(TGE);
       default:
-        return new_token(TLT);
+        return new_token(TGT);
       }
     case '=':
       consume();
