@@ -8,4 +8,4 @@ hoc: $(OBJS)
 $(OBJS): hoc.h
 
 clean:
-	$(RM) hoc *.o
+	$(RM) hoc $(OBJS)

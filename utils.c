@@ -1,12 +1,12 @@
 #include "hoc.h"
 
 char *format(const char *fmt, ...) {
-  char buf[2048];
+  char* buf = malloc(sizeof(char) * 2048);
   va_list ap;
   va_start(ap, fmt);
-  vsnprintf(buf, sizeof(buf), fmt, ap);
+  vsnprintf(buf, 2048, fmt, ap);
   va_end(ap);
-  return strdup(buf);
+  return realloc(buf, sizeof(char) * (strlen(buf) + 1));
 }
 
 void error(const char *fmt, ...) {
