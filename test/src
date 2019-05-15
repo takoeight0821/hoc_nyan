@@ -1,2 +1,2 @@
-123;
-return (1 + 2) * 3 - 4;
+var = 4;
+return var * 10 + 2;
