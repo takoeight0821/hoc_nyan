@@ -57,6 +57,8 @@ enum NodeTag {
     NNE,
     NASSIGN,
     NRETURN,
+    NIF,
+    NELSE,
     NSTMTS,
 };
 
