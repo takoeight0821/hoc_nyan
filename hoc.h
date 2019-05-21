@@ -63,6 +63,7 @@ enum NodeTag {
     NIF,
     NIFELSE,
     NBLOCK,
+    NFUNCDEF,
 };
 
 typedef struct Node Node;
@@ -73,12 +74,16 @@ typedef struct Node {
   Node* lhs;
   Node* rhs;
 
+  // integer literal
   int integer;
 
+  // variable
   char* ident;
 
+  // return
   Node* ret;
 
+  // block
   Vector* stmts;
 
   // if else
@@ -86,8 +91,10 @@ typedef struct Node {
   Node* then;
   Node* els;
 
-  // block
-  Node* block_stmts;
+  // function definition
+  char* func_name;
+  Vector* params;
+  Node* body;
 } Node;
 
 // node.c

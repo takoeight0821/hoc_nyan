@@ -78,18 +78,18 @@ void emit_ret() {
   puts("\tret");
 }
 
-void emit_load32(Reg dst, int offset) {
-  printf("\tmov %s, [rbp-%d]\n", reg32[dst], offset);
+void emit_load32(Reg dst, size_t offset) {
+  printf("\tmov %s, [rbp-%zu]\n", reg32[dst], offset);
 }
 
-void emit_store32(Reg dst, int offset) {
-  printf("\tmov [rbp-%d], %s\n", offset, reg32[dst]);
+void emit_store32(Reg dst, size_t offset) {
+  printf("\tmov [rbp-%zu], %s\n", offset, reg32[dst]);
 }
 
 void compile(Node* node, Map* vars) {
   switch (node->tag) {
   case NVAR: {
-    int offset = (int)map_get(vars, node->ident);
+    size_t offset = (size_t)map_get(vars, node->ident);
     if (offset == 0) {
       error("%s is not defined\n", node->ident);
     }
@@ -98,7 +98,7 @@ void compile(Node* node, Map* vars) {
     break;
   }
   case NASSIGN: {
-    int offset = (int)map_get(vars, node->lhs->ident);
+    size_t offset = (size_t)map_get(vars, node->lhs->ident);
     compile(node->rhs, vars);
     emit_pop(AX);
     emit_store32(AX, offset);
