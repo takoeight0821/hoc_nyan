@@ -28,6 +28,8 @@ enum TokenTag {
   TEQUAL,
   TLPAREN,
   TRPAREN,
+  TLBRACE,
+  TRBRACE,
   TSEMICOLON,
   TEQ,
   TNE,
@@ -60,7 +62,7 @@ enum NodeTag {
     NRETURN,
     NIF,
     NIFELSE,
-    NSTMTS,
+    NBLOCK,
 };
 
 typedef struct Node Node;
@@ -83,6 +85,9 @@ typedef struct Node {
   Node* cond;
   Node* then;
   Node* els;
+
+  // block
+  Node* block_stmts;
 } Node;
 
 // node.c
@@ -94,7 +99,7 @@ Node* new_assign_node(Node* lhs, Node* rhs);
 Node* new_return_node(Node* ret);
 Node* new_if_node(Node* cond, Node* then);
 Node* new_if_else_node(Node* cond, Node* then, Node* els);
-Node* new_stmts_node(Vector* stmts);
+Node* new_block_node(Vector* stmts);
 void dump_node(Node* node, int level);
 
 // utils.c

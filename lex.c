@@ -111,6 +111,12 @@ static Token* next_token() {
     case ')':
       consume();
       return new_token(TRPAREN);
+    case '{':
+      consume();
+      return new_token(TLBRACE);
+    case '}':
+      consume();
+      return new_token(TRBRACE);
     case ';':
       consume();
       return new_token(TSEMICOLON);
@@ -185,6 +191,12 @@ void dump_token(Token tok) {
     break;
   case TRPAREN:
     eprintf("[RPAREN]");
+    break;
+  case TLBRACE:
+    eprintf("[LBRACE]");
+    break;
+  case TRBRACE:
+    eprintf("[RBRACE]");
     break;
   case TSEMICOLON:
     eprintf("[SEMICOLON]");

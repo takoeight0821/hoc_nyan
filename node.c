@@ -62,11 +62,9 @@ Node* new_if_else_node(Node* cond, Node* then, Node* els) {
   return node;
 }
 
-Node* new_stmts_node(Vector* stmts) {
-  Node* node = new_node(NSTMTS);
-
+Node* new_block_node(Vector* stmts) {
+  Node* node = new_node(NBLOCK);
   node->stmts = stmts;
-
   return node;
 }
 
@@ -173,11 +171,13 @@ void dump_node(Node* node, int level) {
     dump_node(node->els, level+1);
     eprintf(")");
     break;
-  case NSTMTS: {
+  case NBLOCK: {
+    eprintf("{");
     for (size_t i = 0; i < node->stmts->length; i++) {
       dump_node(node->stmts->ptr[i], level);
       puts("");
     }
+    eprintf("}");
     break;
   }
   }

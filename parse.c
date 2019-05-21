@@ -41,6 +41,7 @@ static Node* variable();
 static Node* unary();
 static Node* equality();
 static Node* relational();
+static Node* statement();
 
 static Node* term() {
   if (match(TLPAREN)) {
@@ -180,6 +181,18 @@ static Node* statement() {
 
     node = new_assign_node(lhs, rhs);
 
+  } else if (match(TLBRACE)) {
+    Vector* stmts = new_vec();
+    while (la(0) != TRBRACE) {
+      vec_push(stmts, statement());
+    }
+    Node* node = new_node(NBLOCK);
+    node->stmts = stmts;
+
+    if (!match(TRBRACE)) {
+      parse_error("}", lt(0));
+    }
+    return node; // ; is not necessary
   } else {
     node = expr();
   };
@@ -191,16 +204,6 @@ static Node* statement() {
   return node;
 }
 
-static Node* statements() {
-  Vector* stmts = new_vec();
-  while (la(0) != TEOF) {
-    vec_push(stmts, statement());
-  }
-  Node* node = new_node(NSTMTS);
-  node->stmts = stmts;
-  return node;
-}
-
 Node* parse(Vector* tokens, Map *vars, size_t *local_size) {
   vmap = new_map();
 
@@ -209,7 +212,12 @@ Node* parse(Vector* tokens, Map *vars, size_t *local_size) {
     lookahead[i] = *(Token*)(tokens->ptr[i]);
   }
 
-  Node* ast = statements();
+  Node* ast = statement();
+
+  if (!match(TEOF)) {
+    parse_error("EOF", lt(0));
+  }
+
   *vars = *vmap;
   *local_size = lsize;
   return ast;

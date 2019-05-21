@@ -231,11 +231,13 @@ void compile(Node* node, Map* vars) {
     printf("%s:\n", end);
     break;
   }
-  case NSTMTS: {
+  case NBLOCK: {
     for (size_t i = 0; i < node->stmts->length; i++) {
       compile(node->stmts->ptr[i], vars);
+      emit_pop(AX);
     }
     break;
   }
+
   }
 }
