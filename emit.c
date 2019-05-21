@@ -2,6 +2,11 @@
 
 char* reg64[] = { "rax", "rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11" };
 char* reg32[] = { "eax", "edi", "esi", "edx", "ecx", "r8d", "r9d", "r10d", "r11d" };
+unsigned int label_id = 0;
+
+char* new_label(char* name) {
+  return format(".L%s%u", name, label_id++);
+}
 
 void emit_enter(int size, int nest) {
   printf("\tpush rbp\n");
@@ -11,6 +16,14 @@ void emit_enter(int size, int nest) {
 
 void emit_leave() {
   puts("\tleave");
+}
+
+void emit_je(char* label) {
+  printf("\tje %s\n", label);
+}
+
+void emit_jmp(char* label) {
+  printf("\tjmp %s\n", label);
 }
 
 void emit_mov(Reg dst, Reg src) {
@@ -23,6 +36,10 @@ void emit_movi(Reg dst, long src) {
 
 void emit_cmp(Reg reg1, Reg reg2) {
   printf("\tcmp %s, %s\n", reg64[reg1], reg64[reg2]);
+}
+
+void emit_cmpi(Reg reg, int i) {
+  printf("\tcmp %s, %d\n", reg64[reg], i);
 }
 
 void emit_add32(Reg dst, Reg src) {
@@ -190,6 +207,30 @@ void compile(Node* node, Map* vars) {
     emit_leave();
     emit_ret();
     break;
+  case NIF: {
+    compile(node->cond, vars);
+    emit_pop(AX);
+    emit_cmpi(AX, 0);
+    char* l = new_label("end");
+    emit_je(l);
+    compile(node->then, vars);
+    printf("%s:\n", l);
+    break;
+  }
+  case NIFELSE: {
+    compile(node->cond, vars);
+    emit_pop(AX);
+    emit_cmpi(AX, 0);
+    char* els = new_label("else");
+    emit_je(els);
+    compile(node->then, vars);
+    char* end = new_label("end");
+    emit_jmp(end);
+    printf("%s:\n", els);
+    compile(node->els, vars);
+    printf("%s:\n", end);
+    break;
+  }
   case NSTMTS: {
     for (size_t i = 0; i < node->stmts->length; i++) {
       compile(node->stmts->ptr[i], vars);
