@@ -55,9 +55,9 @@ int main(int argc, char** argv)
 
   Vector* tokens = lex(fp);
 
-  /* for (int i = 0; i < tokens->length; i++) { */
-  /*   dump_token(*(Token*)(tokens->ptr[i])); */
-  /* } */
+  for (int i = 0; i < tokens->length; i++) {
+    dump_token(*(Token*)(tokens->ptr[i]));
+  }
 
   fclose(fp);
 
@@ -65,7 +65,7 @@ int main(int argc, char** argv)
   size_t local_size = 0;
   Node* ast = parse(tokens, vmap, &local_size);
 
-  /* dump_node(ast, 0); */
+  dump_node(ast, 0);
 
   puts(".intel_syntax noprefix");
   puts(".text");

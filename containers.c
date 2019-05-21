@@ -53,15 +53,21 @@ void map_put(Map *map, char *key, void *val) {
   vec_push(map->vals, val);
 }
 
+void map_puti(Map *map, char *key, intptr_t val) {
+  map_put(map, key, (void*)val);
+}
+
 void *map_get(Map *map, char *key) {
-  // iは負になりうる
-  // ptrdiff_tを使うべき？
-  for (int i = map->keys->length - 1; i >= 0; i--) {
+  for (size_t i = map->keys->length - 1; map->keys->length > 0 && i >= 0; i--) {
     if (streq(map->keys->ptr[i], key)) {
       return map->vals->ptr[i];
     }
   }
   return NULL;
+}
+
+intptr_t map_geti(Map *map, char *key) {
+  return (intptr_t)map_get(map, key);
 }
 
 int map_has_key(Map* map, char *key) {

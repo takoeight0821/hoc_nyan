@@ -147,6 +147,27 @@ static Node* statement() {
   if (la(0) == TIDENT && streq(lt(0).ident, "return")) {
     consume();
     node = new_return_node(expr());
+  } else if (la(0) == TIDENT && streq(lt(0).ident, "if")) {
+    consume(); // if
+    if (!match(TLPAREN)) {
+      parse_error("(", lt(0));
+    }
+    Node* cond = expr();
+    if (!match(TRPAREN)) {
+      parse_error(")", lt(0));
+    }
+    Node* then = statement();
+
+    if (la(0) == TIDENT && streq(lt(0).ident, "else")) {
+      consume(); // else
+      Node* els = statement();
+      node = new_if_else_node(cond, then, els);
+    } else {
+      node = new_if_node(cond, then);
+    }
+
+    return node; // ; is not necessary
+
   } else if (la(0) == TIDENT && la(1) == TEQUAL) {
     Node* lhs = variable();
     consume();
@@ -154,7 +175,7 @@ static Node* statement() {
 
     if (!map_has_key(vmap, lhs->ident)) {
       lsize += 4; // sizeof(int)
-      map_put(vmap, lhs->ident, (void*)lsize);
+      map_puti(vmap, lhs->ident, lsize);
     }
 
     node = new_assign_node(lhs, rhs);

@@ -35,5 +35,7 @@ try 1 "return 1 <= 1;"
 try 1 "return 42 == 4 * 10 + 2;"
 try 1 "return 1 < 2;"
 try 1 "return 2 > 1;"
+try 1 "if (1) return 1;"
+try 2 "if (0) return 1; else return 2;"
 
 echo OK

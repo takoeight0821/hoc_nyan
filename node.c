@@ -47,6 +47,21 @@ Node* new_return_node(Node* ret) {
   return node;
 }
 
+Node* new_if_node(Node* cond, Node* then) {
+  Node* node = new_node(NIF);
+  node->cond = cond;
+  node->then = then;
+  return node;
+}
+
+Node* new_if_else_node(Node* cond, Node* then, Node* els) {
+  Node* node = new_node(NIFELSE);
+  node->cond = cond;
+  node->then = then;
+  node->els = els;
+  return node;
+}
+
 Node* new_stmts_node(Vector* stmts) {
   Node* node = new_node(NSTMTS);
 
@@ -140,6 +155,22 @@ void dump_node(Node* node, int level) {
   case NRETURN:
     eprintf("(return ");
     dump_node(node->ret, level+1);
+    eprintf(")");
+    break;
+  case NIF:
+    eprintf("(if ");
+    dump_node(node->cond, level+1);
+    eprintf(" ");
+    dump_node(node->then, level+1);
+    eprintf(")");
+    break;
+  case NIFELSE:
+    eprintf("(if ");
+    dump_node(node->cond, level+1);
+    eprintf(" ");
+    dump_node(node->then, level+1);
+    eprintf(" ");
+    dump_node(node->els, level+1);
     eprintf(")");
     break;
   case NSTMTS: {

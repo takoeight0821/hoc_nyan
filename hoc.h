@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 
 typedef struct {
   void **ptr;
@@ -58,7 +59,7 @@ enum NodeTag {
     NASSIGN,
     NRETURN,
     NIF,
-    NELSE,
+    NIFELSE,
     NSTMTS,
 };
 
@@ -77,6 +78,11 @@ typedef struct Node {
   Node* ret;
 
   Vector* stmts;
+
+  // if else
+  Node* cond;
+  Node* then;
+  Node* els;
 } Node;
 
 // node.c
@@ -86,6 +92,8 @@ Node* new_int_node(int integer);
 Node* new_var_node(char* ident);
 Node* new_assign_node(Node* lhs, Node* rhs);
 Node* new_return_node(Node* ret);
+Node* new_if_node(Node* cond, Node* then);
+Node* new_if_else_node(Node* cond, Node* then, Node* els);
 Node* new_stmts_node(Vector* stmts);
 void dump_node(Node* node, int level);
 
@@ -104,7 +112,9 @@ intptr_t vec_popi(Vector* v);
 char* vec_to_string(Vector* v);
 Map* new_map();
 void map_put(Map *map, char *key, void *val);
+void map_puti(Map *map, char *key, intptr_t val);
 void *map_get(Map *map, char *key);
+intptr_t map_geti(Map *map, char *key);
 int map_has_key(Map *map, char *key);
 
 // emit.c
