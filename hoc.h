@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -31,6 +32,7 @@ enum TokenTag {
   TLBRACE,
   TRBRACE,
   TSEMICOLON,
+  TCOMMA,
   TEQ,
   TNE,
   TLE,
@@ -59,6 +61,7 @@ enum NodeTag {
     NEQ,
     NNE,
     NASSIGN,
+    NCALL,
     NRETURN,
     NIF,
     NIFELSE,
@@ -77,8 +80,11 @@ typedef struct Node {
   // integer literal
   int integer;
 
-  // variable
-  char* ident;
+  // variable, function call, function definition
+  char* name;
+
+  // function call
+  Vector* args;
 
   // return
   Node* ret;
@@ -92,7 +98,6 @@ typedef struct Node {
   Node* els;
 
   // function definition
-  char* func_name;
   Vector* params;
   Node* body;
 } Node;
@@ -103,6 +108,7 @@ Node* new_binop_node(enum NodeTag tag, Node* lhs, Node* rhs);
 Node* new_int_node(int integer);
 Node* new_var_node(char* ident);
 Node* new_assign_node(Node* lhs, Node* rhs);
+Node* new_call_node(char* name, Vector* args);
 Node* new_return_node(Node* ret);
 Node* new_if_node(Node* cond, Node* then);
 Node* new_if_else_node(Node* cond, Node* then, Node* els);

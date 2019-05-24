@@ -33,6 +33,7 @@ static int match(enum TokenTag tag) {
   }
 }
 
+static Node* expr();
 static Node* term();
 static Node* integer();
 static Node* add();
@@ -50,8 +51,26 @@ static Node* term() {
       parse_error("[RPAREN]", lt(0));
     }
     return node;
-  } else if (la(0) == TIDENT) {
+  } else if (la(0) == TIDENT && la(1) != TLPAREN) {
     return variable();
+  } else if (la(0) == TIDENT) {
+    Node* node = new_call_node(lt(0).ident, new_vec());
+    consume();
+    if (!match(TLPAREN)) {
+      parse_error("(", lt(0));
+    }
+    if (match(TRPAREN)) {
+      return node;
+    }
+
+    for (;;) {
+      vec_push(node->args, expr());
+      if (match(TRPAREN)) {
+        return node;
+      } else if (!match(TCOMMA)) {
+        parse_error(",", lt(0));
+      }
+    }
   } else {
     return integer();
   }
@@ -174,9 +193,9 @@ static Node* statement() {
     consume();
     Node* rhs = expr();
 
-    if (!map_has_key(vmap, lhs->ident)) {
+    if (!map_has_key(vmap, lhs->name)) {
       lsize += 4; // sizeof(int)
-      map_puti(vmap, lhs->ident, lsize);
+      map_puti(vmap, lhs->name, lsize);
     }
 
     node = new_assign_node(lhs, rhs);

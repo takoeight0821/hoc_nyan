@@ -120,6 +120,9 @@ static Token* next_token() {
     case ';':
       consume();
       return new_token(TSEMICOLON);
+    case ',':
+      consume();
+      return new_token(TCOMMA);
     default:
       if (isalpha(c) || c == '_') {
         return ident();

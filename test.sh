@@ -39,5 +39,6 @@ try 1 "if (1) return 1;"
 try 2 "if (0) return 1; else return 2;"
 try 3 "{ 1; 2; return 3; }"
 try 1 "if (0) { return 0; } else { return 1; }"
+try 0 "{ f(); return 0; }"
 
 echo OK

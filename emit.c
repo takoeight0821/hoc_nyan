@@ -89,16 +89,16 @@ void emit_store32(Reg dst, size_t offset) {
 void compile(Node* node, Map* vars) {
   switch (node->tag) {
   case NVAR: {
-    size_t offset = (size_t)map_get(vars, node->ident);
+    size_t offset = (size_t)map_get(vars, node->name);
     if (offset == 0) {
-      error("%s is not defined\n", node->ident);
+      error("%s is not defined\n", node->name);
     }
     emit_load32(AX, offset);
     emit_push(AX);
     break;
   }
   case NASSIGN: {
-    size_t offset = (size_t)map_get(vars, node->lhs->ident);
+    size_t offset = (size_t)map_get(vars, node->lhs->name); // lvar
     compile(node->rhs, vars);
     emit_pop(AX);
     emit_store32(AX, offset);
@@ -201,6 +201,13 @@ void compile(Node* node, Map* vars) {
   case NINT:
     emit_pushi(node->integer);
     break;
+  case NCALL:
+    // スタックをがりがりいじりながらコード生成してるので、
+    // rspのアライメントをうまいこと扱う必要がある。
+    // push/popの回数をカウントしておく？偶数なら何もしない。奇数ならrsp += 8。関数が戻ってきたらrsp -= 8
+    // 8ccはそうしてる。
+    // entryを呼ぶとき、確保する量を16でアライメント
+    error("function call is not supported\n");
   case NRETURN:
     compile(node->ret, vars);
     emit_pop(AX);
@@ -238,6 +245,9 @@ void compile(Node* node, Map* vars) {
     }
     break;
   }
-
+  default:
+    eprintf("emit error: ");
+    dump_node(node, 0);
+    error(" unimplemented\n");
   }
 }

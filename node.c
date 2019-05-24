@@ -24,10 +24,17 @@ Node* new_assign_node(Node* lhs, Node* rhs) {
   return node;
 }
 
+Node* new_call_node(char* name, Vector* args) {
+  Node* node = new_node(NCALL);
+  node->name = name;
+  node->args = args;
+  return node;
+}
+
 Node* new_var_node(char* ident) {
   Node* node = new_node(NVAR);
-  node->ident = calloc(sizeof(char), strlen(ident));
-  strcpy(node->ident, ident);
+  node->name = calloc(sizeof(char), strlen(ident));
+  strcpy(node->name, ident);
   return node;
 }
 
@@ -76,14 +83,25 @@ Node* new_block_node(Vector* stmts) {
 
 void dump_node(Node* node, int level) {
   /* indent(level); */
+  assert(node);
 
   switch (node->tag) {
   case NINT:
     eprintf("%d", node->integer);
     break;
   case NVAR:
-    eprintf("%s", node->ident);
+    eprintf("%s", node->name);
     break;
+  case NCALL: {
+    eprintf("(call ");
+    eprintf("%s", node->name);
+    for (size_t i = 0; i < node->args->length; i++) {
+      eprintf(" ");
+      dump_node(node->args->ptr[i], level+1);
+    }
+    eprintf(")");
+    break;
+  }
   case NASSIGN:
     eprintf("(= ");
     dump_node(node->lhs, level+1); eprintf(" ");
