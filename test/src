@@ -1,2 +1,4 @@
-var = 4;
-return var * 10 + 2;
+{
+  var = 4;
+  return var * 10 + 2;
+}

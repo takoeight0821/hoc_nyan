@@ -33,7 +33,7 @@ Node* new_call_node(char* name, Vector* args) {
 
 Node* new_var_node(char* ident) {
   Node* node = new_node(NVAR);
-  node->name = calloc(sizeof(char), strlen(ident));
+  node->name = calloc(sizeof(char), strlen(ident) + 1);
   strcpy(node->name, ident);
   return node;
 }
