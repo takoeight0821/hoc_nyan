@@ -1,21 +1,34 @@
 #include "hoc.h"
 
-char* reg64[] = { "rax", "rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11" };
-char* reg32[] = { "eax", "edi", "esi", "edx", "ecx", "r8d", "r9d", "r10d", "r11d" };
-unsigned int label_id = 0;
+static char* reg64[] = { "rax", "rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11" };
+static char* reg32[] = { "eax", "edi", "esi", "edx", "ecx", "r8d", "r9d", "r10d", "r11d" };
+static Reg argregs[] = {DI, SI, DX, CX, R8, R9};
+static unsigned int label_id = 0;
+static int stack_size = 0;
 
-char* new_label(char* name) {
+static char* new_label(char* name) {
   return format(".L%s%u", name, label_id++);
 }
 
+__attribute__((format(printf, 1, 2))) static void emit(char *fmt, ...);
+
+static void emit(char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  printf("\t");
+  vprintf(fmt, ap);
+  printf("\n");
+}
+
 void emit_enter(int size, int nest) {
-  printf("\tpush rbp\n");
-  printf("\tmov rbp, rsp\n");
-  printf("\tsub rsp, %d\n", size);
+  emit("push rbp");
+  emit("mov rbp, rsp");
+  emit("sub rsp, %d", size);
+  stack_size += size;
 }
 
 void emit_leave() {
-  puts("\tleave");
+  emit("leave");
 }
 
 void emit_je(char* label) {
@@ -64,14 +77,17 @@ void emit_div32(Reg src) {
 
 void emit_push(Reg src) {
   printf("\tpush %s\n", reg64[src]);
+  stack_size += 8;
 }
 
 void emit_pushi(int src) {
   printf("\tpush %d\n", src);
+  stack_size += 8;
 }
 
 void emit_pop(Reg dst) {
   printf("\tpop %s\n", reg64[dst]);
+  stack_size -= 8;
 }
 
 void emit_ret() {
@@ -201,13 +217,39 @@ void compile(Node* node, Map* vars) {
   case NINT:
     emit_pushi(node->integer);
     break;
-  case NCALL:
-    // スタックをがりがりいじりながらコード生成してるので、
+  case NCALL: {
+    // function call
+    for (size_t i = 0; i < node->args->length; i++) {
+      compile(node->args->ptr[i], vars);
+    }
+    for (ptrdiff_t i = node->args->length - 1; i >= 0; i--) {
+      emit_pop(argregs[i]);
+    }
+
+    emit_push(R10);
+    emit_push(R11);
+    emit("mov rax, 0");
+
+        // スタックをがりがりいじりながらコード生成してるので、
     // rspのアライメントをうまいこと扱う必要がある。
-    // push/popの回数をカウントしておく？偶数なら何もしない。奇数ならrsp += 8。関数が戻ってきたらrsp -= 8
-    // 8ccはそうしてる。
-    // entryを呼ぶとき、確保する量を16でアライメント
-    error("function call is not supported\n");
+    // push/popの回数をカウントしておく。偶数なら何もしない。奇数ならrsp -= 8。関数が戻ってきたらrsp += 8
+    bool ispadding = stack_size % 16;
+    if (ispadding) {
+      emit("sub rsp, 8");
+      stack_size += 8;
+    }
+    emit("call %s", node->name);
+    emit_pop(R11);
+    emit_pop(R10);
+
+    if (ispadding) {
+      emit("add rsp, 8");
+      stack_size -= 8;
+    }
+
+    emit_push(AX);
+    break;
+  }
   case NRETURN:
     compile(node->ret, vars);
     emit_pop(AX);

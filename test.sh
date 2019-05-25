@@ -6,7 +6,8 @@ try() {
 
     echo "$input" > tmp
     ./hoc tmp > tmp.s
-    gcc -o tmp.out tmp.s
+    gcc -c test.c -o test.o
+    gcc -o tmp.out tmp.s test.o
     ./tmp.out
     actual="$?"
 
