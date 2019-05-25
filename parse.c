@@ -223,21 +223,60 @@ static Node* statement() {
   return node;
 }
 
-Node* parse(Vector* tokens, Map *vars, size_t *local_size) {
-  vmap = new_map();
+Node* funcdef() {
+  char* name = strdup(lt(0).ident);
+  if (!match(TIDENT)) {
+    parse_error("function name", lt(0));
+  }
+  if (!match(TLPAREN)) {
+    parse_error("(", lt(0));
+  }
+  Vector* params = new_vec();
+  for (;;) {
+    if (la(0) == TIDENT) {
+      vec_push(params, strdup(lt(0).ident));
+      consume();
+    } /* else { */
+    /*   parse_error("ident or )", lt(0)); */
+    /* } */
+    if (match(TCOMMA))
+      continue;
+    if (match(TRPAREN))
+      break;
+    parse_error(", or )", lt(0));
+  }
 
+  vmap = new_map();
+  lsize = 0;
+  for (size_t i = 0; i < params->length; i++) {
+    lsize += 4; // sizeof(int);
+    map_puti(vmap, params->ptr[i], lsize);
+  }
+
+  Node* body = statement();
+
+  Node* node = new_node(NFUNCDEF);
+  node->name = name;
+  node->params = params;
+  node->body = body;
+  node->local_env = vmap;
+  node->local_size = lsize;
+
+  return node;
+}
+
+Vector* parse(Vector* tokens) {
   lookahead = calloc(tokens->length, sizeof(Token));
   for (size_t i = 0; i < tokens->length; i++) {
     lookahead[i] = *(Token*)(tokens->ptr[i]);
   }
 
-  Node* ast = statement();
+  vmap = new_map();
 
-  if (!match(TEOF)) {
-    parse_error("EOF", lt(0));
+  Vector* funcdefs = new_vec();
+  while (!match(TEOF)) {
+    vec_push(funcdefs, funcdef());
   }
 
-  *vars = *vmap;
-  *local_size = lsize;
-  return ast;
+  return funcdefs;
 }

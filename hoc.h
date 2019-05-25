@@ -101,6 +101,8 @@ typedef struct Node {
   // function definition
   Vector* params;
   Node* body;
+  Map* local_env;
+  size_t local_size;
 } Node;
 
 // node.c
@@ -159,4 +161,4 @@ Vector* lex(FILE* file);
 void dump_token(Token tok);
 
 // parse.c
-Node* parse(Vector* tokens, /* out */ Map *vars, /* out */ size_t *local_size);
+Vector* parse(Vector* tokens);

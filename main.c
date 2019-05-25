@@ -61,18 +61,12 @@ int main(int argc, char** argv)
 
   fclose(fp);
 
-  Map* vmap = new_map();
-  size_t local_size = 0;
-  Node* ast = parse(tokens, vmap, &local_size);
-
-  dump_node(ast, 0);
+  Vector* funcdefs = parse(tokens);
 
   puts(".intel_syntax noprefix");
-  puts(".text");
-  puts(".global main");
-  puts("main:");
-  emit_enter(local_size, 0);
-  compile(ast, vmap);
+  for (size_t i = 0; i < funcdefs->length; i++) {
+    compile(funcdefs->ptr[i], new_map());
+  }
 
   return 0;
 }

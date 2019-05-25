@@ -26,7 +26,8 @@ Node* new_assign_node(Node* lhs, Node* rhs) {
 
 Node* new_call_node(char* name, Vector* args) {
   Node* node = new_node(NCALL);
-  node->name = name;
+  node->name = calloc(sizeof(char), strlen(name) + 1);
+  strcpy(node->name, name);
   node->args = args;
   return node;
 }
@@ -72,6 +73,15 @@ Node* new_if_else_node(Node* cond, Node* then, Node* els) {
 Node* new_block_node(Vector* stmts) {
   Node* node = new_node(NBLOCK);
   node->stmts = stmts;
+  return node;
+}
+
+Node* new_funcdef_node(char* name, Vector* params, Node* body) {
+  Node* node = new_node(NFUNCDEF);
+  node->name = calloc(sizeof(char), strlen(name) + 1);
+  strcpy(node->name, name);
+  node->params = params;
+  node->body = body;
   return node;
 }
 
@@ -190,12 +200,24 @@ void dump_node(Node* node, int level) {
     eprintf(")");
     break;
   case NBLOCK: {
-    eprintf("{");
+    eprintf("{\n");
     for (size_t i = 0; i < node->stmts->length; i++) {
-      dump_node(node->stmts->ptr[i], level);
+      dump_node(node->stmts->ptr[i], level+1);
       puts("");
     }
     eprintf("}");
+    break;
+  }
+  case NFUNCDEF: {
+    eprintf("%s", node->name);
+    eprintf("(");
+    for (size_t i = 0; i < node->params->length; i++) {
+      if (i != 0)
+        eprintf(", ");
+      eprintf("%s", node->params->ptr[i]);
+    }
+    eprintf(") ");
+    dump_node(node->body, level);
     break;
   }
   }

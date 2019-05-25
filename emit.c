@@ -5,6 +5,7 @@ static char* reg32[] = { "eax", "edi", "esi", "edx", "ecx", "r8d", "r9d", "r10d"
 static Reg argregs[] = {DI, SI, DX, CX, R8, R9};
 static unsigned int label_id = 0;
 static int stack_size = 0;
+static char* func_end_label;
 
 static char* new_label(char* name) {
   return format(".L%s%u", name, label_id++);
@@ -228,9 +229,9 @@ void compile(Node* node, Map* vars) {
 
     emit_push(R10);
     emit_push(R11);
-    emit("mov rax, 0");
+    emit_movi(AX, 0);
 
-        // スタックをがりがりいじりながらコード生成してるので、
+    // スタックをがりがりいじりながらコード生成してるので、
     // rspのアライメントをうまいこと扱う必要がある。
     // push/popの回数をカウントしておく。偶数なら何もしない。奇数ならrsp -= 8。関数が戻ってきたらrsp += 8
     bool ispadding = stack_size % 16;
@@ -253,8 +254,7 @@ void compile(Node* node, Map* vars) {
   case NRETURN:
     compile(node->ret, vars);
     emit_pop(AX);
-    emit_leave();
-    emit_ret();
+    emit_jmp(func_end_label);
     break;
   case NIF: {
     compile(node->cond, vars);
@@ -285,6 +285,24 @@ void compile(Node* node, Map* vars) {
       compile(node->stmts->ptr[i], vars);
       emit_pop(AX);
     }
+    break;
+  }
+  case NFUNCDEF: {
+    func_end_label = new_label("end");
+
+    puts(".text");
+    printf(".global %s\n", node->name);
+    printf("%s:\n", node->name);
+    emit_enter(node->local_size, 0);
+    for (size_t i = 0; i < node->params->length; i++) {
+      size_t offset = (size_t)map_get(node->local_env, node->params->ptr[i]);
+      emit_store32(argregs[i], offset);
+    }
+    compile(node->body, node->local_env);
+
+    printf("%s:\n", func_end_label);
+    emit_leave();
+    emit_ret();
     break;
   }
   default:
