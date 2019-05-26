@@ -204,6 +204,9 @@ void dump_token(Token tok) {
   case TSEMICOLON:
     eprintf("[SEMICOLON]");
     break;
+  case TCOMMA:
+    eprintf("[COMMA]");
+    break;
   case TEOF:
     eprintf("[EOF]");
     break;
