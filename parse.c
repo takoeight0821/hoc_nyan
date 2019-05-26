@@ -2,8 +2,8 @@
 
 static Token* lookahead;
 static size_t p = 0; // 次の字句のインデックス
-static Map* vmap;
-static size_t lsize = 0;
+static Map* local_env;
+static size_t local_size = 0;
 
 static void consume() {
   p++;
@@ -54,7 +54,9 @@ static Node* term() {
   } else if (la(0) == TIDENT && la(1) != TLPAREN) {
     return variable();
   } else if (la(0) == TIDENT) {
-    Node* node = new_call_node(lt(0).ident, new_vec());
+    Node* node = new_node(NCALL);
+    node->name = strdup(lt(0).ident);
+    node->args = new_vec();
     consume();
     if (!match(TLPAREN)) {
       parse_error("(", lt(0));
@@ -80,7 +82,11 @@ static Node* unary() {
   if (match(TPLUS)) {
     return term();
   } else if (match(TMINUS)) {
-    Node* node = new_binop_node(NMINUS, new_int_node(0), term());
+    Node* node = new_node(NMINUS);
+    Node* zero = new_node(NINT);
+    zero->integer = 0;
+    node->lhs = zero;
+    node->rhs = term();
     return node;
   } else {
     return term();
@@ -88,28 +94,36 @@ static Node* unary() {
 }
 
 static Node* variable() {
-  Node* n = new_var_node(lt(0).ident);
+  Node* node = new_node(NVAR);
+  node->name = strdup(lt(0).ident);
   if (!match(TIDENT)) {
     parse_error("variable", lt(0));
   }
-  return n;
+  return node;
 }
 
 static Node* integer() {
-  Node* n = new_int_node(lt(0).integer);
+  Node* node = new_node(NINT);
+  node->integer = lt(0).integer;
   if (!match(TINT)) {
     parse_error("integer", lt(0));
   }
-  return n;
+  return node;
 }
 
 static Node* equality() {
   Node* lhs = relational();
   for (;;) {
     if (match(TEQ)) {
-      lhs = new_binop_node(NEQ, lhs, relational());
+      Node* node = new_node(NEQ);
+      node->lhs = lhs;
+      node->rhs = relational();
+      lhs = node;
     } else if (match(TNE)) {
-      lhs = new_binop_node(NNE, lhs, relational());
+      Node* node = new_node(NNE);
+      node->lhs = lhs;
+      node->rhs = relational();
+      lhs = node;
     } else {
       return lhs;
     }
@@ -120,13 +134,25 @@ static Node* relational() {
   Node* lhs = add();
   for (;;) {
     if (match(TLT)) {
-      lhs = new_binop_node(NLT, lhs, add());
+      Node* node = new_node(NLT);
+      node->lhs = lhs;
+      node->rhs = add();
+      lhs = node;
     } else if (match(TLE)) {
-      lhs = new_binop_node(NLE, lhs, add());
+      Node* node = new_node(NLE);
+      node->lhs = lhs;
+      node->rhs = add();
+      lhs = node;
     } else if (match(TGT)) {
-      lhs = new_binop_node(NGT, lhs, add());
+      Node* node = new_node(NGT);
+      node->lhs = lhs;
+      node->rhs = add();
+      lhs = node;
     } else if (match(TGE)) {
-      lhs = new_binop_node(NGE, lhs, add());
+      Node* node = new_node(NGE);
+      node->lhs = lhs;
+      node->rhs = add();
+      lhs = node;
     } else {
       return lhs;
     }
@@ -136,9 +162,15 @@ static Node* mul() {
   Node* lhs = unary();
   for (;;) {
     if (match(TASTERISK)) {
-      lhs = new_binop_node(NMUL, lhs, unary());
+      Node* node = new_node(NMUL);
+      node->lhs = lhs;
+      node->rhs = unary();
+      lhs = node;
     } else if (match(TSLASH)) {
-      lhs = new_binop_node(NDIV, lhs, unary());
+      Node* node = new_node(NDIV);
+      node->lhs = lhs;
+      node->rhs = unary();
+      lhs = node;
     } else {
       return lhs;
     }
@@ -149,9 +181,15 @@ static Node* add() {
   Node* lhs = mul();
   for (;;) {
     if (match(TPLUS)) {
-      lhs = new_binop_node(NPLUS, lhs, mul());
+      Node* node = new_node(NPLUS);
+      node->lhs = lhs;
+      node->rhs = mul();
+      lhs = node;
     } else if (match(TMINUS)) {
-      lhs = new_binop_node(NMINUS, lhs, mul());
+      Node* node = new_node(NMINUS);
+      node->lhs = lhs;
+      node->rhs = mul();
+      lhs = node;
     } else {
       return lhs;
     }
@@ -166,7 +204,8 @@ static Node* statement() {
   Node* node;
   if (la(0) == TIDENT && streq(lt(0).ident, "return")) {
     consume();
-    node = new_return_node(expr());
+    node = new_node(NRETURN);
+    node->ret = expr();
   } else if (la(0) == TIDENT && streq(lt(0).ident, "if")) {
     consume(); // if
     if (!match(TLPAREN)) {
@@ -181,9 +220,14 @@ static Node* statement() {
     if (la(0) == TIDENT && streq(lt(0).ident, "else")) {
       consume(); // else
       Node* els = statement();
-      node = new_if_else_node(cond, then, els);
+      node = new_node(NIFELSE);
+      node->cond = cond;
+      node->then = then;
+      node->els = els;
     } else {
-      node = new_if_node(cond, then);
+      node = new_node(NIF);
+      node->cond = cond;
+      node->then = then;
     }
 
     return node; // ; is not necessary
@@ -193,12 +237,14 @@ static Node* statement() {
     consume();
     Node* rhs = expr();
 
-    if (!map_has_key(vmap, lhs->name)) {
-      lsize += 4; // sizeof(int)
-      map_puti(vmap, lhs->name, lsize);
+    if (!map_has_key(local_env, lhs->name)) {
+      local_size += 4; // sizeof(int)
+      map_puti(local_env, lhs->name, local_size);
     }
 
-    node = new_assign_node(lhs, rhs);
+    node = new_node(NASSIGN);
+    node->lhs = lhs;
+    node->rhs = rhs;
 
   } else if (match(TLBRACE)) {
     Vector* stmts = new_vec();
@@ -246,11 +292,11 @@ Node* funcdef() {
     parse_error(", or )", lt(0));
   }
 
-  vmap = new_map();
-  lsize = 0;
+  local_env = new_map();
+  local_size = 0;
   for (size_t i = 0; i < params->length; i++) {
-    lsize += 4; // sizeof(int);
-    map_puti(vmap, params->ptr[i], lsize);
+    local_size += 4; // sizeof(int);
+    map_puti(local_env, params->ptr[i], local_size);
   }
 
   Node* body = statement();
@@ -259,8 +305,8 @@ Node* funcdef() {
   node->name = name;
   node->params = params;
   node->body = body;
-  node->local_env = vmap;
-  node->local_size = lsize;
+  node->local_env = local_env;
+  node->local_size = local_size;
 
   return node;
 }
@@ -271,7 +317,7 @@ Vector* parse(Vector* tokens) {
     lookahead[i] = *(Token*)(tokens->ptr[i]);
   }
 
-  vmap = new_map();
+  local_env = new_map();
 
   Vector* funcdefs = new_vec();
   while (!match(TEOF)) {
