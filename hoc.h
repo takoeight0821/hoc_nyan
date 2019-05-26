@@ -66,6 +66,7 @@ enum NodeTag {
     NRETURN,
     NIF,
     NIFELSE,
+    NWHILE,
     NBLOCK,
     NFUNCDEF,
 };
@@ -94,13 +95,13 @@ typedef struct Node {
   Vector* stmts;
 
   // if else
-  Node* cond;
+  Node* cond; // while
   Node* then;
   Node* els;
 
   // function definition
   Vector* params;
-  Node* body;
+  Node* body; // while
   Map* local_env;
   size_t local_size;
 } Node;
