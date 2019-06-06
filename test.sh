@@ -45,5 +45,6 @@ try 0 "main () { return g(0); }"
 try 1 "id(x) { return x; }main() { return id(1); }"
 try 0 "main () { while (0) { return 1; } return 0; }"
 try 55 "main () { x = 10; sum = 0; while (x != 0) { sum = sum + x; x = x - 1; } return sum; }"
+try 0 "main () { x = y = 0; return x; }"
 
 echo OK
