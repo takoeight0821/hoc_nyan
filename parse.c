@@ -196,8 +196,30 @@ static Node* add() {
   }
 }
 
-static Node* expr() {
+static Node* assign() {
+  if (la(0) == TIDENT) {
+    if (la(1) == TEQUAL) {
+      Node* lhs = equality();
+      consume(); // =
+      Node* rhs = assign();
+
+      if (!map_has_key(local_env, lhs->name)) {
+        local_size += 4; // sizeof(int)
+        map_puti(local_env, lhs->name, local_size);
+      }
+
+      Node* node = new_node(NASSIGN);
+      node->lhs = lhs;
+      node->rhs = rhs;
+      return node;
+    }
+  }
+
   return equality();
+}
+
+static Node* expr() {
+  return assign();
 }
 
 static Node* statement() {
@@ -248,20 +270,6 @@ static Node* statement() {
     node->body = body;
 
     return node; // ; is not necessary
-
-  } else if (la(0) == TIDENT && la(1) == TEQUAL) {
-    Node* lhs = variable();
-    consume();
-    Node* rhs = expr();
-
-    if (!map_has_key(local_env, lhs->name)) {
-      local_size += 4; // sizeof(int)
-      map_puti(local_env, lhs->name, local_size);
-    }
-
-    node = new_node(NASSIGN);
-    node->lhs = lhs;
-    node->rhs = rhs;
 
   } else if (match(TLBRACE)) {
     Vector* stmts = new_vec();
