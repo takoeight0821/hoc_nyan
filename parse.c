@@ -232,6 +232,23 @@ static Node* statement() {
 
     return node; // ; is not necessary
 
+  } else if (la(0) == TIDENT && streq(lt(0).ident, "while")) {
+    consume(); // while
+    if (!match(TLPAREN)) {
+      parse_error("(", lt(0));
+    }
+    Node* cond = expr();
+    if (!match(TRPAREN)) {
+      parse_error(")", lt(0));
+    }
+    Node* body = statement();
+
+    node = new_node(NWHILE);
+    node->cond = cond;
+    node->body = body;
+
+    return node; // ; is not necessary
+
   } else if (la(0) == TIDENT && la(1) == TEQUAL) {
     Node* lhs = variable();
     consume();
