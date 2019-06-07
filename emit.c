@@ -115,7 +115,6 @@ void compile(Node* node, Map* vars) {
     break;
   }
   case NDEFVAR: {
-    emit_pushi(0); // dummy value
     break;
   }
   case NASSIGN: {
@@ -315,7 +314,6 @@ void compile(Node* node, Map* vars) {
   case NBLOCK: {
     for (size_t i = 0; i < node->stmts->length; i++) {
       compile(node->stmts->ptr[i], vars);
-      emit_pop(AX);
     }
     break;
   }
