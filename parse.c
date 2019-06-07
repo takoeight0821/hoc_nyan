@@ -228,6 +228,10 @@ static Node* statement() {
     consume();
     node = new_node(NRETURN);
     node->ret = expr();
+    if (!match(TSEMICOLON)) {
+      parse_error(";", lt(0));
+    }
+    return node;
   } else if (la(0) == TIDENT && streq(lt(0).ident, "if")) {
     consume(); // if
     if (!match(TLPAREN)) {
@@ -253,7 +257,6 @@ static Node* statement() {
     }
 
     return node; // ; is not necessary
-
   } else if (la(0) == TIDENT && streq(lt(0).ident, "while")) {
     consume(); // while
     if (!match(TLPAREN)) {
@@ -285,13 +288,12 @@ static Node* statement() {
     return node; // ; is not necessary
   } else {
     node = expr();
+    if (!match(TSEMICOLON)) {
+      parse_error(";", lt(0));
+    }
+    return node;
   };
 
-  if (!match(TSEMICOLON)) {
-    parse_error(";", lt(0));
-  }
-
-  return node;
 }
 
 Node* funcdef() {
