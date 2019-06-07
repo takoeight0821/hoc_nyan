@@ -293,6 +293,21 @@ void compile(Node* node, Map* vars) {
     printf("%s:\n", end);
     break;
   }
+  case NFOR: {
+    char* begin = new_label("begin");
+    char* end = new_label("end");
+    compile(node->init, vars);
+    printf("%s:\n", begin);
+    compile(node->cond, vars);
+    emit_pop(AX);
+    emit_cmpi(AX,0);
+    emit_je(end);
+    compile(node->body, vars);
+    compile(node->step, vars);
+    emit_jmp(begin);
+    printf("%s:\n", end);
+    break;
+  }
   case NBLOCK: {
     for (size_t i = 0; i < node->stmts->length; i++) {
       compile(node->stmts->ptr[i], vars);

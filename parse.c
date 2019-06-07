@@ -273,7 +273,28 @@ static Node* statement() {
     node->body = body;
 
     return node; // ; is not necessary
+  } else if (la(0) == TIDENT && streq(lt(0).ident, "for")) {
+    consume(); // for
+    node = new_node(NFOR);
 
+    if (!match(TLPAREN)) {
+      parse_error("(", lt(0));
+    }
+    node->init = expr();
+    if (!match(TSEMICOLON)) {
+      parse_error(";", lt(0));
+    }
+    node->cond = expr();
+    if (!match(TSEMICOLON)) {
+      parse_error(";", lt(0));
+    }
+    node->step = expr();
+    if(!match(TRPAREN)) {
+      parse_error(")", lt(0));
+    }
+    node->body = statement();
+
+    return node; // ; is not necessary
   } else if (match(TLBRACE)) {
     Vector* stmts = new_vec();
     while (la(0) != TRBRACE) {
