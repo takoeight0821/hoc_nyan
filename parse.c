@@ -340,7 +340,13 @@ static Node* statement() {
 }
 
 Node* funcdef() {
+  if (!(la(0) == TIDENT && streq(lt(0).ident, "int"))) {
+    parse_error("int", lt(0));
+  }
+  consume();
+
   char* name = strdup(lt(0).ident);
+
   if (!match(TIDENT)) {
     parse_error("function name", lt(0));
   }
@@ -349,17 +355,22 @@ Node* funcdef() {
   }
   Vector* params = new_vec();
   for (;;) {
-    if (la(0) == TIDENT) {
-      vec_push(params, strdup(lt(0).ident));
+    if (la(0) == TIDENT && streq(lt(0).ident, "int")) {
       consume();
-    } /* else { */
-    /*   parse_error("ident or )", lt(0)); */
-    /* } */
-    if (match(TCOMMA))
-      continue;
-    if (match(TRPAREN))
+      if (la(0) == TIDENT) {
+        vec_push(params, strdup(lt(0).ident));
+        consume();
+        if (match(TCOMMA))
+          continue;
+        if (match(TRPAREN))
+          break;
+        parse_error(", or )", lt(0));
+      }
+    } else if (match(TRPAREN)) {
       break;
-    parse_error(", or )", lt(0));
+    } else {
+      parse_error(")", lt(0));
+    }
   }
 
   local_env = new_map();
