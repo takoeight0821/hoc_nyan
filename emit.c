@@ -114,6 +114,10 @@ void compile(Node* node, Map* vars) {
     emit_push(AX);
     break;
   }
+  case NDEFVAR: {
+    emit_pushi(0); // dummy value
+    break;
+  }
   case NASSIGN: {
     size_t offset = (size_t)map_get(vars, node->lhs->name); // lvar
     compile(node->rhs, vars);

@@ -204,8 +204,7 @@ static Node* assign() {
       Node* rhs = assign();
 
       if (!map_has_key(local_env, lhs->name)) {
-        local_size += 4; // sizeof(int)
-        map_puti(local_env, lhs->name, local_size);
+        error("%s is not defined\n", lhs->name);
       }
 
       Node* node = new_node(NASSIGN);
@@ -224,7 +223,30 @@ static Node* expr() {
 
 static Node* statement() {
   Node* node;
-  if (la(0) == TIDENT && streq(lt(0).ident, "return")) {
+  if (la(0) == TIDENT && streq(lt(0).ident, "int")) {
+    // variable definition
+    consume(); // int
+    node = new_node(NDEFVAR);
+
+    if (la(0) != TIDENT) {
+      parse_error("ident", lt(0));
+    }
+    node->name = strdup(lt(0).ident);
+    consume(); // ident
+
+    if (map_has_key(local_env, node->name)) {
+      error("%s is already defined\n", node->name);
+    }
+
+    local_size += 4; // sizeof(int)
+    map_puti(local_env, node->name, local_size);
+
+    if (!match(TSEMICOLON)) {
+      parse_error(";", lt(0));
+    }
+
+    return node;
+  } else if (la(0) == TIDENT && streq(lt(0).ident, "return")) {
     consume();
     node = new_node(NRETURN);
     node->ret = expr();

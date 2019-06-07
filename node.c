@@ -33,6 +33,10 @@ void dump_node(Node* node, int level) {
     eprintf(")");
     break;
   }
+  case NDEFVAR: {
+    eprintf("(int %s)", node->name);
+    break;
+  }
   case NASSIGN:
     eprintf("(= ");
     dump_node(node->lhs, level+1); eprintf(" ");

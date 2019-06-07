@@ -61,6 +61,7 @@ enum NodeTag {
     NGE,
     NEQ,
     NNE,
+    NDEFVAR,
     NASSIGN,
     NCALL,
     NRETURN,
@@ -83,7 +84,7 @@ typedef struct Node {
   // integer literal
   int integer;
 
-  // variable, function call, function definition
+  // variable, function call, variable definition, function definition
   char* name;
 
   // function call

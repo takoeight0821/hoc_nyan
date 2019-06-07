@@ -63,6 +63,10 @@ int main(int argc, char** argv)
 
   Vector* funcdefs = parse(tokens);
 
+  for (int i = 0; i < funcdefs->length; i++) {
+    dump_node((Node*)(funcdefs->ptr[i]), 0);
+  }
+
   puts(".intel_syntax noprefix");
   for (size_t i = 0; i < funcdefs->length; i++) {
     compile(funcdefs->ptr[i], new_map());
