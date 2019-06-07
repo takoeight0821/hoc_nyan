@@ -127,6 +127,17 @@ void dump_node(Node* node, int level) {
     dump_node(node->body, level+1);
     eprintf(")");
     break;
+  case NFOR:
+    eprintf("(for ");
+    dump_node(node->init, level+1);
+    eprintf(" ");
+    dump_node(node->cond, level+1);
+    eprintf(" ");
+    dump_node(node->step, level+1);
+    eprintf(" ");
+    dump_node(node->body, level+1);
+    eprintf(")");
+    break;
   case NBLOCK: {
     eprintf("{\n");
     for (size_t i = 0; i < node->stmts->length; i++) {
