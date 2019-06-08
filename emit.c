@@ -324,10 +324,7 @@ void compile(Node* node, Map* vars) {
     printf(".global %s\n", node->name);
     printf("%s:\n", node->name);
 
-    /* emit_enter(node->local_size, 0); */
-    emit("push rbp");
-    emit("mov rbp, rsp");
-    emit("sub rsp, %lu", node->local_size);
+    emit_enter(node->local_size, 0);
 
     for (size_t i = 0; i < node->params->length; i++) {
       size_t offset = (size_t)map_get(node->local_env, node->params->ptr[i]);
