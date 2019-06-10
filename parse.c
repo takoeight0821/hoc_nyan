@@ -33,6 +33,14 @@ static int match(enum TokenTag tag) {
   }
 }
 
+static int match_ident(char* name) {
+  if (la(0) == TIDENT && streq(lt(0).ident, name)) {
+    consume();
+    return 1;
+  } else {
+    return 0;
+  }
+}
 static Node* expr();
 static Node* term();
 static Node* integer();
@@ -224,9 +232,8 @@ static Node* expr() {
 
 static Node* statement() {
   Node* node;
-  if (la(0) == TIDENT && streq(lt(0).ident, "int")) {
+  if (match_ident("int")) {
     // variable definition
-    consume(); // int
     node = new_node(NDEFVAR);
 
     if (la(0) != TIDENT) {
@@ -247,16 +254,14 @@ static Node* statement() {
     }
 
     return node;
-  } else if (la(0) == TIDENT && streq(lt(0).ident, "return")) {
-    consume();
+  } else if (match_ident("return")) {
     node = new_node(NRETURN);
     node->ret = expr();
     if (!match(TSEMICOLON)) {
       parse_error(";", lt(0));
     }
     return node;
-  } else if (la(0) == TIDENT && streq(lt(0).ident, "if")) {
-    consume(); // if
+  } else if (match_ident("if")) {
     if (!match(TLPAREN)) {
       parse_error("(", lt(0));
     }
@@ -266,8 +271,7 @@ static Node* statement() {
     }
     Node* then = statement();
 
-    if (la(0) == TIDENT && streq(lt(0).ident, "else")) {
-      consume(); // else
+    if (match_ident("else")) {
       Node* els = statement();
       node = new_node(NIFELSE);
       node->cond = cond;
@@ -280,8 +284,7 @@ static Node* statement() {
     }
 
     return node; // ; is not necessary
-  } else if (la(0) == TIDENT && streq(lt(0).ident, "while")) {
-    consume(); // while
+  } else if (match_ident("while")) {
     if (!match(TLPAREN)) {
       parse_error("(", lt(0));
     }
@@ -296,8 +299,7 @@ static Node* statement() {
     node->body = body;
 
     return node; // ; is not necessary
-  } else if (la(0) == TIDENT && streq(lt(0).ident, "for")) {
-    consume(); // for
+  } else if (match_ident("for")) {
     node = new_node(NFOR);
 
     if (!match(TLPAREN)) {
@@ -341,10 +343,9 @@ static Node* statement() {
 }
 
 Node* funcdef() {
-  if (!(la(0) == TIDENT && streq(lt(0).ident, "int"))) {
+  if (!match_ident("int")) {
     parse_error("int", lt(0));
   }
-  consume();
 
   char* name = strdup(lt(0).ident);
 
@@ -360,8 +361,7 @@ Node* funcdef() {
   local_size = 0;
 
   for (;;) {
-    if (la(0) == TIDENT && streq(lt(0).ident, "int") && la(1) == TIDENT) {
-      consume(); // int
+    if (match_ident("int") && la(0) == TIDENT) {
 
       char* param_name = strdup(lt(0).ident);
 
