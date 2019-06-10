@@ -360,21 +360,21 @@ Node* funcdef() {
   local_size = 0;
 
   for (;;) {
-    if (la(0) == TIDENT && streq(lt(0).ident, "int")) {
-      consume();
-      if (la(0) == TIDENT) {
-        char* param = strdup(lt(0).ident);
+    if (la(0) == TIDENT && streq(lt(0).ident, "int") && la(1) == TIDENT) {
+      consume(); // int
 
-        local_size += 4; // sizeof(int);
-        map_puti(local_env, param, local_size);
+      char* param_name = strdup(lt(0).ident);
 
-        vec_push(params, variable());
-        if (match(TCOMMA))
-          continue;
-        if (match(TRPAREN))
-          break;
-        parse_error(", or )", lt(0));
-      }
+      local_size += 4; // sizeof(int);
+      map_puti(local_env, param_name, local_size);
+
+      vec_push(params, variable());
+      if (match(TCOMMA))
+        continue;
+      if (match(TRPAREN))
+        break;
+      parse_error(", or )", lt(0));
+
     } else if (match(TRPAREN)) {
       break;
     } else {
