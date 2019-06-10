@@ -58,7 +58,7 @@ void map_puti(Map *map, char *key, intptr_t val) {
 }
 
 void *map_get(Map *map, char *key) {
-  for (size_t i = map->keys->length - 1; map->keys->length > 0 && i >= 0; i--) {
+  for (size_t i = map->keys->length - 1; map->keys->length > 0; i--) {
     if (streq(map->keys->ptr[i], key)) {
       return map->vals->ptr[i];
     }
