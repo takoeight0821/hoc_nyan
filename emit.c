@@ -106,7 +106,6 @@ void emit_store32(Reg dst, size_t offset) {
 void compile(Node* node) {
   switch (node->tag) {
   case NVAR: {
-    /* size_t offset = (size_t)map_get(vars, node->name); */
     if (node->offset == 0) {
       error("%s is not defined\n", node->name);
     }
@@ -118,7 +117,6 @@ void compile(Node* node) {
     break;
   }
   case NASSIGN: {
-    /* size_t offset = (size_t)map_get(vars, node->lhs->name); // lvar */
     compile(node->rhs);
     emit_pop(AX);
     emit_store32(AX, node->lhs->offset);
