@@ -6,6 +6,16 @@ Node* new_node(enum NodeTag tag) {
   return node;
 }
 
+size_t size_of(Type* ty) {
+  if (ty->ty == TY_INT) {
+    return 4;
+  } else if (ty->ty == TY_PTR) {
+    return 8;
+  } else {
+    error("invalid type");
+  }
+}
+
 void indent(int level) {
   for (int i = 0; i < level; i++) {
     eprintf("  ");

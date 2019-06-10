@@ -4,6 +4,7 @@ static Token* lookahead;
 static size_t p = 0; // 次の字句のインデックス
 static Map* local_env;
 static size_t local_size = 0;
+static Map* local_type_env;
 
 static void consume() {
   p++;
@@ -51,6 +52,34 @@ static Node* unary();
 static Node* equality();
 static Node* relational();
 static Node* statement();
+
+static Type* type() {
+  Type* ty = malloc(sizeof(Type));
+
+  enum {
+    INT = 1,
+  };
+
+  int base_type = 0;
+
+  for (;;) {
+    if (match_ident("int")) {
+      base_type += INT;
+    } else {
+      break;
+    }
+  }
+
+  switch (base_type) {
+  case INT:
+    *ty = (Type){TY_INT, NULL};
+    break;
+  default:
+    return NULL;
+  }
+
+  return ty;
+}
 
 static Node* term() {
   if (match(TLPAREN)) {
@@ -232,7 +261,9 @@ static Node* expr() {
 
 static Node* statement() {
   Node* node;
-  if (match_ident("int")) {
+
+  Type* ty = type();
+  if (ty) {
     // variable definition
     node = new_node(NDEFVAR);
 
@@ -246,8 +277,9 @@ static Node* statement() {
       error("%s is already defined\n", node->name);
     }
 
-    local_size += 4; // sizeof(int)
+    local_size += size_of(ty);
     map_puti(local_env, node->name, local_size);
+    map_put(local_type_env, node->name, ty);
 
     if (!match(TSEMICOLON)) {
       parse_error(";", lt(0));
@@ -358,6 +390,7 @@ Node* funcdef() {
 
   Vector* params = new_vec();
   local_env = new_map();
+  local_type_env = new_map();
   local_size = 0;
 
   for (;;) {
@@ -367,6 +400,9 @@ Node* funcdef() {
 
       local_size += 4; // sizeof(int);
       map_puti(local_env, param_name, local_size);
+      Type* ty = malloc(sizeof(Type));
+      ty->ty = TY_INT;
+      map_put(local_type_env, param_name, ty);
 
       vec_push(params, variable());
       if (match(TCOMMA))
@@ -400,6 +436,7 @@ Vector* parse(Vector* tokens) {
   }
 
   local_env = new_map();
+  local_type_env = new_map();
 
   Vector* funcdefs = new_vec();
   while (!match(TEOF)) {

@@ -73,9 +73,16 @@ enum NodeTag {
     NFUNCDEF,
 };
 
+typedef struct Type {
+  enum { TY_INT, TY_PTR } ty;
+  struct Type* ptr_to;
+} Type;
+
 typedef struct Node Node;
 typedef struct Node {
   enum NodeTag tag;
+
+  Type* type;
 
   // binop and assign
   Node* lhs;
@@ -115,6 +122,8 @@ typedef struct Node {
 // node.c
 Node* new_node(enum NodeTag tag);
 void dump_node(Node* node, int level);
+Type* type_of(Node* node);
+size_t size_of(Type* ty);
 
 // utils.c
 char* format(const char* fmt, ...);
