@@ -103,14 +103,14 @@ void emit_store32(Reg dst, size_t offset) {
   printf("\tmov [rbp-%zu], %s\n", offset, reg32[dst]);
 }
 
-void compile(Node* node, Map* vars) {
+void compile(Node* node) {
   switch (node->tag) {
   case NVAR: {
-    size_t offset = (size_t)map_get(vars, node->name);
-    if (offset == 0) {
+    /* size_t offset = (size_t)map_get(vars, node->name); */
+    if (node->offset == 0) {
       error("%s is not defined\n", node->name);
     }
-    emit_load32(AX, offset);
+    emit_load32(AX, node->offset);
     emit_push(AX);
     break;
   }
@@ -118,40 +118,40 @@ void compile(Node* node, Map* vars) {
     break;
   }
   case NASSIGN: {
-    size_t offset = (size_t)map_get(vars, node->lhs->name); // lvar
-    compile(node->rhs, vars);
+    /* size_t offset = (size_t)map_get(vars, node->lhs->name); // lvar */
+    compile(node->rhs);
     emit_pop(AX);
-    emit_store32(AX, offset);
+    emit_store32(AX, node->lhs->offset);
     emit_push(AX);
     break;
   }
   case NPLUS:
-    compile(node->lhs, vars);
-    compile(node->rhs, vars);
+    compile(node->lhs);
+    compile(node->rhs);
     emit_pop(DI);
     emit_pop(AX);
     emit_add32(AX, DI);
     emit_push(AX);
     break;
   case NMINUS:
-    compile(node->lhs, vars);
-    compile(node->rhs, vars);
+    compile(node->lhs);
+    compile(node->rhs);
     emit_pop(DI);
     emit_pop(AX);
     emit_sub32(AX, DI);
     emit_push(AX);
     break;
   case NMUL:
-    compile(node->lhs, vars);
-    compile(node->rhs, vars);
+    compile(node->lhs);
+    compile(node->rhs);
     emit_pop(DI);
     emit_pop(AX);
     emit_imul32(DI);
     emit_push(AX);
     break;
   case NDIV:
-    compile(node->lhs, vars);
-    compile(node->rhs, vars);
+    compile(node->lhs);
+    compile(node->rhs);
     emit_pop(DI);
     emit_pop(AX);
     emit_movi(DX, 0);
@@ -159,8 +159,8 @@ void compile(Node* node, Map* vars) {
     emit_push(AX);
     break;
   case NEQ:
-    compile(node->lhs, vars);
-    compile(node->rhs, vars);
+    compile(node->lhs);
+    compile(node->rhs);
     emit_pop(DI);
     emit_pop(AX);
     printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
@@ -169,8 +169,8 @@ void compile(Node* node, Map* vars) {
     emit_push(AX);
     break;
   case NNE:
-    compile(node->lhs, vars);
-    compile(node->rhs, vars);
+    compile(node->lhs);
+    compile(node->rhs);
     emit_pop(DI);
     emit_pop(AX);
     printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
@@ -179,8 +179,8 @@ void compile(Node* node, Map* vars) {
     emit_push(AX);
     break;
   case NGE:
-    compile(node->lhs, vars);
-    compile(node->rhs, vars);
+    compile(node->lhs);
+    compile(node->rhs);
     emit_pop(AX);
     emit_pop(DI);
     printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
@@ -189,8 +189,8 @@ void compile(Node* node, Map* vars) {
     emit_push(AX);
     break;
   case NGT:
-    compile(node->lhs, vars);
-    compile(node->rhs, vars);
+    compile(node->lhs);
+    compile(node->rhs);
     emit_pop(AX);
     emit_pop(DI);
     printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
@@ -199,8 +199,8 @@ void compile(Node* node, Map* vars) {
     emit_push(AX);
     break;
   case NLE:
-    compile(node->lhs, vars);
-    compile(node->rhs, vars);
+    compile(node->lhs);
+    compile(node->rhs);
     emit_pop(DI);
     emit_pop(AX);
     printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
@@ -209,8 +209,8 @@ void compile(Node* node, Map* vars) {
     emit_push(AX);
     break;
   case NLT:
-    compile(node->lhs, vars);
-    compile(node->rhs, vars);
+    compile(node->lhs);
+    compile(node->rhs);
     emit_pop(DI);
     emit_pop(AX);
     printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
@@ -224,7 +224,7 @@ void compile(Node* node, Map* vars) {
   case NCALL: {
     // function call
     for (size_t i = 0; i < node->args->length; i++) {
-      compile(node->args->ptr[i], vars);
+      compile(node->args->ptr[i]);
     }
     for (ptrdiff_t i = node->args->length - 1; i >= 0; i--) {
       emit_pop(argregs[i]);
@@ -255,31 +255,31 @@ void compile(Node* node, Map* vars) {
     break;
   }
   case NRETURN:
-    compile(node->ret, vars);
+    compile(node->ret);
     emit_pop(AX);
     emit_jmp(func_end_label);
     break;
   case NIF: {
-    compile(node->cond, vars);
+    compile(node->cond);
     emit_pop(AX);
     emit_cmpi(AX, 0);
     char* l = new_label("end");
     emit_je(l);
-    compile(node->then, vars);
+    compile(node->then);
     printf("%s:\n", l);
     break;
   }
   case NIFELSE: {
-    compile(node->cond, vars);
+    compile(node->cond);
     emit_pop(AX);
     emit_cmpi(AX, 0);
     char* els = new_label("else");
     emit_je(els);
-    compile(node->then, vars);
+    compile(node->then);
     char* end = new_label("end");
     emit_jmp(end);
     printf("%s:\n", els);
-    compile(node->els, vars);
+    compile(node->els);
     printf("%s:\n", end);
     break;
   }
@@ -287,11 +287,11 @@ void compile(Node* node, Map* vars) {
     char* begin = new_label("begin");
     char* end = new_label("end");
     printf("%s:\n", begin);
-    compile(node->cond, vars);
+    compile(node->cond);
     emit_pop(AX);
     emit_cmpi(AX, 0);
     emit_je(end);
-    compile(node->body, vars);
+    compile(node->body);
     emit_jmp(begin);
     printf("%s:\n", end);
     break;
@@ -299,21 +299,21 @@ void compile(Node* node, Map* vars) {
   case NFOR: {
     char* begin = new_label("begin");
     char* end = new_label("end");
-    compile(node->init, vars);
+    compile(node->init);
     printf("%s:\n", begin);
-    compile(node->cond, vars);
+    compile(node->cond);
     emit_pop(AX);
     emit_cmpi(AX,0);
     emit_je(end);
-    compile(node->body, vars);
-    compile(node->step, vars);
+    compile(node->body);
+    compile(node->step);
     emit_jmp(begin);
     printf("%s:\n", end);
     break;
   }
   case NBLOCK: {
     for (size_t i = 0; i < node->stmts->length; i++) {
-      compile(node->stmts->ptr[i], vars);
+      compile(node->stmts->ptr[i]);
     }
     break;
   }
@@ -327,10 +327,10 @@ void compile(Node* node, Map* vars) {
     emit_enter(node->local_size, 0);
 
     for (size_t i = 0; i < node->params->length; i++) {
-      size_t offset = (size_t)map_get(node->local_env, node->params->ptr[i]);
+      size_t offset = ((Node*)node->params->ptr[i])->offset;
       emit_store32(argregs[i], offset);
     }
-    compile(node->body, node->local_env);
+    compile(node->body);
 
     printf("%s:\n", func_end_label);
     emit_leave();

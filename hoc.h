@@ -86,6 +86,7 @@ typedef struct Node {
 
   // variable, function call, variable definition, function definition
   char* name;
+  size_t offset; // variable
 
   // function call
   Vector* args;
@@ -108,7 +109,6 @@ typedef struct Node {
   // function definition
   Vector* params;
   Node* body; // while, for
-  Map* local_env;
   size_t local_size;
 } Node;
 
@@ -152,7 +152,7 @@ typedef enum {
 void emit_enter(int size, int nest);
 void emit_leave();
 void emit_mov(Reg dst, Reg src);
-void compile(Node* node, Map* vars);
+void compile(Node* node);
 
 // lex.c
 Vector* lex(FILE* file);

@@ -69,7 +69,7 @@ int main(int argc, char** argv)
 
   puts(".intel_syntax noprefix");
   for (size_t i = 0; i < funcdefs->length; i++) {
-    compile(funcdefs->ptr[i], new_map());
+    compile(funcdefs->ptr[i]);
   }
 
   return 0;

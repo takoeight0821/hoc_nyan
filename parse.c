@@ -96,6 +96,7 @@ static Node* unary() {
 static Node* variable() {
   Node* node = new_node(NVAR);
   node->name = strdup(lt(0).ident);
+  node->offset = map_geti(local_env, node->name);
   if (!match(TIDENT)) {
     parse_error("variable", lt(0));
   }
@@ -353,13 +354,21 @@ Node* funcdef() {
   if (!match(TLPAREN)) {
     parse_error("(", lt(0));
   }
+
   Vector* params = new_vec();
+  local_env = new_map();
+  local_size = 0;
+
   for (;;) {
     if (la(0) == TIDENT && streq(lt(0).ident, "int")) {
       consume();
       if (la(0) == TIDENT) {
-        vec_push(params, strdup(lt(0).ident));
-        consume();
+        char* param = strdup(lt(0).ident);
+
+        local_size += 4; // sizeof(int);
+        map_puti(local_env, param, local_size);
+
+        vec_push(params, variable());
         if (match(TCOMMA))
           continue;
         if (match(TRPAREN))
@@ -373,20 +382,12 @@ Node* funcdef() {
     }
   }
 
-  local_env = new_map();
-  local_size = 0;
-  for (size_t i = 0; i < params->length; i++) {
-    local_size += 4; // sizeof(int);
-    map_puti(local_env, params->ptr[i], local_size);
-  }
-
   Node* body = statement();
 
   Node* node = new_node(NFUNCDEF);
   node->name = name;
   node->params = params;
   node->body = body;
-  node->local_env = local_env;
   node->local_size = local_size;
 
   return node;
