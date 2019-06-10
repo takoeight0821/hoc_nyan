@@ -394,14 +394,13 @@ Node* funcdef() {
   local_size = 0;
 
   for (;;) {
-    if (match_ident("int") && la(0) == TIDENT) {
+    Type* ty = malloc(sizeof(Type));
 
+    if ((ty = type()) && la(0) == TIDENT) {
       char* param_name = strdup(lt(0).ident);
 
-      local_size += 4; // sizeof(int);
+      local_size += size_of(ty); // sizeof(int);
       map_puti(local_env, param_name, local_size);
-      Type* ty = malloc(sizeof(Type));
-      ty->ty = TY_INT;
       map_put(local_type_env, param_name, ty);
 
       vec_push(params, variable());
