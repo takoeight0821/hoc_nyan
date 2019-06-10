@@ -53,7 +53,7 @@ static Node* equality();
 static Node* relational();
 static Node* statement();
 
-static Type* type() {
+static Type* type_specifier() {
   Type* ty = malloc(sizeof(Type));
 
   enum {
@@ -262,7 +262,7 @@ static Node* expr() {
 static Node* statement() {
   Node* node;
 
-  Type* ty = type();
+  Type* ty = type_specifier();
   if (ty) {
     // variable definition
     node = new_node(NDEFVAR);
@@ -394,12 +394,12 @@ Node* funcdef() {
   local_size = 0;
 
   for (;;) {
-    Type* ty = malloc(sizeof(Type));
+    Type* ty;
 
-    if ((ty = type()) && la(0) == TIDENT) {
+    if ((ty = type_specifier()) && la(0) == TIDENT) {
       char* param_name = strdup(lt(0).ident);
 
-      local_size += size_of(ty); // sizeof(int);
+      local_size += size_of(ty);
       map_puti(local_env, param_name, local_size);
       map_put(local_type_env, param_name, ty);
 
