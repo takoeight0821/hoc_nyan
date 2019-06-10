@@ -6,161 +6,191 @@ Node* new_node(enum NodeTag tag) {
   return node;
 }
 
-/* void indent(int level) { */
-/*   for (int i = 0; i < level; i++) { */
-/*     printf(" "); */
-/*   } */
-/* } */
+void indent(int level) {
+  for (int i = 0; i < level; i++) {
+    eprintf("  ");
+  }
+}
 
 void dump_node(Node* node, int level) {
-  /* indent(level); */
   assert(node);
 
   switch (node->tag) {
   case NINT:
-    eprintf("%d", node->integer);
+    indent(level);
+    eprintf("%d\n", node->integer);
     break;
   case NVAR:
-    eprintf("%s", node->name);
+    indent(level);
+    eprintf("%s\n", node->name);
     break;
   case NCALL: {
-    eprintf("(call ");
-    eprintf("%s", node->name);
+    indent(level);
+    eprintf("(call\n");
+    indent(level + 1);
+    eprintf("%s\n", node->name);
     for (size_t i = 0; i < node->args->length; i++) {
-      eprintf(" ");
       dump_node(node->args->ptr[i], level+1);
     }
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   }
   case NDEFVAR: {
-    eprintf("(int %s)", node->name);
+    indent(level);
+    eprintf("(int %s)\n", node->name);
     break;
   }
   case NASSIGN:
-    eprintf("(= ");
-    dump_node(node->lhs, level+1); eprintf(" ");
+    indent(level);
+    eprintf("(=\n");
+    dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NPLUS:
-    eprintf("(+ ");
-    dump_node(node->lhs, level+1); eprintf(" ");
+    indent(level);
+    eprintf("(+\n");
+    dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NMINUS:
-    eprintf("(- ");
-    dump_node(node->lhs, level+1); eprintf(" ");
+    indent(level);
+    eprintf("(-\n");
+    dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NMUL:
-    eprintf("(* ");
-    dump_node(node->lhs, level+1); eprintf(" ");
+    indent(level);
+    eprintf("(*\n");
+    dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NDIV:
-    eprintf("(/ ");
-    dump_node(node->lhs, level+1); eprintf(" ");
+    indent(level);
+    eprintf("(/\n");
+    dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NLT:
-    eprintf("(< ");
-    dump_node(node->lhs, level+1); eprintf(" ");
+    indent(level);
+    eprintf("(<\n");
+    dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NLE:
-    eprintf("(<= ");
-    dump_node(node->lhs, level+1); eprintf(" ");
+    indent(level);
+    eprintf("(<=\n");
+    dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NGT:
-    eprintf("(> ");
-    dump_node(node->lhs, level+1); eprintf(" ");
+    indent(level);
+    eprintf("(>\n");
+    dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NGE:
-    eprintf("(>= ");
-    dump_node(node->lhs, level+1); eprintf(" ");
+    indent(level);
+    eprintf("(>=\n");
+    dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NEQ:
-    eprintf("(== ");
-    dump_node(node->lhs, level+1); eprintf(" ");
+    indent(level);
+    eprintf("(==\n");
+    dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NNE:
-    eprintf("(!= ");
-    dump_node(node->lhs, level+1); eprintf(" ");
+    indent(level);
+    eprintf("(!=\n");
+    dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NRETURN:
-    eprintf("(return ");
+    indent(level);
+    eprintf("(return\n");
     dump_node(node->ret, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NIF:
-    eprintf("(if ");
+    indent(level);
+    eprintf("(if\n");
     dump_node(node->cond, level+1);
-    eprintf(" ");
     dump_node(node->then, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NIFELSE:
-    eprintf("(if ");
+    indent(level);
+    eprintf("(if\n");
     dump_node(node->cond, level+1);
-    eprintf(" ");
     dump_node(node->then, level+1);
-    eprintf(" ");
     dump_node(node->els, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NWHILE:
-    eprintf("(while ");
+    indent(level);
+    eprintf("(while\n");
     dump_node(node->cond, level+1);
-    eprintf(" ");
     dump_node(node->body, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NFOR:
-    eprintf("(for ");
+    indent(level);
+    eprintf("(for\n");
     dump_node(node->init, level+1);
-    eprintf(" ");
     dump_node(node->cond, level+1);
-    eprintf(" ");
     dump_node(node->step, level+1);
-    eprintf(" ");
     dump_node(node->body, level+1);
-    eprintf(")");
+    indent(level);
+    eprintf(")\n");
     break;
   case NBLOCK: {
+    indent(level);
     eprintf("{\n");
     for (size_t i = 0; i < node->stmts->length; i++) {
       dump_node(node->stmts->ptr[i], level+1);
-      puts("");
     }
-    eprintf("}");
+    indent(level);
+    eprintf("}\n");
     break;
   }
   case NFUNCDEF: {
-    eprintf("%s", node->name);
+    eprintf("%s ", node->name);
     eprintf("(");
     for (size_t i = 0; i < node->params->length; i++) {
       if (i != 0)
         eprintf(", ");
-      eprintf("%s", node->params->ptr[i]);
+      eprintf("%s", ((Node*)node->params->ptr[i])->name);
     }
-    eprintf(") ");
-    dump_node(node->body, level);
+    eprintf(")\n");
+    dump_node(node->body, level+1);
     break;
   }
   }

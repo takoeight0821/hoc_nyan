@@ -58,6 +58,7 @@ int main(int argc, char** argv)
   for (int i = 0; i < tokens->length; i++) {
     dump_token(*(Token*)(tokens->ptr[i]));
   }
+  eprintf("\n");
 
   fclose(fp);
 
