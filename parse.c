@@ -274,6 +274,17 @@ static Type* ptr_to(Type* ty) {
   return new_ty;
 }
 
+// TODO: 名前解決
+static void add_lvar(char* name, Type* ty) {
+  if (map_has_key(local_env, name)) {
+    error("%s is already defined\n", name);
+  }
+
+  local_size += size_of(ty);
+  map_puti(local_env, name, local_size);
+  map_put(local_type_env, name, ty);
+}
+
 static Node* direct_decl(Type* ty) {
   if (la(0) != TIDENT) {
     parse_error("ident", lt(0));
@@ -282,13 +293,7 @@ static Node* direct_decl(Type* ty) {
   node->name = strdup(lt(0).ident);
   consume();
 
-  if (map_has_key(local_env, node->name)) {
-    error("%s is already defined\n", node->name);
-  }
-
-  local_size += size_of(ty);
-  map_puti(local_env, node->name, local_size);
-  map_put(local_type_env, node->name, ty);
+  add_lvar(node->name, ty);
 
   return node;
 }
