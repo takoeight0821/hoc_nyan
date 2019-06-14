@@ -259,35 +259,55 @@ static Node* expr() {
   return assign();
 }
 
-static Node* statement() {
+static int is_typename(Token t) {
+  if (t.tag == TIDENT) {
+    return streq(t.ident, "int");
+  } else {
+    return 0;
+  }
+}
+
+static Node* declaration() {
   Node* node;
-
+  // variable definition
   Type* ty = type_specifier();
-  if (ty) {
-    // variable definition
-    node = new_node(NDEFVAR);
 
-    if (la(0) != TIDENT) {
-      parse_error("ident", lt(0));
-    }
-    node->name = strdup(lt(0).ident);
-    consume(); // ident
+  node = new_node(NDEFVAR);
 
-    if (map_has_key(local_env, node->name)) {
-      error("%s is already defined\n", node->name);
-    }
+  if (la(0) != TIDENT) {
+    parse_error("ident", lt(0));
+  }
+  node->name = strdup(lt(0).ident);
+  consume(); // ident
 
-    local_size += size_of(ty);
-    map_puti(local_env, node->name, local_size);
-    map_put(local_type_env, node->name, ty);
+  if (map_has_key(local_env, node->name)) {
+    error("%s is already defined\n", node->name);
+  }
 
-    if (!match(TSEMICOLON)) {
-      parse_error(";", lt(0));
-    }
+  local_size += size_of(ty);
+  map_puti(local_env, node->name, local_size);
+  map_put(local_type_env, node->name, ty);
 
-    return node;
+  if (!match(TSEMICOLON)) {
+    parse_error(";", lt(0));
+  }
+
+  return node;
+};
+
+static Node* expr_stmt() {
+  Node* node = expr();
+  if (!match(TSEMICOLON)) {
+    parse_error(";", lt(0));
+  }
+  return node;
+};
+
+static Node* statement() {
+  if (is_typename(lt(0))) {
+    return declaration();
   } else if (match_ident("return")) {
-    node = new_node(NRETURN);
+    Node* node = new_node(NRETURN);
     node->ret = expr();
     if (!match(TSEMICOLON)) {
       parse_error(";", lt(0));
@@ -305,17 +325,17 @@ static Node* statement() {
 
     if (match_ident("else")) {
       Node* els = statement();
-      node = new_node(NIFELSE);
+      Node* node = new_node(NIFELSE);
       node->cond = cond;
       node->then = then;
       node->els = els;
+      return node;
     } else {
-      node = new_node(NIF);
+      Node* node = new_node(NIF);
       node->cond = cond;
       node->then = then;
+      return node;
     }
-
-    return node; // ; is not necessary
   } else if (match_ident("while")) {
     if (!match(TLPAREN)) {
       parse_error("(", lt(0));
@@ -326,13 +346,13 @@ static Node* statement() {
     }
     Node* body = statement();
 
-    node = new_node(NWHILE);
+    Node* node = new_node(NWHILE);
     node->cond = cond;
     node->body = body;
 
-    return node; // ; is not necessary
+    return node;
   } else if (match_ident("for")) {
-    node = new_node(NFOR);
+    Node* node = new_node(NFOR);
 
     if (!match(TLPAREN)) {
       parse_error("(", lt(0));
@@ -365,11 +385,7 @@ static Node* statement() {
     }
     return node; // ; is not necessary
   } else {
-    node = expr();
-    if (!match(TSEMICOLON)) {
-      parse_error(";", lt(0));
-    }
-    return node;
+    return expr_stmt();
   };
 
 }
