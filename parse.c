@@ -267,18 +267,20 @@ static int is_typename(Token t) {
   }
 }
 
-static Node* declaration() {
-  Node* node;
-  // variable definition
-  Type* ty = type_specifier();
+static Type* ptr_to(Type* ty) {
+  Type* new_ty = malloc(sizeof(Type));
+  new_ty->ty = TY_PTR;
+  new_ty->ptr_to = ty;
+  return new_ty;
+}
 
-  node = new_node(NDEFVAR);
-
+static Node* direct_decl(Type* ty) {
   if (la(0) != TIDENT) {
     parse_error("ident", lt(0));
   }
+  Node* node = new_node(NDEFVAR);
   node->name = strdup(lt(0).ident);
-  consume(); // ident
+  consume();
 
   if (map_has_key(local_env, node->name)) {
     error("%s is already defined\n", node->name);
@@ -288,11 +290,27 @@ static Node* declaration() {
   map_puti(local_env, node->name, local_size);
   map_put(local_type_env, node->name, ty);
 
+  return node;
+}
+
+static Node* declarator(Type* ty) {
+  while (match(TASTERISK)) {
+    ty = ptr_to(ty);
+  }
+  return direct_decl(ty);
+}
+
+static Node* declaration() {
+  // variable definition
+  Type* ty = type_specifier();
+
+  Node* decl = declarator(ty);
+
   if (!match(TSEMICOLON)) {
     parse_error(";", lt(0));
   }
 
-  return node;
+  return decl;
 };
 
 static Node* expr_stmt() {
