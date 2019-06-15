@@ -344,6 +344,7 @@ static Node* statement() {
     if (!match(TRPAREN)) {
       parse_error(")", lt(0));
     }
+
     Node* then = statement();
 
     if (match_ident("else")) {
@@ -360,18 +361,17 @@ static Node* statement() {
       return node;
     }
   } else if (match_ident("while")) {
+    Node* node = new_node(NWHILE);
+
     if (!match(TLPAREN)) {
       parse_error("(", lt(0));
     }
-    Node* cond = expr();
+    node->cond = expr();
     if (!match(TRPAREN)) {
       parse_error(")", lt(0));
     }
-    Node* body = statement();
 
-    Node* node = new_node(NWHILE);
-    node->cond = cond;
-    node->body = body;
+    node->body = statement();
 
     return node;
   } else if (match_ident("for")) {
@@ -394,23 +394,21 @@ static Node* statement() {
     }
     node->body = statement();
 
-    return node; // ; is not necessary
+    return node;
   } else if (match(TLBRACE)) {
-    Vector* stmts = new_vec();
-    while (la(0) != TRBRACE) {
-      vec_push(stmts, statement());
-    }
     Node* node = new_node(NBLOCK);
-    node->stmts = stmts;
+    node->stmts = new_vec();
+    while (la(0) != TRBRACE) {
+      vec_push(node->stmts, statement());
+    }
 
     if (!match(TRBRACE)) {
       parse_error("}", lt(0));
     }
-    return node; // ; is not necessary
+    return node;
   } else {
     return expr_stmt();
-  };
-
+  }
 }
 
 Node* funcdef() {
@@ -433,16 +431,14 @@ Node* funcdef() {
   local_size = 0;
 
   for (;;) {
-    Type* ty;
+    if (is_typename(lt(0))) {
+      Type* ty = type_specifier();
+      Node* param_decl = declarator(ty); // NDEFVAR
+      Node* param = new_node(NVAR);
+      param->name = param_decl->name;
+      param->offset = map_geti(local_env,param->name);
 
-    if ((ty = type_specifier()) && la(0) == TIDENT) {
-      char* param_name = strdup(lt(0).ident);
-
-      local_size += size_of(ty);
-      map_puti(local_env, param_name, local_size);
-      map_put(local_type_env, param_name, ty);
-
-      vec_push(params, variable());
+      vec_push(params, param);
       if (match(TCOMMA))
         continue;
       if (match(TRPAREN))
