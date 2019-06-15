@@ -16,6 +16,19 @@ size_t size_of(Type* ty) {
   }
 }
 
+static Type* new_type() {
+  Type* ty = malloc(sizeof(Type));
+  return ty;
+}
+
+Type* type_of(Node* node) {
+  if (node->type) {
+    return node->type;
+  } else {
+    error("node must be type checked");
+  }
+}
+
 void indent(int level) {
   for (int i = 0; i < level; i++) {
     eprintf("  ");
