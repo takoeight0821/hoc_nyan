@@ -68,6 +68,9 @@ static Token* next_token() {
     case '/':
       consume();
       return new_token(TSLASH);
+    case '&':
+      consume();
+      return new_token(TAND);
     case '<':
       consume();
       switch (c) {
@@ -185,6 +188,9 @@ void dump_token(Token tok) {
     break;
   case TSLASH:
     eprintf("[SLASH]");
+    break;
+  case TAND:
+    eprintf("[AND]");
     break;
   case TEQUAL:
     eprintf("[EQUAL]");

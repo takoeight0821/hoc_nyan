@@ -27,6 +27,7 @@ enum TokenTag {
   TMINUS,
   TASTERISK,
   TSLASH,
+  TAND,
   TEQUAL,
   TLPAREN,
   TRPAREN,
@@ -95,7 +96,7 @@ typedef struct Node {
   Vector* stmts; // block
   Node* expr; // "return" or expression stmt
 
-  char* name; // function call, variable definition, function definition
+  char* name; // function call, variable definition
 
   Var* var;
 
