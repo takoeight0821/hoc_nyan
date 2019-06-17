@@ -292,6 +292,7 @@ static Node* direct_decl(Type* ty) {
   }
   Node* node = new_node(NDEFVAR);
   node->name = strdup(lt(0).ident);
+  node->type = ty;
   consume();
 
   add_lvar(node->name, ty);
