@@ -7,6 +7,14 @@ static unsigned int label_id = 0;
 static int stack_size = 0;
 static char* func_end_label;
 
+static char* reg(Reg r, size_t s) {
+  if (s == 4) {
+    return reg32[r];
+  }
+  assert(s == 8);
+  return reg64[r];
+}
+
 static char* new_label(char* name) {
   return format(".L%s%u", name, label_id++);
 }
@@ -95,12 +103,12 @@ void emit_ret() {
   puts("\tret");
 }
 
-void emit_load32(Reg dst, size_t offset) {
-  printf("\tmov %s, [rbp-%zu]\n", reg32[dst], offset);
+void load(Reg dst, size_t size, size_t offset) {
+  printf("\tmov %s, [rbp-%zu]\n", reg(dst, size), offset);
 }
 
-void emit_store32(Reg dst, size_t offset) {
-  printf("\tmov [rbp-%zu], %s\n", offset, reg32[dst]);
+void store(Reg src, size_t size, size_t offset) {
+  printf("\tmov [rbp-%zu], %s\n", offset, reg(src, size));
 }
 
 void compile(Node* node) {
@@ -109,7 +117,7 @@ void compile(Node* node) {
     if (node->offset == 0) {
       error("%s is not defined\n", node->name);
     }
-    emit_load32(AX, node->offset);
+    load(AX, size_of(type_of(node)), node->offset);
     emit_push(AX);
     break;
   }
@@ -119,7 +127,7 @@ void compile(Node* node) {
   case NASSIGN: {
     compile(node->rhs);
     emit_pop(AX);
-    emit_store32(AX, node->lhs->offset);
+    store(AX, size_of(type_of(node->lhs)), node->lhs->offset);
     emit_push(AX);
     break;
   }
@@ -325,8 +333,8 @@ void compile(Node* node) {
     emit_enter(node->local_size);
 
     for (size_t i = 0; i < node->params->length; i++) {
-      size_t offset = ((Node*)node->params->ptr[i])->offset;
-      emit_store32(argregs[i], offset);
+      Node* param = node->params->ptr[i];
+      store(argregs[i], size_of(type_of(param)), param->offset);
     }
     compile(node->body);
 

@@ -7,12 +7,11 @@ Node* new_node(enum NodeTag tag) {
 }
 
 size_t size_of(Type* ty) {
-  if (ty->ty == TY_INT) {
+  switch (ty->ty) {
+  case TY_INT:
     return 4;
-  } else if (ty->ty == TY_PTR) {
+  case TY_PTR:
     return 8;
-  } else {
-    error("invalid type");
   }
 }
 
@@ -22,10 +21,21 @@ static Type* new_type() {
 }
 
 Type* type_of(Node* node) {
-  if (node->type) {
-    return node->type;
-  } else {
-    error("node must be type checked");
+  assert(node->type);
+  return node->type;
+}
+
+void dump_type(Type* ty) {
+  assert(ty);
+
+  switch (ty->ty) {
+  case TY_INT:
+    eprintf("int");
+    break;
+  case TY_PTR:
+    eprintf("ptr(");
+    dump_type(ty->ptr_to);
+    eprintf(")");
   }
 }
 
@@ -45,7 +55,9 @@ void dump_node(Node* node, int level) {
     break;
   case NVAR:
     indent(level);
-    eprintf("%s\n", node->name);
+    eprintf("%s : ", node->name);
+    dump_type(node->type);
+    eprintf("\n");
     break;
   case NCALL: {
     indent(level);

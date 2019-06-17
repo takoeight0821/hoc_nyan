@@ -122,6 +122,7 @@ typedef struct Node {
 // node.c
 Node* new_node(enum NodeTag tag);
 void dump_node(Node* node, int level);
+void dump_type(Type* ty);
 Type* type_of(Node* node);
 size_t size_of(Type* ty);
 

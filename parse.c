@@ -134,6 +134,7 @@ static Node* variable() {
   Node* node = new_node(NVAR);
   node->name = strdup(lt(0).ident);
   node->offset = map_geti(local_env, node->name);
+  node->type = map_get(local_type_env, node->name);
   if (!match(TIDENT)) {
     parse_error("variable", lt(0));
   }
@@ -436,7 +437,8 @@ Node* funcdef() {
       Node* param_decl = declarator(ty); // NDEFVAR
       Node* param = new_node(NVAR);
       param->name = param_decl->name;
-      param->offset = map_geti(local_env,param->name);
+      param->offset = map_geti(local_env, param->name);
+      param->type = map_get(local_type_env, param->name);
 
       vec_push(params, param);
       if (match(TCOMMA))
