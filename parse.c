@@ -321,7 +321,8 @@ static Node* declaration() {
 };
 
 static Node* expr_stmt() {
-  Node* node = expr();
+  Node* node = new_node(NEXPR_STMT);
+  node->expr = expr();
   if (!match(TSEMICOLON)) {
     parse_error(";", lt(0));
   }
@@ -333,7 +334,7 @@ static Node* statement() {
     return declaration();
   } else if (match_ident("return")) {
     Node* node = new_node(NRETURN);
-    node->ret = expr();
+    node->expr = expr();
     if (!match(TSEMICOLON)) {
       parse_error(";", lt(0));
     }

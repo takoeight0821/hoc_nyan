@@ -316,9 +316,14 @@ void compile(Node* node) {
     comment("end NCALL");
     break;
   }
+  case NEXPR_STMT:
+    comment("start NEXPR_STMT");
+    compile(node->expr);
+    comment("end NRETURN");
+    break;
   case NRETURN:
     comment("start NRETURN");
-    compile(node->ret);
+    compile(node->expr);
     pop(AX);
     emit_jmp(func_end_label);
     comment("end NRETURN");

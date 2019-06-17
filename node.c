@@ -166,10 +166,16 @@ void dump_node(Node* node, int level) {
     indent(level);
     eprintf(")\n");
     break;
+  case NEXPR_STMT:
+    indent(level);
+    eprintf("(expr_stmt\n");
+    dump_node(node->expr, level+1);
+    eprintf(")\n");
+    break;
   case NRETURN:
     indent(level);
     eprintf("(return\n");
-    dump_node(node->ret, level+1);
+    dump_node(node->expr, level+1);
     indent(level);
     eprintf(")\n");
     break;

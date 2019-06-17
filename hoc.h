@@ -64,6 +64,7 @@ enum NodeTag {
     NDEFVAR,
     NASSIGN,
     NCALL,
+    NEXPR_STMT,
     NRETURN,
     NIF,
     NIFELSE,
@@ -95,8 +96,8 @@ typedef struct Node {
   // function call
   Vector* args;
 
-  // return
-  Node* ret;
+  // "return"
+  Node* expr;
 
   // block
   Vector* stmts;
