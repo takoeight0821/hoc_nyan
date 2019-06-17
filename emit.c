@@ -103,21 +103,36 @@ void emit_ret() {
   puts("\tret");
 }
 
-void load(Reg dst, size_t size, size_t offset) {
-  printf("\tmov %s, [rbp-%zu]\n", reg(dst, size), offset);
+/* void load(Reg dst, size_t size, size_t offset) { */
+/*   printf("\tmov %s, [rbp-%zu]\n", reg(dst, size), offset); */
+/* } */
+
+void load(Reg dst, size_t size) {
+  emit("mov %s, [rax]", reg(dst, size));
 }
 
-void store(Reg src, size_t size, size_t offset) {
-  printf("\tmov [rbp-%zu], %s\n", offset, reg(src, size));
+void store(Reg src, size_t size) {
+  emit("mov [rax], %s", reg(src, size));
+}
+
+/* void store(Reg src, size_t size, size_t offset) { */
+/*   printf("\tmov [rbp-%zu], %s\n", offset, reg(src, size)); */
+/* } */
+
+void emit_lval(Node* node) {
+  assert(node->tag == NVAR);
+
+  emit("mov rax, rbp");
+  emit("sub rax, %zu", node->offset);
+  emit_push(AX);
 }
 
 void compile(Node* node) {
   switch (node->tag) {
   case NVAR: {
-    if (node->offset == 0) {
-      error("%s is not defined\n", node->name);
-    }
-    load(AX, size_of(type_of(node)), node->offset);
+    emit_lval(node);
+    emit_pop(AX);
+    load(AX, size_of(type_of(node)));
     emit_push(AX);
     break;
   }
@@ -125,10 +140,12 @@ void compile(Node* node) {
     break;
   }
   case NASSIGN: {
+    emit_lval(node->lhs);
     compile(node->rhs);
+    emit_pop(DI);
     emit_pop(AX);
-    store(AX, size_of(type_of(node->lhs)), node->lhs->offset);
-    emit_push(AX);
+    store(DI, size_of(type_of(node->lhs)));
+    emit_push(DI);
     break;
   }
   case NPLUS:
@@ -169,9 +186,9 @@ void compile(Node* node) {
     compile(node->rhs);
     emit_pop(DI);
     emit_pop(AX);
-    printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
-    printf("\tsete al\n");
-    printf("\tmovzb eax, al\n");
+    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    emit("sete al");
+    emit("movzb rax, al");
     emit_push(AX);
     break;
   case NNE:
@@ -179,29 +196,29 @@ void compile(Node* node) {
     compile(node->rhs);
     emit_pop(DI);
     emit_pop(AX);
-    printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
-    printf("\tsetne al\n");
-    printf("\tmovzb eax, al\n");
+    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    emit("setne al");
+    emit("movzb rax, al");
     emit_push(AX);
     break;
   case NGE:
     compile(node->lhs);
     compile(node->rhs);
-    emit_pop(AX);
     emit_pop(DI);
-    printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
-    printf("\tsetle al\n");
-    printf("\tmovzb eax, al\n");
+    emit_pop(AX);
+    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    emit("setge al");
+    emit("movzb rax, al");
     emit_push(AX);
     break;
   case NGT:
     compile(node->lhs);
     compile(node->rhs);
-    emit_pop(AX);
     emit_pop(DI);
-    printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
-    printf("\tsetl al\n");
-    printf("\tmovzb eax, al\n");
+    emit_pop(AX);
+    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    emit("setg al");
+    emit("movzb rax, al");
     emit_push(AX);
     break;
   case NLE:
@@ -209,9 +226,9 @@ void compile(Node* node) {
     compile(node->rhs);
     emit_pop(DI);
     emit_pop(AX);
-    printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
-    printf("\tsetle al\n");
-    printf("\tmovzb eax, al\n");
+    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    emit("setle al");
+    emit("movzb rax, al");
     emit_push(AX);
     break;
   case NLT:
@@ -219,9 +236,9 @@ void compile(Node* node) {
     compile(node->rhs);
     emit_pop(DI);
     emit_pop(AX);
-    printf("\tcmp %s, %s\n", reg64[AX], reg64[DI]);
-    printf("\tsetl al\n");
-    printf("\tmovzb eax, al\n");
+    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    emit("setl al");
+    emit("movzb rax, al");
     emit_push(AX);
     break;
   case NINT:
@@ -334,7 +351,8 @@ void compile(Node* node) {
 
     for (size_t i = 0; i < node->params->length; i++) {
       Node* param = node->params->ptr[i];
-      store(argregs[i], size_of(type_of(param)), param->offset);
+      emit_lval(param);
+      store(argregs[i], size_of(type_of(param)));
     }
     compile(node->body);
 
