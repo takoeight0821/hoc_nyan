@@ -71,13 +71,18 @@ enum NodeTag {
     NWHILE,
     NFOR,
     NBLOCK,
-    NFUNCDEF,
 };
 
 typedef struct Type {
   enum { TY_INT, TY_PTR } ty;
   struct Type* ptr_to;
 } Type;
+
+typedef struct {
+  Type* type;
+  char* name;
+  size_t offset;
+} Var;
 
 typedef struct Node Node;
 typedef struct Node {
@@ -86,41 +91,45 @@ typedef struct Node {
   Type* type; // type
   Node* lhs; // left-hand side
   Node* rhs; // right-hand side
-
   int integer; // integer literal
+  Vector* stmts; // block
+  Node* expr; // "return" or expression stmt
 
-  // variable, function call, variable definition, function definition
-  char* name;
-  size_t offset; // variable
+  char* name; // function call, variable definition, function definition
+
+  Var* var;
 
   // function call
   Vector* args;
 
-  // "return"
-  Node* expr;
-
-  // block
-  Vector* stmts;
-
-  // if else
-  Node* cond; // while, for
+  // "if" ( cond ) then "else" els
+  // "for" ( init; cond; step ) body
+  // "while" ( cond ) body
+  Node* cond;
   Node* then;
   Node* els;
-
-  // for
   Node* init;
   Node* step;
+  Node* body;
 
-  // function definition
-  Vector* params;
-  Node* body; // while, for
-  size_t local_size;
 } Node;
+
+typedef struct {
+  char* name;
+  Node* body;
+  Vector* params;
+  size_t local_size;
+} Function;
+
+typedef struct {
+  Vector* funcs;
+} Program;
 
 // node.c
 Node* new_node(enum NodeTag tag);
 void dump_node(Node* node, int level);
 void dump_type(Type* ty);
+void dump_function(Function* func);
 Type* type_of(Node* node);
 size_t size_of(Type* ty);
 
@@ -157,11 +166,11 @@ typedef enum {
   R11,
 } Reg;
 
-void compile(Node* node);
+void gen_x86(Program* prog);
 
 // lex.c
 Vector* lex(FILE* file);
 void dump_token(Token tok);
 
 // parse.c
-Vector* parse(Vector* tokens);
+Program* parse(Vector* tokens);

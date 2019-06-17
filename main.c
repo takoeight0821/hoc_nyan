@@ -62,16 +62,13 @@ int main(int argc, char** argv)
 
   fclose(fp);
 
-  Vector* funcdefs = parse(tokens);
+  Program* prog = parse(tokens);
 
-  for (int i = 0; i < funcdefs->length; i++) {
-    dump_node((Node*)(funcdefs->ptr[i]), 0);
+  for (int i = 0; i < prog->funcs->length; i++) {
+    dump_function(prog->funcs->ptr[i]);
   }
 
-  puts(".intel_syntax noprefix");
-  for (size_t i = 0; i < funcdefs->length; i++) {
-    compile(funcdefs->ptr[i]);
-  }
+  gen_x86(prog);
 
   return 0;
 }

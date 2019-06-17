@@ -3,6 +3,7 @@
 Node* new_node(enum NodeTag tag) {
   Node* node = malloc(sizeof(Node));
   node->tag = tag;
+  node->type = NULL;
   return node;
 }
 
@@ -21,8 +22,14 @@ static Type* new_type() {
 }
 
 Type* type_of(Node* node) {
-  assert(node->type);
-  return node->type;
+  if (node->type) {
+    return node->type;
+  } else if (node->tag == NVAR) {
+    node->type = node->var->type;
+    return node->type;
+  } else {
+    error("node must be type checked");
+  }
 }
 
 void dump_type(Type* ty) {
@@ -55,8 +62,8 @@ void dump_node(Node* node, int level) {
     break;
   case NVAR:
     indent(level);
-    eprintf("%s : ", node->name);
-    dump_type(node->type);
+    eprintf("%s : ", node->var->name);
+    dump_type(node->var->type);
     eprintf("\n");
     break;
   case NCALL: {
@@ -224,17 +231,18 @@ void dump_node(Node* node, int level) {
     eprintf("}\n");
     break;
   }
-  case NFUNCDEF: {
-    eprintf("%s ", node->name);
-    eprintf("(");
-    for (size_t i = 0; i < node->params->length; i++) {
-      if (i != 0)
-        eprintf(", ");
-      eprintf("%s", ((Node*)node->params->ptr[i])->name);
-    }
-    eprintf(")\n");
-    dump_node(node->body, level+1);
-    break;
   }
+}
+
+void dump_function(Function* func) {
+  eprintf("%s ", func->name);
+  eprintf("(");
+  for (size_t i = 0; i < func->params->length; i++) {
+    if (i != 0)
+      eprintf(", ");
+    dump_type(((Var*)func->params->ptr[i])->type);
+    eprintf(" %s", ((Var*)func->params->ptr[i])->name);
   }
+  eprintf(")\n");
+  dump_node(func->body, 1);
 }

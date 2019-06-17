@@ -2,9 +2,16 @@
 
 static Token* lookahead;
 static size_t p = 0; // 次の字句のインデックス
-static Map* local_env;
+static Map* local_env; // Map(char*, Var*)
 static size_t local_size = 0;
-static Map* local_type_env;
+
+static Var* new_var(char* name, Type* type, int offset) {
+  Var* var = malloc(sizeof(Var));
+  var->name = strdup(name);
+  var->type = type;
+  var->offset = offset;
+  return var;
+}
 
 static void consume() {
   p++;
@@ -131,13 +138,11 @@ static Node* unary() {
 }
 
 static Node* variable() {
+  assert(la(0) == TIDENT);
+
   Node* node = new_node(NVAR);
-  node->name = strdup(lt(0).ident);
-  node->offset = map_geti(local_env, node->name);
-  node->type = map_get(local_type_env, node->name);
-  if (!match(TIDENT)) {
-    parse_error("variable", lt(0));
-  }
+  node->var = map_get(local_env, lt(0).ident);
+  consume();
   return node;
 }
 
@@ -242,10 +247,6 @@ static Node* assign() {
       consume(); // =
       Node* rhs = assign();
 
-      if (!map_has_key(local_env, lhs->name)) {
-        error("%s is not defined\n", lhs->name);
-      }
-
       Node* node = new_node(NASSIGN);
       node->lhs = lhs;
       node->rhs = rhs;
@@ -282,8 +283,8 @@ static void add_lvar(char* name, Type* ty) {
   }
 
   local_size += size_of(ty);
-  map_puti(local_env, name, local_size);
-  map_put(local_type_env, name, ty);
+  Var* var = new_var(name, ty, local_size);
+  map_put(local_env, name, var);
 }
 
 static Node* direct_decl(Type* ty) {
@@ -414,7 +415,7 @@ static Node* statement() {
   }
 }
 
-Node* funcdef() {
+Function* funcdef() {
   if (!match_ident("int")) {
     parse_error("int", lt(0));
   }
@@ -430,17 +431,13 @@ Node* funcdef() {
 
   Vector* params = new_vec();
   local_env = new_map();
-  local_type_env = new_map();
   local_size = 0;
 
   for (;;) {
     if (is_typename(lt(0))) {
       Type* ty = type_specifier();
       Node* param_decl = declarator(ty); // NDEFVAR
-      Node* param = new_node(NVAR);
-      param->name = param_decl->name;
-      param->offset = map_geti(local_env, param->name);
-      param->type = map_get(local_type_env, param->name);
+      Var* param = map_get(local_env, param_decl->name);
 
       vec_push(params, param);
       if (match(TCOMMA))
@@ -458,28 +455,29 @@ Node* funcdef() {
 
   Node* body = statement();
 
-  Node* node = new_node(NFUNCDEF);
-  node->name = name;
-  node->params = params;
-  node->body = body;
-  node->local_size = local_size;
+  Function* func = malloc(sizeof(Function));
+  func->name = name;
+  func->body = body;
+  func->params = params;
+  func->local_size = local_size;
 
-  return node;
+  return func;
 }
 
-Vector* parse(Vector* tokens) {
+Program* parse(Vector* tokens) {
   lookahead = calloc(tokens->length, sizeof(Token));
   for (size_t i = 0; i < tokens->length; i++) {
     lookahead[i] = *(Token*)(tokens->ptr[i]);
   }
 
   local_env = new_map();
-  local_type_env = new_map();
 
-  Vector* funcdefs = new_vec();
+  Program* prog = malloc(sizeof(Program));
+  prog->funcs = new_vec();
+
   while (!match(TEOF)) {
-    vec_push(funcdefs, funcdef());
+    vec_push(prog->funcs, funcdef());
   }
 
-  return funcdefs;
+  return prog;
 }

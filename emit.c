@@ -112,10 +112,6 @@ void emit_ret() {
   puts("\tret");
 }
 
-/* void load(Reg dst, size_t size, size_t offset) { */
-/*   printf("\tmov %s, [rbp-%zu]\n", reg(dst, size), offset); */
-/* } */
-
 void load(Reg dst, size_t size) {
   emit("mov %s, [rax]", reg(dst, size));
 }
@@ -124,19 +120,23 @@ void store(Reg src, size_t size) {
   emit("mov [rax], %s", reg(src, size));
 }
 
-/* void store(Reg src, size_t size, size_t offset) { */
-/*   printf("\tmov [rbp-%zu], %s\n", offset, reg(src, size)); */
-/* } */
-
 void emit_lval(Node* node) {
   assert(node->tag == NVAR);
 
   emit("mov rax, rbp");
-  emit("sub rax, %zu", node->offset);
+  emit("sub rax, %zu", node->var->offset);
   push(AX);
 }
 
-void compile(Node* node) {
+void emit_var(Var* var) {
+  comment("start Var %s", var->name);
+  emit("mov rax, rbp");
+  emit("sub rax, %zu", var->offset);
+  push(AX);
+  comment("end Var %s", var->name);
+}
+
+void emit_node(Node* node) {
   switch (node->tag) {
   case NVAR: {
     comment("start NVAR");
@@ -155,7 +155,7 @@ void compile(Node* node) {
   case NASSIGN: {
     comment("start NASSIGN");
     emit_lval(node->lhs);
-    compile(node->rhs);
+    emit_node(node->rhs);
     pop(DI);
     pop(AX);
     store(DI, size_of(type_of(node->lhs)));
@@ -165,8 +165,8 @@ void compile(Node* node) {
   }
   case NPLUS:
     comment("start NPLUS");
-    compile(node->lhs);
-    compile(node->rhs);
+    emit_node(node->lhs);
+    emit_node(node->rhs);
     pop(DI);
     pop(AX);
     emit_add32(AX, DI);
@@ -175,8 +175,8 @@ void compile(Node* node) {
     break;
   case NMINUS:
     comment("start NMINUS");
-    compile(node->lhs);
-    compile(node->rhs);
+    emit_node(node->lhs);
+    emit_node(node->rhs);
     pop(DI);
     pop(AX);
     emit_sub32(AX, DI);
@@ -185,8 +185,8 @@ void compile(Node* node) {
     break;
   case NMUL:
     comment("start NMUL");
-    compile(node->lhs);
-    compile(node->rhs);
+    emit_node(node->lhs);
+    emit_node(node->rhs);
     pop(DI);
     pop(AX);
     emit_imul32(DI);
@@ -195,8 +195,8 @@ void compile(Node* node) {
     break;
   case NDIV:
     comment("start NDIV");
-    compile(node->lhs);
-    compile(node->rhs);
+    emit_node(node->lhs);
+    emit_node(node->rhs);
     pop(DI);
     pop(AX);
     emit_movi(DX, 0);
@@ -206,8 +206,8 @@ void compile(Node* node) {
     break;
   case NEQ:
     comment("start NEQ");
-    compile(node->lhs);
-    compile(node->rhs);
+    emit_node(node->lhs);
+    emit_node(node->rhs);
     pop(DI);
     pop(AX);
     emit("cmp %s, %s", reg64[AX], reg64[DI]);
@@ -218,8 +218,8 @@ void compile(Node* node) {
     break;
   case NNE:
     comment("start NNE");
-    compile(node->lhs);
-    compile(node->rhs);
+    emit_node(node->lhs);
+    emit_node(node->rhs);
     pop(DI);
     pop(AX);
     emit("cmp %s, %s", reg64[AX], reg64[DI]);
@@ -230,8 +230,8 @@ void compile(Node* node) {
     break;
   case NGE:
     comment("start NGE");
-    compile(node->lhs);
-    compile(node->rhs);
+    emit_node(node->lhs);
+    emit_node(node->rhs);
     pop(DI);
     pop(AX);
     emit("cmp %s, %s", reg64[AX], reg64[DI]);
@@ -242,8 +242,8 @@ void compile(Node* node) {
     break;
   case NGT:
     comment("start NGT");
-    compile(node->lhs);
-    compile(node->rhs);
+    emit_node(node->lhs);
+    emit_node(node->rhs);
     pop(DI);
     pop(AX);
     emit("cmp %s, %s", reg64[AX], reg64[DI]);
@@ -254,8 +254,8 @@ void compile(Node* node) {
     break;
   case NLE:
     comment("start NLE");
-    compile(node->lhs);
-    compile(node->rhs);
+    emit_node(node->lhs);
+    emit_node(node->rhs);
     pop(DI);
     pop(AX);
     emit("cmp %s, %s", reg64[AX], reg64[DI]);
@@ -266,8 +266,8 @@ void compile(Node* node) {
     break;
   case NLT:
     comment("start NLT");
-    compile(node->lhs);
-    compile(node->rhs);
+    emit_node(node->lhs);
+    emit_node(node->rhs);
     pop(DI);
     pop(AX);
     emit("cmp %s, %s", reg64[AX], reg64[DI]);
@@ -285,7 +285,7 @@ void compile(Node* node) {
     comment("start NCALL");
     // function call
     for (size_t i = 0; i < node->args->length; i++) {
-      compile(node->args->ptr[i]);
+      emit_node(node->args->ptr[i]);
     }
     for (ptrdiff_t i = node->args->length - 1; i >= 0; i--) {
       pop(argregs[i]);
@@ -318,40 +318,40 @@ void compile(Node* node) {
   }
   case NEXPR_STMT:
     comment("start NEXPR_STMT");
-    compile(node->expr);
+    emit_node(node->expr);
     comment("end NRETURN");
     break;
   case NRETURN:
     comment("start NRETURN");
-    compile(node->expr);
+    emit_node(node->expr);
     pop(AX);
     emit_jmp(func_end_label);
     comment("end NRETURN");
     break;
   case NIF: {
     comment("start NIF");
-    compile(node->cond);
+    emit_node(node->cond);
     pop(AX);
     emit_cmpi(AX, 0);
     char* l = new_label("end");
     emit_je(l);
-    compile(node->then);
+    emit_node(node->then);
     printf("%s:\n", l);
     comment("end NIF");
     break;
   }
   case NIFELSE: {
     comment("start NIFELSE");
-    compile(node->cond);
+    emit_node(node->cond);
     pop(AX);
     emit_cmpi(AX, 0);
     char* els = new_label("else");
     emit_je(els);
-    compile(node->then);
+    emit_node(node->then);
     char* end = new_label("end");
     emit_jmp(end);
     printf("%s:\n", els);
-    compile(node->els);
+    emit_node(node->els);
     printf("%s:\n", end);
     comment("end NIFELSE");
     break;
@@ -361,11 +361,11 @@ void compile(Node* node) {
     char* begin = new_label("begin");
     char* end = new_label("end");
     printf("%s:\n", begin);
-    compile(node->cond);
+    emit_node(node->cond);
     pop(AX);
     emit_cmpi(AX, 0);
     emit_je(end);
-    compile(node->body);
+    emit_node(node->body);
     emit_jmp(begin);
     printf("%s:\n", end);
     comment("end NWHILE");
@@ -375,14 +375,14 @@ void compile(Node* node) {
     comment("start NFOR");
     char* begin = new_label("begin");
     char* end = new_label("end");
-    compile(node->init);
+    emit_node(node->init);
     printf("%s:\n", begin);
-    compile(node->cond);
+    emit_node(node->cond);
     pop(AX);
     emit_cmpi(AX,0);
     emit_je(end);
-    compile(node->body);
-    compile(node->step);
+    emit_node(node->body);
+    emit_node(node->step);
     emit_jmp(begin);
     printf("%s:\n", end);
     comment("end NFOR");
@@ -391,37 +391,46 @@ void compile(Node* node) {
   case NBLOCK: {
     comment("start NBLOCK");
     for (size_t i = 0; i < node->stmts->length; i++) {
-      compile(node->stmts->ptr[i]);
+      emit_node(node->stmts->ptr[i]);
     }
     comment("end NBLOCK");
-    break;
-  }
-  case NFUNCDEF: {
-    comment("start NFUNCDEF");
-    func_end_label = new_label("end");
-
-    puts(".text");
-    printf(".global %s\n", node->name);
-    printf("%s:\n", node->name);
-
-    emit_enter(node->local_size);
-
-    for (size_t i = 0; i < node->params->length; i++) {
-      Node* param = node->params->ptr[i];
-      emit_lval(param);
-      store(argregs[i], size_of(type_of(param)));
-    }
-    compile(node->body);
-
-    printf("%s:\n", func_end_label);
-    emit_leave();
-    emit_ret();
-    comment("end NFUNCDEF");
     break;
   }
   default:
     eprintf("emit error: ");
     dump_node(node, 0);
     error(" unimplemented\n");
+  }
+}
+
+void emit_function(Function* func) {
+  comment("start Function");
+  func_end_label = new_label("end");
+
+  puts(".text");
+  printf(".global %s\n", func->name);
+  printf("%s:\n", func->name);
+
+  emit_enter(func->local_size);
+
+  for (size_t i = 0; i < func->params->length; i++) {
+    Var* param = func->params->ptr[i];
+    emit_var(param);
+    store(argregs[i], size_of(param->type));
+  }
+
+  emit_node(func->body);
+
+  printf("%s:\n", func_end_label);
+  emit_leave();
+  emit_ret();
+
+  comment("end Function");
+}
+
+void gen_x86(Program* prog) {
+  puts(".intel_syntax noprefix");
+  for (size_t i = 0; i < prog->funcs->length; i++) {
+    emit_function(prog->funcs->ptr[i]);
   }
 }
