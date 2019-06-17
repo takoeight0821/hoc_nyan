@@ -82,14 +82,11 @@ typedef struct Node Node;
 typedef struct Node {
   enum NodeTag tag;
 
-  Type* type;
+  Type* type; // type
+  Node* lhs; // left-hand side
+  Node* rhs; // right-hand side
 
-  // binop and assign
-  Node* lhs;
-  Node* rhs;
-
-  // integer literal
-  int integer;
+  int integer; // integer literal
 
   // variable, function call, variable definition, function definition
   char* name;
