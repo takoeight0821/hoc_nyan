@@ -84,17 +84,17 @@ void emit_div32(Reg src) {
   printf("\tdiv %s\n", reg32[src]);
 }
 
-void emit_push(Reg src) {
+void push(Reg src) {
   printf("\tpush %s\n", reg64[src]);
   stack_size += 8;
 }
 
-void emit_pushi(int src) {
+void pushi(int src) {
   printf("\tpush %d\n", src);
   stack_size += 8;
 }
 
-void emit_pop(Reg dst) {
+void pop(Reg dst) {
   printf("\tpop %s\n", reg64[dst]);
   stack_size -= 8;
 }
@@ -124,16 +124,16 @@ void emit_lval(Node* node) {
 
   emit("mov rax, rbp");
   emit("sub rax, %zu", node->offset);
-  emit_push(AX);
+  push(AX);
 }
 
 void compile(Node* node) {
   switch (node->tag) {
   case NVAR: {
     emit_lval(node);
-    emit_pop(AX);
+    pop(AX);
     load(AX, size_of(type_of(node)));
-    emit_push(AX);
+    push(AX);
     break;
   }
   case NDEFVAR: {
@@ -142,107 +142,107 @@ void compile(Node* node) {
   case NASSIGN: {
     emit_lval(node->lhs);
     compile(node->rhs);
-    emit_pop(DI);
-    emit_pop(AX);
+    pop(DI);
+    pop(AX);
     store(DI, size_of(type_of(node->lhs)));
-    emit_push(DI);
+    push(DI);
     break;
   }
   case NPLUS:
     compile(node->lhs);
     compile(node->rhs);
-    emit_pop(DI);
-    emit_pop(AX);
+    pop(DI);
+    pop(AX);
     emit_add32(AX, DI);
-    emit_push(AX);
+    push(AX);
     break;
   case NMINUS:
     compile(node->lhs);
     compile(node->rhs);
-    emit_pop(DI);
-    emit_pop(AX);
+    pop(DI);
+    pop(AX);
     emit_sub32(AX, DI);
-    emit_push(AX);
+    push(AX);
     break;
   case NMUL:
     compile(node->lhs);
     compile(node->rhs);
-    emit_pop(DI);
-    emit_pop(AX);
+    pop(DI);
+    pop(AX);
     emit_imul32(DI);
-    emit_push(AX);
+    push(AX);
     break;
   case NDIV:
     compile(node->lhs);
     compile(node->rhs);
-    emit_pop(DI);
-    emit_pop(AX);
+    pop(DI);
+    pop(AX);
     emit_movi(DX, 0);
     emit_div32(DI);
-    emit_push(AX);
+    push(AX);
     break;
   case NEQ:
     compile(node->lhs);
     compile(node->rhs);
-    emit_pop(DI);
-    emit_pop(AX);
+    pop(DI);
+    pop(AX);
     emit("cmp %s, %s", reg64[AX], reg64[DI]);
     emit("sete al");
     emit("movzb rax, al");
-    emit_push(AX);
+    push(AX);
     break;
   case NNE:
     compile(node->lhs);
     compile(node->rhs);
-    emit_pop(DI);
-    emit_pop(AX);
+    pop(DI);
+    pop(AX);
     emit("cmp %s, %s", reg64[AX], reg64[DI]);
     emit("setne al");
     emit("movzb rax, al");
-    emit_push(AX);
+    push(AX);
     break;
   case NGE:
     compile(node->lhs);
     compile(node->rhs);
-    emit_pop(DI);
-    emit_pop(AX);
+    pop(DI);
+    pop(AX);
     emit("cmp %s, %s", reg64[AX], reg64[DI]);
     emit("setge al");
     emit("movzb rax, al");
-    emit_push(AX);
+    push(AX);
     break;
   case NGT:
     compile(node->lhs);
     compile(node->rhs);
-    emit_pop(DI);
-    emit_pop(AX);
+    pop(DI);
+    pop(AX);
     emit("cmp %s, %s", reg64[AX], reg64[DI]);
     emit("setg al");
     emit("movzb rax, al");
-    emit_push(AX);
+    push(AX);
     break;
   case NLE:
     compile(node->lhs);
     compile(node->rhs);
-    emit_pop(DI);
-    emit_pop(AX);
+    pop(DI);
+    pop(AX);
     emit("cmp %s, %s", reg64[AX], reg64[DI]);
     emit("setle al");
     emit("movzb rax, al");
-    emit_push(AX);
+    push(AX);
     break;
   case NLT:
     compile(node->lhs);
     compile(node->rhs);
-    emit_pop(DI);
-    emit_pop(AX);
+    pop(DI);
+    pop(AX);
     emit("cmp %s, %s", reg64[AX], reg64[DI]);
     emit("setl al");
     emit("movzb rax, al");
-    emit_push(AX);
+    push(AX);
     break;
   case NINT:
-    emit_pushi(node->integer);
+    pushi(node->integer);
     break;
   case NCALL: {
     // function call
@@ -250,11 +250,11 @@ void compile(Node* node) {
       compile(node->args->ptr[i]);
     }
     for (ptrdiff_t i = node->args->length - 1; i >= 0; i--) {
-      emit_pop(argregs[i]);
+      pop(argregs[i]);
     }
 
-    emit_push(R10);
-    emit_push(R11);
+    push(R10);
+    push(R11);
     emit_movi(AX, 0);
 
     // スタックをがりがりいじりながらコード生成してるので、
@@ -266,25 +266,25 @@ void compile(Node* node) {
       stack_size += 8;
     }
     emit("call %s", node->name);
-    emit_pop(R11);
-    emit_pop(R10);
+    pop(R11);
+    pop(R10);
 
     if (ispadding) {
       emit("add rsp, 8");
       stack_size -= 8;
     }
 
-    emit_push(AX);
+    push(AX);
     break;
   }
   case NRETURN:
     compile(node->ret);
-    emit_pop(AX);
+    pop(AX);
     emit_jmp(func_end_label);
     break;
   case NIF: {
     compile(node->cond);
-    emit_pop(AX);
+    pop(AX);
     emit_cmpi(AX, 0);
     char* l = new_label("end");
     emit_je(l);
@@ -294,7 +294,7 @@ void compile(Node* node) {
   }
   case NIFELSE: {
     compile(node->cond);
-    emit_pop(AX);
+    pop(AX);
     emit_cmpi(AX, 0);
     char* els = new_label("else");
     emit_je(els);
@@ -311,7 +311,7 @@ void compile(Node* node) {
     char* end = new_label("end");
     printf("%s:\n", begin);
     compile(node->cond);
-    emit_pop(AX);
+    pop(AX);
     emit_cmpi(AX, 0);
     emit_je(end);
     compile(node->body);
@@ -325,7 +325,7 @@ void compile(Node* node) {
     compile(node->init);
     printf("%s:\n", begin);
     compile(node->cond);
-    emit_pop(AX);
+    pop(AX);
     emit_cmpi(AX,0);
     emit_je(end);
     compile(node->body);
