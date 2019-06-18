@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdnoreturn.h>
 #include <stdbool.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -128,6 +129,7 @@ typedef struct {
 
 // node.c
 Node* new_node(enum NodeTag tag);
+char* show_type(Type* ty);
 void dump_node(Node* node, int level);
 void dump_type(Type* ty);
 void dump_function(Function* func);
@@ -135,8 +137,9 @@ Type* type_of(Node* node);
 size_t size_of(Type* ty);
 
 // utils.c
-char* format(const char* fmt, ...);
-void error(const char* fmt, ...)__attribute__((noreturn));
+
+noreturn void error(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+char *format(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 void eprintf(const char* fmt, ...);
 int streq(char* s0, char* s1);
 

@@ -1,6 +1,6 @@
 #include "hoc.h"
 
-char *format(const char *fmt, ...) {
+char* format(const char *fmt, ...) {
   char* buf = malloc(sizeof(char) * 2048);
   va_list ap;
   va_start(ap, fmt);

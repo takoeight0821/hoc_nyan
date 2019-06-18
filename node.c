@@ -18,6 +18,7 @@ size_t size_of(Type* ty) {
 
 static Type* new_type() {
   Type* ty = malloc(sizeof(Type));
+  ty->ptr_to = NULL;
   return ty;
 }
 
@@ -33,23 +34,26 @@ Type* type_of(Node* node) {
 }
 
 void dump_type(Type* ty) {
+  eprintf("%s", show_type(ty));
+}
+
+char* show_type(Type* ty) {
   assert(ty);
 
   switch (ty->ty) {
   case TY_INT:
-    eprintf("int");
-    break;
+    return format("int");
   case TY_PTR:
-    eprintf("ptr(");
-    dump_type(ty->ptr_to);
-    eprintf(")");
+    return format("ptr(%s)", show_type(ty->ptr_to));
   }
 }
 
+static char* show_indent(int level) {
+  return format("%*s", level, "");
+}
+
 void indent(int level) {
-  for (int i = 0; i < level; i++) {
-    eprintf("  ");
-  }
+  eprintf("%s", show_indent(level));
 }
 
 void dump_node(Node* node, int level) {
