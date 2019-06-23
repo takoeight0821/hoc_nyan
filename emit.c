@@ -110,7 +110,8 @@ void emit_node(Node* node) {
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit("add %s, %s", reg32[AX], reg32[DI]);
+    // TODO: regを使ってnode->lhsの型のサイズに合わせたコード生成
+    emit("add %s, %s", reg64[AX], reg64[DI]);
     push(AX);
     comment("end NPLUS");
     break;
@@ -120,7 +121,7 @@ void emit_node(Node* node) {
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit("sub %s, %s", reg32[AX], reg32[DI]);
+    emit("sub %s, %s", reg64[AX], reg64[DI]);
     push(AX);
     comment("end NMINUS");
     break;
@@ -130,7 +131,7 @@ void emit_node(Node* node) {
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit("imul %s", reg32[DI]);
+    emit("imul %s", reg64[DI]);
     push(AX);
     comment("end NMUL");
     break;
@@ -141,7 +142,7 @@ void emit_node(Node* node) {
     pop(DI);
     pop(AX);
     emit("mov %s, %d", reg64[DX], 0);
-    emit("div %s", reg32[DI]);
+    emit("div %s", reg64[DI]);
     push(AX);
     comment("end NDIV");
     break;
