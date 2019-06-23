@@ -48,7 +48,7 @@ try 1 "int main () { int x; x = 0; x = x + 1; return x; }"
 try 55 "int main () { int x; int sum; x = 10; sum = 0; while (x != 0) { sum = sum + x; x = x - 1; } return sum; }"
 try 0 "int main () { int x; int y; x = y = 0; return x; }"
 try 55 "int main () { int i; int sum; sum = 0; for (i = 1; i <= 10; i = i + 1) { sum = sum + i; } return sum; }"
-# try 0 "int main () { int *x; int** y; return 0; }"
-# try 1 "int main () { int *x; int y = 1; x = &y; return *x; }"
+try 0 "int main () { int *x; int** y; return 0; }"
+try 1 "int main () { int *x; int y; y = 1; x = &y; return *x; }"
 
 echo OK

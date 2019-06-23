@@ -61,12 +61,17 @@ void store(Reg src, size_t size) {
   emit("mov [rax], %s", reg(src, size));
 }
 
-void emit_lval(Node* node) {
-  assert(node->tag == NVAR);
+void emit_node(Node*);
 
-  emit("mov rax, rbp");
-  emit("sub rax, %zu", node->var->offset);
-  push(AX);
+void emit_lval(Node* node) {
+  if (node->tag == NVAR) {
+    emit("mov rax, rbp");
+    emit("sub rax, %zu", node->var->offset);
+    push(AX);
+  } else {
+    assert(node->tag == NDEREF);
+    emit_node(node->expr);
+  }
 }
 
 void emit_var(Var* var) {
@@ -256,6 +261,21 @@ void emit_node(Node* node) {
 
     push(AX);
     comment("end NCALL");
+    break;
+  }
+  case NADDR: {
+    comment("start NADDR");
+    emit_lval(node->expr);
+    comment("end NADDR");
+    break;
+  }
+  case NDEREF: {
+    comment("start NDEREF");
+    emit_node(node->expr);
+    pop(AX);
+    load(AX, 8); // TODO: size_of(type_of(node))
+    push(AX);
+    comment("end NDEREF");
     break;
   }
   case NEXPR_STMT:

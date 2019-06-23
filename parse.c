@@ -132,6 +132,14 @@ static Node* unary() {
     node->lhs = zero;
     node->rhs = term();
     return node;
+  } else if (match(TAND)) {
+    Node* node = new_node(NADDR);
+    node->expr = term();
+    return node;
+  } else if (match(TASTERISK)) {
+    Node* node = new_node(NDEREF);
+    node->expr = term();
+    return node;
   } else {
     return term();
   }
