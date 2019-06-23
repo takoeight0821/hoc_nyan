@@ -1,9 +1,8 @@
 #include "hoc.h"
 
 Node* new_node(enum NodeTag tag) {
-  Node* node = malloc(sizeof(Node));
+  Node* node = calloc(1, sizeof(Node));
   node->tag = tag;
-  node->type = NULL;
   return node;
 }
 
@@ -17,8 +16,7 @@ size_t size_of(Type* ty) {
 }
 
 static Type* new_type() {
-  Type* ty = malloc(sizeof(Type));
-  ty->ptr_to = NULL;
+  Type* ty = calloc(1, sizeof(Type));
   return ty;
 }
 

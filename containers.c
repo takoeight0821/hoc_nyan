@@ -1,8 +1,8 @@
 #include "hoc.h"
 
 Vector* new_vec() {
-  Vector* v = malloc(sizeof(Vector));
-  v->ptr = malloc(sizeof(void*) * 16);
+  Vector* v = calloc(1, sizeof(Vector));
+  v->ptr = calloc(16, sizeof(void*));
   v->capacity = 16;
   v->length = 0;
   return v;
@@ -42,7 +42,7 @@ char* vec_to_string(Vector* v) {
 }
 
 Map *new_map() {
-  Map *map = malloc(sizeof(Map));
+  Map *map = calloc(1, sizeof(Map));
   map->keys = new_vec();
   map->vals = new_vec();
   return map;

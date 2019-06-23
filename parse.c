@@ -6,7 +6,7 @@ static Map* local_env; // Map(char*, Var*)
 static size_t local_size = 0;
 
 static Var* new_var(char* name, Type* type, int offset) {
-  Var* var = malloc(sizeof(Var));
+  Var* var = calloc(1, sizeof(Var));
   var->name = strdup(name);
   var->type = type;
   var->offset = offset;
@@ -61,7 +61,7 @@ static Node* relational();
 static Node* statement();
 
 static Type* type_specifier() {
-  Type* ty = malloc(sizeof(Type));
+  Type* ty = calloc(1, sizeof(Type));
 
   enum {
     INT = 1,
@@ -270,7 +270,7 @@ static int is_typename(Token t) {
 }
 
 static Type* ptr_to(Type* ty) {
-  Type* new_ty = malloc(sizeof(Type));
+  Type* new_ty = calloc(1, sizeof(Type));
   new_ty->ty = TY_PTR;
   new_ty->ptr_to = ty;
   return new_ty;
@@ -455,7 +455,7 @@ Function* funcdef() {
 
   Node* body = statement();
 
-  Function* func = malloc(sizeof(Function));
+  Function* func = calloc(1, sizeof(Function));
   func->name = name;
   func->body = body;
   func->params = params;
@@ -472,7 +472,7 @@ Program* parse(Vector* tokens) {
 
   local_env = new_map();
 
-  Program* prog = malloc(sizeof(Program));
+  Program* prog = calloc(1, sizeof(Program));
   prog->funcs = new_vec();
 
   while (!match(TEOF)) {

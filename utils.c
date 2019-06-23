@@ -1,7 +1,7 @@
 #include "hoc.h"
 
 char* format(const char *fmt, ...) {
-  char* buf = malloc(sizeof(char) * 2048);
+  char* buf = calloc(2048, sizeof(char));
   va_list ap;
   va_start(ap, fmt);
   vsnprintf(buf, 2048, fmt, ap);

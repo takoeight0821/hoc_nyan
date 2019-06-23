@@ -38,61 +38,6 @@ static void comment(char *fmt, ...) {
   printf("\n");
 }
 
-void emit_enter(int size) {
-  emit("push rbp");
-  emit("mov rbp, rsp");
-  emit("sub rsp, %d", size);
-  stack_size += size;
-}
-
-void emit_leave() {
-  emit("leave");
-}
-
-void emit_je(char* label) {
-  printf("\tje %s\n", label);
-}
-
-void emit_jmp(char* label) {
-  printf("\tjmp %s\n", label);
-}
-
-void emit_mov(Reg dst, Reg src) {
-  printf("\tmov %s, %s\n", reg64[dst], reg64[src]);
-}
-
-void emit_movi(Reg dst, long src) {
-  printf("\tmov %s, %ld\n", reg64[dst], src);
-}
-
-void emit_cmp(Reg reg1, Reg reg2) {
-  printf("\tcmp %s, %s\n", reg64[reg1], reg64[reg2]);
-}
-
-void emit_cmpi(Reg reg, int i) {
-  printf("\tcmp %s, %d\n", reg64[reg], i);
-}
-
-void emit_add32(Reg dst, Reg src) {
-  printf("\tadd %s, %s\n", reg32[dst], reg32[src]);
-}
-
-void emit_sub32(Reg dst, Reg src) {
-  printf("\tsub %s, %s\n", reg32[dst], reg32[src]);
-}
-
-void emit_imul32(Reg src) {
-  printf("\timul %s\n", reg32[src]);
-}
-
-void emit_mul32(Reg src) {
-  printf("\tmul %s\n", reg32[src]);
-}
-
-void emit_div32(Reg src) {
-  printf("\tdiv %s\n", reg32[src]);
-}
-
 void push(Reg src) {
   printf("\tpush %s\n", reg64[src]);
   stack_size += 8;
@@ -106,10 +51,6 @@ void pushi(int src) {
 void pop(Reg dst) {
   printf("\tpop %s\n", reg64[dst]);
   stack_size -= 8;
-}
-
-void emit_ret() {
-  puts("\tret");
 }
 
 void load(Reg dst, size_t size) {
@@ -169,7 +110,7 @@ void emit_node(Node* node) {
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit_add32(AX, DI);
+    emit("add %s, %s", reg32[AX], reg32[DI]);
     push(AX);
     comment("end NPLUS");
     break;
@@ -179,7 +120,7 @@ void emit_node(Node* node) {
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit_sub32(AX, DI);
+    emit("sub %s, %s", reg32[AX], reg32[DI]);
     push(AX);
     comment("end NMINUS");
     break;
@@ -189,7 +130,7 @@ void emit_node(Node* node) {
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit_imul32(DI);
+    emit("imul %s", reg32[DI]);
     push(AX);
     comment("end NMUL");
     break;
@@ -199,8 +140,8 @@ void emit_node(Node* node) {
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit_movi(DX, 0);
-    emit_div32(DI);
+    emit("mov %s, %d", reg64[DX], 0);
+    emit("div %s", reg32[DI]);
     push(AX);
     comment("end NDIV");
     break;
@@ -293,7 +234,7 @@ void emit_node(Node* node) {
 
     push(R10);
     push(R11);
-    emit_movi(AX, 0);
+    emit("mov %s, %d", reg64[AX], 0);
 
     // スタックをがりがりいじりながらコード生成してるので、
     // rspのアライメントをうまいこと扱う必要がある。
@@ -325,16 +266,16 @@ void emit_node(Node* node) {
     comment("start NRETURN");
     emit_node(node->expr);
     pop(AX);
-    emit_jmp(func_end_label);
+    emit("jmp %s", func_end_label);
     comment("end NRETURN");
     break;
   case NIF: {
     comment("start NIF");
     emit_node(node->cond);
     pop(AX);
-    emit_cmpi(AX, 0);
+    emit("cmp %s, %d", reg64[AX], 0);
     char* l = new_label("end");
-    emit_je(l);
+    emit("je %s", l);
     emit_node(node->then);
     printf("%s:\n", l);
     comment("end NIF");
@@ -344,12 +285,12 @@ void emit_node(Node* node) {
     comment("start NIFELSE");
     emit_node(node->cond);
     pop(AX);
-    emit_cmpi(AX, 0);
+    emit("cmp %s, %d", reg64[AX], 0);
     char* els = new_label("else");
-    emit_je(els);
+    emit("je %s", els);
     emit_node(node->then);
     char* end = new_label("end");
-    emit_jmp(end);
+    emit("jmp %s", end);
     printf("%s:\n", els);
     emit_node(node->els);
     printf("%s:\n", end);
@@ -363,10 +304,10 @@ void emit_node(Node* node) {
     printf("%s:\n", begin);
     emit_node(node->cond);
     pop(AX);
-    emit_cmpi(AX, 0);
-    emit_je(end);
+    emit("cmp %s, %d", reg64[AX], 0);
+    emit("je %s", end);
     emit_node(node->body);
-    emit_jmp(begin);
+    emit("jmp %s", begin);
     printf("%s:\n", end);
     comment("end NWHILE");
     break;
@@ -379,11 +320,11 @@ void emit_node(Node* node) {
     printf("%s:\n", begin);
     emit_node(node->cond);
     pop(AX);
-    emit_cmpi(AX,0);
-    emit_je(end);
+    emit("cmp %s, %d", reg64[AX], 0);
+    emit("je %s", end);
     emit_node(node->body);
     emit_node(node->step);
-    emit_jmp(begin);
+    emit("jmp %s", begin);
     printf("%s:\n", end);
     comment("end NFOR");
     break;
@@ -411,7 +352,10 @@ void emit_function(Function* func) {
   printf(".global %s\n", func->name);
   printf("%s:\n", func->name);
 
-  emit_enter(func->local_size);
+  emit("push rbp");
+  emit("mov rbp, rsp");
+  emit("sub rsp, %lu", func->local_size);
+  stack_size += func->local_size;
 
   for (size_t i = 0; i < func->params->length; i++) {
     Var* param = func->params->ptr[i];
@@ -422,8 +366,8 @@ void emit_function(Function* func) {
   emit_node(func->body);
 
   printf("%s:\n", func_end_label);
-  emit_leave();
-  emit_ret();
+  emit("leave");
+  emit("ret");
 
   comment("end Function");
 }

@@ -16,7 +16,7 @@ static void whitespace() {
 }
 
 static Token* new_token(enum TokenTag tag) {
-  Token* t = malloc(sizeof(Token));
+  Token* t = calloc(1, sizeof(Token));
   t->tag = tag;
   return t;
 }
