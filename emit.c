@@ -84,6 +84,11 @@ void emit_var(Var* var) {
 
 void emit_node(Node* node) {
   switch (node->tag) {
+  case NINT:
+    comment("start NINT");
+    pushi(node->integer);
+    comment("end NINT");
+    break;
   case NVAR: {
     comment("start NVAR");
     emit_lval(node);
@@ -91,22 +96,6 @@ void emit_node(Node* node) {
     load(AX, size_of(type_of(node)));
     push(AX);
     comment("end NVAR");
-    break;
-  }
-  case NDEFVAR: {
-    comment("start NDEFVAR");
-    comment("end NDEFVAR");
-    break;
-  }
-  case NASSIGN: {
-    comment("start NASSIGN");
-    emit_lval(node->lhs);
-    emit_node(node->rhs);
-    pop(DI);
-    pop(AX);
-    store(DI, size_of(type_of(node->lhs)));
-    push(DI);
-    comment("end NASSIGN");
     break;
   }
   case NPLUS:
@@ -151,6 +140,54 @@ void emit_node(Node* node) {
     push(AX);
     comment("end NDIV");
     break;
+  case NLT:
+    comment("start NLT");
+    emit_node(node->lhs);
+    emit_node(node->rhs);
+    pop(DI);
+    pop(AX);
+    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    emit("setl al");
+    emit("movzb rax, al");
+    push(AX);
+    comment("end NLT");
+    break;
+  case NLE:
+    comment("start NLE");
+    emit_node(node->lhs);
+    emit_node(node->rhs);
+    pop(DI);
+    pop(AX);
+    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    emit("setle al");
+    emit("movzb rax, al");
+    push(AX);
+    comment("end NLE");
+    break;
+  case NGT:
+    comment("start NGT");
+    emit_node(node->lhs);
+    emit_node(node->rhs);
+    pop(DI);
+    pop(AX);
+    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    emit("setg al");
+    emit("movzb rax, al");
+    push(AX);
+    comment("end NGT");
+    break;
+  case NGE:
+    comment("start NGE");
+    emit_node(node->lhs);
+    emit_node(node->rhs);
+    pop(DI);
+    pop(AX);
+    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    emit("setge al");
+    emit("movzb rax, al");
+    push(AX);
+    comment("end NGE");
+    break;
   case NEQ:
     comment("start NEQ");
     emit_node(node->lhs);
@@ -175,59 +212,22 @@ void emit_node(Node* node) {
     push(AX);
     comment("end NNE");
     break;
-  case NGE:
-    comment("start NGE");
-    emit_node(node->lhs);
+  case NDEFVAR: {
+    comment("start NDEFVAR");
+    comment("end NDEFVAR");
+    break;
+  }
+  case NASSIGN: {
+    comment("start NASSIGN");
+    emit_lval(node->lhs);
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit("cmp %s, %s", reg64[AX], reg64[DI]);
-    emit("setge al");
-    emit("movzb rax, al");
-    push(AX);
-    comment("end NGE");
+    store(DI, size_of(type_of(node->lhs)));
+    push(DI);
+    comment("end NASSIGN");
     break;
-  case NGT:
-    comment("start NGT");
-    emit_node(node->lhs);
-    emit_node(node->rhs);
-    pop(DI);
-    pop(AX);
-    emit("cmp %s, %s", reg64[AX], reg64[DI]);
-    emit("setg al");
-    emit("movzb rax, al");
-    push(AX);
-    comment("end NGT");
-    break;
-  case NLE:
-    comment("start NLE");
-    emit_node(node->lhs);
-    emit_node(node->rhs);
-    pop(DI);
-    pop(AX);
-    emit("cmp %s, %s", reg64[AX], reg64[DI]);
-    emit("setle al");
-    emit("movzb rax, al");
-    push(AX);
-    comment("end NLE");
-    break;
-  case NLT:
-    comment("start NLT");
-    emit_node(node->lhs);
-    emit_node(node->rhs);
-    pop(DI);
-    pop(AX);
-    emit("cmp %s, %s", reg64[AX], reg64[DI]);
-    emit("setl al");
-    emit("movzb rax, al");
-    push(AX);
-    comment("end NLT");
-    break;
-  case NINT:
-    comment("start NINT");
-    pushi(node->integer);
-    comment("end NINT");
-    break;
+  }
   case NCALL: {
     comment("start NCALL");
     // function call

@@ -68,33 +68,6 @@ void dump_node(Node* node, int level) {
     dump_type(node->var->type);
     eprintf("\n");
     break;
-  case NCALL: {
-    indent(level);
-    eprintf("(call\n");
-    indent(level + 1);
-    eprintf("%s\n", node->name);
-    for (size_t i = 0; i < node->args->length; i++) {
-      dump_node(node->args->ptr[i], level+1);
-    }
-    indent(level);
-    eprintf(")\n");
-    break;
-  }
-  case NDEFVAR: {
-    indent(level);
-    eprintf("(");
-    dump_type(node->type);
-    eprintf(" %s)\n", node->name);
-    break;
-  }
-  case NASSIGN:
-    indent(level);
-    eprintf("(=\n");
-    dump_node(node->lhs, level+1);
-    dump_node(node->rhs, level+1);
-    indent(level);
-    eprintf(")\n");
-    break;
   case NPLUS:
     indent(level);
     eprintf("(+\n");
@@ -175,10 +148,50 @@ void dump_node(Node* node, int level) {
     indent(level);
     eprintf(")\n");
     break;
+  case NDEFVAR: {
+    indent(level);
+    eprintf("(");
+    dump_type(node->type);
+    eprintf(" %s)\n", node->name);
+    break;
+  }
+  case NASSIGN:
+    indent(level);
+    eprintf("(=\n");
+    dump_node(node->lhs, level+1);
+    dump_node(node->rhs, level+1);
+    indent(level);
+    eprintf(")\n");
+    break;
+  case NCALL: {
+    indent(level);
+    eprintf("(call\n");
+    indent(level + 1);
+    eprintf("%s\n", node->name);
+    for (size_t i = 0; i < node->args->length; i++) {
+      dump_node(node->args->ptr[i], level+1);
+    }
+    indent(level);
+    eprintf(")\n");
+    break;
+  }
+  case NADDR:
+    indent(level);
+    eprintf("(&\n");
+    dump_node(node->expr, level+1);
+    indent(level);
+    eprintf(")\n");
+  case NDEREF:
+    indent(level);
+    eprintf("(*\n");
+    dump_node(node->expr, level+1);
+    indent(level);
+    eprintf(")\n");
   case NEXPR_STMT:
     indent(level);
     eprintf("(expr_stmt\n");
     dump_node(node->expr, level+1);
+    indent(level);
     eprintf(")\n");
     break;
   case NRETURN:
