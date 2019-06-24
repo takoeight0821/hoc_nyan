@@ -181,12 +181,14 @@ void dump_node(Node* node, int level) {
     dump_node(node->expr, level+1);
     indent(level);
     eprintf(")\n");
+    break;
   case NDEREF:
     indent(level);
     eprintf("(*\n");
     dump_node(node->expr, level+1);
     indent(level);
     eprintf(")\n");
+    break;
   case NEXPR_STMT:
     indent(level);
     eprintf("(expr_stmt\n");

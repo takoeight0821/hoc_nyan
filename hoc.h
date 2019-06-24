@@ -77,8 +77,13 @@ enum NodeTag {
     NBLOCK,
 };
 
+enum TypeTag {
+  TY_INT,
+  TY_PTR,
+};
+
 typedef struct Type {
-  enum { TY_INT, TY_PTR } ty;
+  enum TypeTag ty;
   struct Type* ptr_to;
 } Type;
 
@@ -174,9 +179,13 @@ typedef enum {
 
 void gen_x86(Program* prog);
 
+// token.c
+void warn_token(Token tok, char* msg);
+noreturn void bad_token(Token tok, char* msg);
+void dump_token(Token tok);
+
 // lex.c
 Vector* lex(FILE* file);
-void dump_token(Token tok);
 
 // parse.c
 Program* parse(Vector* tokens);

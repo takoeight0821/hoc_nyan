@@ -26,10 +26,7 @@ static enum TokenTag la(size_t i) {
 }
 
 static void parse_error(const char* expected, Token actual) {
-  eprintf("%s expected, but got ", expected);
-  dump_token(actual);
-  eprintf("\n");
-  exit(1);
+  bad_token(actual, format(" %s expected", expected));
 }
 
 static int match(enum TokenTag tag) {
