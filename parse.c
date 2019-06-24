@@ -1,6 +1,6 @@
 #include "hoc.h"
 
-static Token* lookahead;
+static Token* tokens;
 static size_t p = 0; // 次の字句のインデックス
 static Map* local_env; // Map(char*, Var*)
 static size_t local_size = 0;
@@ -22,7 +22,7 @@ static void consume() {
 }
 
 static Token lt(size_t i) {
-  return lookahead[p + i];
+  return tokens[p + i];
 }
 
 static enum TokenTag la(size_t i) {
@@ -50,12 +50,13 @@ static int match_ident(char* name) {
     return 0;
   }
 }
+
+static Node* variable(Token t);
 static Node* expr();
 static Node* term();
 static Node* integer();
 static Node* add();
 static Node* mul();
-static Node* variable();
 static Node* unary();
 static Node* equality();
 static Node* relational();
@@ -97,7 +98,9 @@ static Node* term() {
     }
     return node;
   } else if (la(0) == TIDENT && la(1) != TLPAREN) {
-    return variable();
+    Node* node = variable(lt(0));
+    consume();
+    return node;
   } else if (la(0) == TIDENT) {
     Node* node = new_node(NCALL);
     node->name = strdup(lt(0).ident);
@@ -146,12 +149,10 @@ static Node* unary() {
   }
 }
 
-static Node* variable() {
-  assert(la(0) == TIDENT);
-
+static Node* variable(Token t) {
+  assert(t.tag == TIDENT);
   Node* node = new_node(NVAR);
-  node->var = find_var(lt(0).ident);
-  consume();
+  node->var = find_var(t.ident);
   return node;
 }
 
@@ -473,10 +474,10 @@ Function* funcdef() {
   return func;
 }
 
-Program* parse(Vector* tokens) {
-  lookahead = calloc(tokens->length, sizeof(Token));
-  for (size_t i = 0; i < tokens->length; i++) {
-    lookahead[i] = *(Token*)(tokens->ptr[i]);
+Program* parse(Vector* token_vec) {
+  tokens = calloc(token_vec->length, sizeof(Token));
+  for (size_t i = 0; i < token_vec->length; i++) {
+    tokens[i] = *(Token*)(token_vec->ptr[i]);
   }
 
   local_env = new_map();
