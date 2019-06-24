@@ -13,6 +13,10 @@ static Var* new_var(char* name, Type* type, int offset) {
   return var;
 }
 
+static Var* find_var(char* name) {
+  return map_get(local_env, name);
+}
+
 static void consume() {
   p++;
 }
@@ -146,7 +150,7 @@ static Node* variable() {
   assert(la(0) == TIDENT);
 
   Node* node = new_node(NVAR);
-  node->var = map_get(local_env, lt(0).ident);
+  node->var = find_var(lt(0).ident);
   consume();
   return node;
 }
@@ -442,7 +446,7 @@ Function* funcdef() {
     if (is_typename(lt(0))) {
       Type* ty = type_specifier();
       Node* param_decl = declarator(ty); // NDEFVAR
-      Var* param = map_get(local_env, param_decl->name);
+      Var* param = find_var(param_decl->name);
 
       vec_push(params, param);
       if (match(TCOMMA))
