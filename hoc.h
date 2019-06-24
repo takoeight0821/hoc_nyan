@@ -189,3 +189,6 @@ Vector* lex(FILE* file);
 
 // parse.c
 Program* parse(Vector* tokens);
+
+// sema.c
+void sema(Program* prog);
