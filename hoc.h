@@ -180,9 +180,9 @@ typedef enum {
 void gen_x86(Program* prog);
 
 // token.c
-void warn_token(Token tok, char* msg);
-noreturn void bad_token(Token tok, char* msg);
-void dump_token(Token tok);
+void warn_token(Token* tok, char* msg);
+noreturn void bad_token(Token* tok, char* msg);
+void dump_token(Token* tok);
 
 // lex.c
 Vector* lex(FILE* file);

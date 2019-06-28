@@ -1,6 +1,6 @@
 #include "hoc.h"
 
-static Token* tokens;
+static Vector* tokens;
 static size_t p = 0; // 次の字句のインデックス
 static Map* local_env; // Map(char*, Var*)
 static size_t local_size = 0;
@@ -21,15 +21,15 @@ static void consume() {
   p++;
 }
 
-static Token lt(size_t i) {
-  return tokens[p + i];
+static Token* lt(size_t i) {
+  return tokens->ptr[p + i];
 }
 
 static enum TokenTag la(size_t i) {
-  return lt(i).tag;
+  return lt(i)->tag;
 }
 
-static void parse_error(const char* expected, Token actual) {
+static void parse_error(const char* expected, Token* actual) {
   bad_token(actual, format(" %s expected", expected));
 }
 
@@ -43,7 +43,7 @@ static int match(enum TokenTag tag) {
 }
 
 static int match_ident(char* name) {
-  if (la(0) == TIDENT && streq(lt(0).ident, name)) {
+  if (la(0) == TIDENT && streq(lt(0)->ident, name)) {
     consume();
     return 1;
   } else {
@@ -51,7 +51,7 @@ static int match_ident(char* name) {
   }
 }
 
-static Node* variable(Token t);
+static Node* variable(Token* t);
 static Node* expr();
 static Node* term();
 static Node* integer();
@@ -103,7 +103,7 @@ static Node* term() {
     return node;
   } else if (la(0) == TIDENT) {
     Node* node = new_node(NCALL);
-    node->name = strdup(lt(0).ident);
+    node->name = strdup(lt(0)->ident);
     node->args = new_vec();
     consume();
     if (!match(TLPAREN)) {
@@ -149,16 +149,16 @@ static Node* unary() {
   }
 }
 
-static Node* variable(Token t) {
-  assert(t.tag == TIDENT);
+static Node* variable(Token* t) {
+  assert(t->tag == TIDENT);
   Node* node = new_node(NVAR);
-  node->var = find_var(t.ident);
+  node->var = find_var(t->ident);
   return node;
 }
 
 static Node* integer() {
   Node* node = new_node(NINT);
-  node->integer = lt(0).integer;
+  node->integer = lt(0)->integer;
   if (!match(TINT)) {
     parse_error("integer", lt(0));
   }
@@ -271,9 +271,9 @@ static Node* expr() {
   return assign();
 }
 
-static int is_typename(Token t) {
-  if (t.tag == TIDENT) {
-    return streq(t.ident, "int");
+static int is_typename(Token* t) {
+  if (t->tag == TIDENT) {
+    return streq(t->ident, "int");
   } else {
     return 0;
   }
@@ -302,7 +302,7 @@ static Node* direct_decl(Type* ty) {
     parse_error("ident", lt(0));
   }
   Node* node = new_node(NDEFVAR);
-  node->name = strdup(lt(0).ident);
+  node->name = strdup(lt(0)->ident);
   node->type = ty;
   consume();
 
@@ -430,7 +430,7 @@ Function* funcdef() {
     parse_error("int", lt(0));
   }
 
-  char* name = strdup(lt(0).ident);
+  char* name = strdup(lt(0)->ident);
 
   if (!match(TIDENT)) {
     parse_error("function name", lt(0));
@@ -475,10 +475,7 @@ Function* funcdef() {
 }
 
 Program* parse(Vector* token_vec) {
-  tokens = calloc(token_vec->length, sizeof(Token));
-  for (size_t i = 0; i < token_vec->length; i++) {
-    tokens[i] = *(Token*)(token_vec->ptr[i]);
-  }
+  tokens = token_vec;
 
   local_env = new_map();
 

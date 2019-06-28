@@ -1,22 +1,22 @@
 #include "hoc.h"
 
-void warn_token(Token tok, char* msg) {
+void warn_token(Token* tok, char* msg) {
   dump_token(tok);
   eprintf("%s\n", msg);
 }
 
-noreturn void bad_token(Token tok, char* msg) {
+noreturn void bad_token(Token* tok, char* msg) {
   warn_token(tok, msg);
   exit(1);
 }
 
-void dump_token(Token tok) {
-  switch (tok.tag) {
+void dump_token(Token* tok) {
+  switch (tok->tag) {
   case TINT:
-    eprintf("[INT %d]", tok.integer);
+    eprintf("[INT %d]", tok->integer);
     break;
   case TIDENT:
-    eprintf("[IDENT %s]", tok.ident);
+    eprintf("[IDENT %s]", tok->ident);
     break;
   case TLE:
     eprintf("[LE]");

@@ -56,7 +56,7 @@ int main(int argc, char** argv)
   Vector* tokens = lex(fp);
 
   for (size_t i = 0; i < tokens->length; i++) {
-    dump_token(*(Token*)(tokens->ptr[i]));
+    dump_token(tokens->ptr[i]);
   }
   eprintf("\n");
 
