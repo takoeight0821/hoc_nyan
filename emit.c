@@ -98,120 +98,139 @@ void emit_node(Node* node) {
     comment("end NVAR");
     break;
   }
-  case NPLUS:
+  case NPLUS: {
     comment("start NPLUS");
     emit_node(node->lhs);
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    // TODO: regを使ってnode->lhsの型のサイズに合わせたコード生成
-    emit("add %s, %s", reg64[AX], reg64[DI]);
+    size_t size = size_of(type_of(node->lhs));
+    emit("add %s, %s", reg(AX, size), reg(DI, size));
     push(AX);
     comment("end NPLUS");
     break;
-  case NMINUS:
+  }
+  case NMINUS: {
     comment("start NMINUS");
     emit_node(node->lhs);
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit("sub %s, %s", reg64[AX], reg64[DI]);
+    size_t size = size_of(type_of(node->lhs));
+    emit("sub %s, %s", reg(AX, size), reg(DI, size));
     push(AX);
     comment("end NMINUS");
     break;
-  case NMUL:
+  }
+  case NMUL: {
     comment("start NMUL");
     emit_node(node->lhs);
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit("imul %s", reg64[DI]);
+    size_t size = size_of(type_of(node->lhs));
+    emit("imul %s", reg(DI, size));
     push(AX);
     comment("end NMUL");
     break;
-  case NDIV:
+  }
+  case NDIV: {
     comment("start NDIV");
     emit_node(node->lhs);
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
     emit("mov %s, %d", reg64[DX], 0);
-    emit("div %s", reg64[DI]);
+    size_t size = size_of(type_of(node->lhs));
+    emit("div %s", reg(DI, size));
     push(AX);
     comment("end NDIV");
     break;
-  case NLT:
+  }
+  case NLT: {
     comment("start NLT");
     emit_node(node->lhs);
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    size_t size = size_of(type_of(node->lhs));
+    emit("cmp %s, %s", reg(AX, size), reg(DI, size));
     emit("setl al");
     emit("movzb rax, al");
     push(AX);
     comment("end NLT");
     break;
-  case NLE:
+  }
+  case NLE: {
     comment("start NLE");
     emit_node(node->lhs);
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    size_t size = size_of(type_of(node->lhs));
+    emit("cmp %s, %s", reg(AX, size), reg(DI, size));
     emit("setle al");
     emit("movzb rax, al");
     push(AX);
     comment("end NLE");
     break;
-  case NGT:
+  }
+  case NGT: {
     comment("start NGT");
     emit_node(node->lhs);
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    size_t size = size_of(type_of(node->lhs));
+    emit("cmp %s, %s", reg(AX, size), reg(DI, size));
     emit("setg al");
     emit("movzb rax, al");
     push(AX);
     comment("end NGT");
     break;
-  case NGE:
+  }
+  case NGE: {
     comment("start NGE");
     emit_node(node->lhs);
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    size_t size = size_of(type_of(node->lhs));
+    emit("cmp %s, %s", reg(AX, size), reg(DI, size));
     emit("setge al");
     emit("movzb rax, al");
     push(AX);
     comment("end NGE");
     break;
-  case NEQ:
+  }
+  case NEQ: {
     comment("start NEQ");
     emit_node(node->lhs);
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    size_t size = size_of(type_of(node->lhs));
+    emit("cmp %s, %s", reg(AX, size), reg(DI, size));
     emit("sete al");
     emit("movzb rax, al");
     push(AX);
     comment("end NEQ");
     break;
-  case NNE:
+  }
+  case NNE: {
     comment("start NNE");
     emit_node(node->lhs);
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    emit("cmp %s, %s", reg64[AX], reg64[DI]);
+    size_t size = size_of(type_of(node->lhs));
+    emit("cmp %s, %s", reg(AX, size), reg(DI, size));
     emit("setne al");
     emit("movzb rax, al");
     push(AX);
     comment("end NNE");
     break;
+  }
   case NDEFVAR: {
     comment("start NDEFVAR");
     comment("end NDEFVAR");
@@ -273,7 +292,7 @@ void emit_node(Node* node) {
     comment("start NDEREF");
     emit_node(node->expr);
     pop(AX);
-    load(AX, 8); // TODO: size_of(type_of(node))
+    load(AX, size_of(node->expr->type->ptr_to));
     push(AX);
     comment("end NDEREF");
     break;

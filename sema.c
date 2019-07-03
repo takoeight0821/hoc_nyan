@@ -28,6 +28,8 @@ void walk(Node* node) {
 
   switch (node->tag) {
   case NINT: {
+    node->type = new_type();
+    node->type->ty = TY_INT;
     break;
   }
   case NVAR: {
