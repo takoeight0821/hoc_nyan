@@ -64,6 +64,8 @@ int main(int argc, char** argv)
 
   Program* prog = parse(tokens);
 
+  sema(prog);
+
   for (size_t i = 0; i < prog->funcs->length; i++) {
     dump_function(prog->funcs->ptr[i]);
   }

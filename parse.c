@@ -467,6 +467,8 @@ Function* funcdef() {
 
   Function* func = calloc(1, sizeof(Function));
   func->name = name;
+  func->ret_type = new_type();
+  func->ret_type->ty = TY_INT;
   func->body = body;
   func->params = params;
   func->local_size = local_size;

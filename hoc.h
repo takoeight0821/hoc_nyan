@@ -125,6 +125,7 @@ typedef struct Node {
 
 typedef struct {
   char* name;
+  Type* ret_type;
   Node* body;
   Vector* params;
   size_t local_size;
@@ -136,6 +137,7 @@ typedef struct {
 
 // node.c
 Node* new_node(enum NodeTag tag);
+Type* new_type();
 char* show_type(Type* ty);
 void dump_node(Node* node, int level);
 void dump_type(Type* ty);

@@ -15,7 +15,7 @@ size_t size_of(Type* ty) {
   }
 }
 
-static Type* new_type() {
+Type* new_type() {
   Type* ty = calloc(1, sizeof(Type));
   return ty;
 }
