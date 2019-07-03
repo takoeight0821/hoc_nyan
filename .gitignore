@@ -3,6 +3,7 @@
 
 tmp/
 main
+hoc
 
 # Prerequisites
 *.d
