@@ -465,6 +465,16 @@ Function* funcdef() {
     }
   }
 
+  if (match(TSEMICOLON)) {
+    Function* func = calloc(1, sizeof(Function));
+    func->name = name;
+    func->ret_type = ret_type;
+    func->body = NULL;
+    func->params = params;
+    func->local_size = local_size;
+    return func;
+  }
+
   Node* body = statement();
 
   Function* func = calloc(1, sizeof(Function));

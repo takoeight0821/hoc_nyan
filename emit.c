@@ -386,6 +386,13 @@ void emit_node(Node* node) {
 
 void emit_function(Function* func) {
   comment("start Function");
+
+  if (func->body == NULL) {
+    comment("prototype");
+    comment("end Function");
+    return;
+  }
+
   func_end_label = new_label("end");
 
   puts(".text");

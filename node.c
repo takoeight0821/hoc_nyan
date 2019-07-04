@@ -261,5 +261,7 @@ void dump_function(Function* func) {
     eprintf(" %s", ((Var*)func->params->ptr[i])->name);
   }
   eprintf(")\n");
-  dump_node(func->body, 1);
+
+  if (func->body)
+    dump_node(func->body, 1);
 }

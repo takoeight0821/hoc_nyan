@@ -9,7 +9,8 @@ void sema(Program* prog) {
   funcs = prog->funcs;
   for (size_t i = 0; i < prog->funcs->length; i++) {
     Function* fn = prog->funcs->ptr[i];
-    walk(fn->body);
+    if (fn->body)
+      walk(fn->body);
   }
 }
 
