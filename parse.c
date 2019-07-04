@@ -426,8 +426,10 @@ static Node* statement() {
 }
 
 Function* funcdef() {
-  if (!match_ident("int")) {
-    parse_error("int", lt(0));
+  Type* ret_type = type_specifier();
+
+  while (match(TASTERISK)) {
+    ret_type = ptr_to(ret_type);
   }
 
   char* name = strdup(lt(0)->ident);
@@ -467,8 +469,7 @@ Function* funcdef() {
 
   Function* func = calloc(1, sizeof(Function));
   func->name = name;
-  func->ret_type = new_type();
-  func->ret_type->ty = TY_INT;
+  func->ret_type = ret_type;
   func->body = body;
   func->params = params;
   func->local_size = local_size;
