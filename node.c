@@ -9,7 +9,7 @@ Node* new_node(enum NodeTag tag) {
 size_t size_of(Type* ty) {
   switch (ty->ty) {
   case TY_INT:
-    return 8;
+    return 4;
   case TY_PTR:
     return 8;
   }

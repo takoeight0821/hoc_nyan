@@ -50,5 +50,7 @@ try 0 "int main () { int x; int y; x = y = 0; return x; }"
 try 55 "int main () { int i; int sum; sum = 0; for (i = 1; i <= 10; i = i + 1) { sum = sum + i; } return sum; }"
 try 0 "int main () { int *x; int** y; return 0; }"
 try 1 "int main () { int *x; int y; y = 1; x = &y; return *x; }"
+try 1 "int main () { int *p; alloc4(&p, 1, 2, 4, 8); return *p; }"
+try 4 "int main () { int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 2; return *q; }"
 
 echo OK

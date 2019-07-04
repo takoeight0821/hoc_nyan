@@ -41,6 +41,17 @@ void walk(Node* node) {
     walk(node->rhs);
 
     node->type = node->lhs->type;
+
+    if (node->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) {
+      // ポインタの加算に対応
+      // ptr + n -> ptr + sizeof(typeof(*ptr)) * n
+      Node* new_rhs = new_node(NMUL);
+      new_rhs->lhs = node->rhs;
+      new_rhs->rhs = new_node(NINT);
+      new_rhs->rhs->integer = size_of(node->type->ptr_to);
+      walk(new_rhs);
+      node->rhs = new_rhs;
+    }
     break;
   }
   case NMINUS: {

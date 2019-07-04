@@ -300,7 +300,7 @@ void emit_node(Node* node) {
   case NEXPR_STMT:
     comment("start NEXPR_STMT");
     emit_node(node->expr);
-    comment("end NRETURN");
+    comment("end NEXPR_STMT");
     break;
   case NRETURN:
     comment("start NRETURN");
