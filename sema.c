@@ -42,6 +42,9 @@ void walk(Node* node) {
 
     node->type = node->lhs->type;
 
+    assert((node->lhs->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) ||
+           (node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT));
+
     if (node->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) {
       // ポインタの加算に対応
       // ptr + n -> ptr + sizeof(typeof(*ptr)) * n
@@ -59,6 +62,8 @@ void walk(Node* node) {
     walk(node->rhs);
 
     node->type = node->lhs->type;
+
+    assert(node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT);
     break;
   }
   case NMUL: {
@@ -66,6 +71,8 @@ void walk(Node* node) {
     walk(node->rhs);
 
     node->type = node->lhs->type;
+
+    assert(node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT);
     break;
   }
   case NDIV: {
@@ -73,6 +80,8 @@ void walk(Node* node) {
     walk(node->rhs);
 
     node->type = node->lhs->type;
+
+    assert(node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT);
     break;
   }
   case NLT: {
@@ -81,6 +90,8 @@ void walk(Node* node) {
 
     node->type = new_type();
     node->type->ty = TY_INT;
+
+    assert(node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT);
     break;
   }
   case NLE: {
@@ -89,6 +100,8 @@ void walk(Node* node) {
 
     node->type = new_type();
     node->type->ty = TY_INT;
+
+    assert(node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT);
     break;
   }
   case NGT: {
@@ -97,6 +110,8 @@ void walk(Node* node) {
 
     node->type = new_type();
     node->type->ty = TY_INT;
+
+    assert(node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT);
     break;
   }
   case NGE: {
@@ -105,6 +120,8 @@ void walk(Node* node) {
 
     node->type = new_type();
     node->type->ty = TY_INT;
+
+    assert(node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT);
     break;
   }
   case NEQ: {
@@ -113,6 +130,8 @@ void walk(Node* node) {
 
     node->type = new_type();
     node->type->ty = TY_INT;
+
+    assert(node->lhs->type->ty == node->rhs->type->ty);
     break;
   }
   case NNE: {
@@ -121,6 +140,8 @@ void walk(Node* node) {
 
     node->type = new_type();
     node->type->ty = TY_INT;
+
+    assert(node->lhs->type->ty == node->rhs->type->ty);
     break;
   }
   case NDEFVAR: {
@@ -131,6 +152,8 @@ void walk(Node* node) {
     walk(node->rhs);
 
     node->type = node->rhs->type;
+
+    assert(node->lhs->type->ty == node->rhs->type->ty);
     break;
   }
   case NCALL: {
@@ -152,6 +175,8 @@ void walk(Node* node) {
     walk(node->expr);
 
     node->type = node->expr->type->ptr_to;
+
+    assert(node->type);
     break;
   }
   case NEXPR_STMT: {
