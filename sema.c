@@ -21,7 +21,9 @@ Type* ret_type(char* name) {
       return fn->ret_type;
     }
   }
-  return NULL;
+  Type* t = new_type();
+  t->ty = TY_INT;
+  return t;
 }
 
 void walk(Node* node) {
