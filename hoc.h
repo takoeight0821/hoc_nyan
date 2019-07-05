@@ -93,16 +93,15 @@ typedef struct {
   size_t offset;
 } Var;
 
-typedef struct Node Node;
 typedef struct Node {
   enum NodeTag tag;
 
   Type* type; // type
-  Node* lhs; // left-hand side
-  Node* rhs; // right-hand side
+  struct Node* lhs; // left-hand side
+  struct Node* rhs; // right-hand side
   int integer; // integer literal
   Vector* stmts; // block
-  Node* expr; // "return" or expression stmt or address-of or dereference
+  struct Node* expr; // "return" or expression stmt or address-of or dereference
 
   char* name; // function call, variable definition
 
@@ -114,12 +113,12 @@ typedef struct Node {
   // "if" ( cond ) then "else" els
   // "for" ( init; cond; step ) body
   // "while" ( cond ) body
-  Node* cond;
-  Node* then;
-  Node* els;
-  Node* init;
-  Node* step;
-  Node* body;
+  struct Node* cond;
+  struct Node* then;
+  struct Node* els;
+  struct Node* init;
+  struct Node* step;
+  struct Node* body;
 
 } Node;
 
