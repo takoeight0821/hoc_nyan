@@ -4,6 +4,10 @@ Vector* funcs; // Vector(Function*)
 
 void walk(Node*);
 
+noreturn void type_error(Type* expected, Node* node) {
+  bad_token(node->token, format("type error: expected %s, but got %s", show_type(expected), show_type(type_of(node))));
+}
+
 // 各Nodeの.typeを埋める
 void sema(Program* prog) {
   funcs = prog->funcs;
@@ -45,15 +49,20 @@ void walk(Node* node) {
 
     node->type = node->lhs->type;
 
-    assert((node->lhs->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) ||
-           (node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT));
+    if (node->lhs->type->ty == TY_PTR || node->type->ty == TY_INT) {
+      if (node->rhs->type->ty != TY_INT) {
+        type_error(new_type(TY_INT), node->rhs);
+      }
+    } else {
+      type_error(new_type(TY_INT), node->lhs);
+    }
 
     if (node->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) {
       // ポインタの加算に対応
       // ptr + n -> ptr + sizeof(typeof(*ptr)) * n
-      Node* new_rhs = new_node(NMUL);
+      Node* new_rhs = new_node(NMUL, node->rhs->token);
       new_rhs->lhs = node->rhs;
-      new_rhs->rhs = new_node(NINT);
+      new_rhs->rhs = new_node(NINT, node->rhs->token);
       new_rhs->rhs->integer = size_of(node->type->ptr_to);
       walk(new_rhs);
       node->rhs = new_rhs;
@@ -66,15 +75,20 @@ void walk(Node* node) {
 
     node->type = node->lhs->type;
 
-    assert((node->lhs->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) ||
-           (node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT));
+    if (node->lhs->type->ty == TY_PTR || node->type->ty == TY_INT) {
+      if (node->rhs->type->ty != TY_INT) {
+        type_error(new_type(TY_INT), node->rhs);
+      }
+    } else {
+      type_error(new_type(TY_INT), node->lhs);
+    }
 
     if (node->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) {
       // ポインタの減算に対応
       // ptr - n -> ptr - sizeof(typeof(*ptr)) * n
-      Node* new_rhs = new_node(NMUL);
+      Node* new_rhs = new_node(NMUL, node->rhs->token);
       new_rhs->lhs = node->rhs;
-      new_rhs->rhs = new_node(NINT);
+      new_rhs->rhs = new_node(NINT, node->rhs->token);
       new_rhs->rhs->integer = size_of(node->type->ptr_to);
       walk(new_rhs);
       node->rhs = new_rhs;
@@ -87,7 +101,13 @@ void walk(Node* node) {
 
     node->type = node->lhs->type;
 
-    assert(node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT);
+    if (node->lhs->type->ty != TY_INT) {
+      type_error(new_type(TY_INT), node->lhs);
+    }
+    if (node->rhs->type->ty != TY_INT) {
+      type_error(new_type(TY_INT), node->rhs);
+    }
+
     break;
   }
   case NDIV: {
@@ -96,7 +116,13 @@ void walk(Node* node) {
 
     node->type = node->lhs->type;
 
-    assert(node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT);
+    if (node->lhs->type->ty != TY_INT) {
+      type_error(new_type(TY_INT), node->lhs);
+    }
+    if (node->rhs->type->ty != TY_INT) {
+      type_error(new_type(TY_INT), node->rhs);
+    }
+
     break;
   }
   case NLT: {
@@ -106,7 +132,13 @@ void walk(Node* node) {
     node->type = new_type();
     node->type->ty = TY_INT;
 
-    assert(node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT);
+    if (node->lhs->type->ty != TY_INT) {
+      type_error(new_type(TY_INT), node->lhs);
+    }
+    if (node->rhs->type->ty != TY_INT) {
+      type_error(new_type(TY_INT), node->rhs);
+    }
+
     break;
   }
   case NLE: {
@@ -116,7 +148,13 @@ void walk(Node* node) {
     node->type = new_type();
     node->type->ty = TY_INT;
 
-    assert(node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT);
+    if (node->lhs->type->ty != TY_INT) {
+      type_error(new_type(TY_INT), node->lhs);
+    }
+    if (node->rhs->type->ty != TY_INT) {
+      type_error(new_type(TY_INT), node->rhs);
+    }
+
     break;
   }
   case NGT: {
@@ -126,7 +164,13 @@ void walk(Node* node) {
     node->type = new_type();
     node->type->ty = TY_INT;
 
-    assert(node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT);
+    if (node->lhs->type->ty != TY_INT) {
+      type_error(new_type(TY_INT), node->lhs);
+    }
+    if (node->rhs->type->ty != TY_INT) {
+      type_error(new_type(TY_INT), node->rhs);
+    }
+
     break;
   }
   case NGE: {
@@ -136,7 +180,13 @@ void walk(Node* node) {
     node->type = new_type();
     node->type->ty = TY_INT;
 
-    assert(node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT);
+    if (node->lhs->type->ty != TY_INT) {
+      type_error(new_type(TY_INT), node->lhs);
+    }
+    if (node->rhs->type->ty != TY_INT) {
+      type_error(new_type(TY_INT), node->rhs);
+    }
+
     break;
   }
   case NEQ: {
@@ -146,7 +196,10 @@ void walk(Node* node) {
     node->type = new_type();
     node->type->ty = TY_INT;
 
-    assert(node->lhs->type->ty == node->rhs->type->ty);
+    if (node->lhs->type->ty != node->rhs->type->ty) {
+      type_error(type_of(node->lhs), node->rhs);
+    }
+
     break;
   }
   case NNE: {
@@ -156,7 +209,10 @@ void walk(Node* node) {
     node->type = new_type();
     node->type->ty = TY_INT;
 
-    assert(node->lhs->type->ty == node->rhs->type->ty);
+    if (node->lhs->type->ty != node->rhs->type->ty) {
+      type_error(type_of(node->lhs), node->rhs);
+    }
+
     break;
   }
   case NDEFVAR: {
@@ -168,7 +224,10 @@ void walk(Node* node) {
 
     node->type = node->rhs->type;
 
-    assert(node->lhs->type->ty == node->rhs->type->ty);
+    if (node->lhs->type->ty != node->rhs->type->ty) {
+      type_error(type_of(node->lhs), node->rhs);
+    }
+
     break;
   }
   case NCALL: {

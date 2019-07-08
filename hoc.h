@@ -101,6 +101,7 @@ typedef struct {
 
 typedef struct Node {
   enum NodeTag tag;
+  Token* token; // for error reporting
 
   Type* type; // type
   struct Node* lhs; // left-hand side
@@ -141,7 +142,7 @@ typedef struct {
 } Program;
 
 // node.c
-Node* new_node(enum NodeTag tag);
+Node* new_node(enum NodeTag tag, Token* token);
 Type* new_type();
 char* show_type(Type* ty);
 void dump_node(Node* node, int level);

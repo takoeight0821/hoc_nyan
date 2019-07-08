@@ -102,7 +102,7 @@ static Node* term() {
     consume();
     return node;
   } else if (la(0) == TIDENT) {
-    Node* node = new_node(NCALL);
+    Node* node = new_node(NCALL, lt(0));
     node->name = strdup(lt(0)->ident);
     node->args = new_vec();
     consume();
@@ -128,24 +128,24 @@ static Node* term() {
 
 static Node* unary() {
   if (match_ident("sizeof")) {
-    Node* node = new_node(NSIZEOF);
+    Node* node = new_node(NSIZEOF, tokens->ptr[p - 1]);
     node->expr = unary();
     return node;
   } else if (match(TPLUS)) {
     return term();
   } else if (match(TMINUS)) {
-    Node* node = new_node(NMINUS);
-    Node* zero = new_node(NINT);
+    Node* node = new_node(NMINUS, tokens->ptr[p - 1]);
+    Node* zero = new_node(NINT, tokens->ptr[p - 1]);
     zero->integer = 0;
     node->lhs = zero;
     node->rhs = term();
     return node;
   } else if (match(TAND)) {
-    Node* node = new_node(NADDR);
+    Node* node = new_node(NADDR, tokens->ptr[p - 1]);
     node->expr = term();
     return node;
   } else if (match(TASTERISK)) {
-    Node* node = new_node(NDEREF);
+    Node* node = new_node(NDEREF, tokens->ptr[p - 1]);
     node->expr = term();
     return node;
   } else {
@@ -155,13 +155,13 @@ static Node* unary() {
 
 static Node* variable(Token* t) {
   assert(t->tag == TIDENT);
-  Node* node = new_node(NVAR);
+  Node* node = new_node(NVAR, t);
   node->var = find_var(t->ident);
   return node;
 }
 
 static Node* integer() {
-  Node* node = new_node(NINT);
+  Node* node = new_node(NINT, lt(0));
   node->integer = lt(0)->integer;
   if (!match(TINT)) {
     parse_error("integer", lt(0));
@@ -173,12 +173,12 @@ static Node* equality() {
   Node* lhs = relational();
   for (;;) {
     if (match(TEQ)) {
-      Node* node = new_node(NEQ);
+      Node* node = new_node(NEQ, tokens->ptr[p - 1]);
       node->lhs = lhs;
       node->rhs = relational();
       lhs = node;
     } else if (match(TNE)) {
-      Node* node = new_node(NNE);
+      Node* node = new_node(NNE, tokens->ptr[p - 1]);
       node->lhs = lhs;
       node->rhs = relational();
       lhs = node;
@@ -192,22 +192,22 @@ static Node* relational() {
   Node* lhs = add();
   for (;;) {
     if (match(TLT)) {
-      Node* node = new_node(NLT);
+      Node* node = new_node(NLT, tokens->ptr[p - 1]);
       node->lhs = lhs;
       node->rhs = add();
       lhs = node;
     } else if (match(TLE)) {
-      Node* node = new_node(NLE);
+      Node* node = new_node(NLE, tokens->ptr[p - 1]);
       node->lhs = lhs;
       node->rhs = add();
       lhs = node;
     } else if (match(TGT)) {
-      Node* node = new_node(NGT);
+      Node* node = new_node(NGT, tokens->ptr[p - 1]);
       node->lhs = lhs;
       node->rhs = add();
       lhs = node;
     } else if (match(TGE)) {
-      Node* node = new_node(NGE);
+      Node* node = new_node(NGE, tokens->ptr[p - 1]);
       node->lhs = lhs;
       node->rhs = add();
       lhs = node;
@@ -220,12 +220,12 @@ static Node* mul() {
   Node* lhs = unary();
   for (;;) {
     if (match(TASTERISK)) {
-      Node* node = new_node(NMUL);
+      Node* node = new_node(NMUL, tokens->ptr[p - 1]);
       node->lhs = lhs;
       node->rhs = unary();
       lhs = node;
     } else if (match(TSLASH)) {
-      Node* node = new_node(NDIV);
+      Node* node = new_node(NDIV, tokens->ptr[p - 1]);
       node->lhs = lhs;
       node->rhs = unary();
       lhs = node;
@@ -239,12 +239,12 @@ static Node* add() {
   Node* lhs = mul();
   for (;;) {
     if (match(TPLUS)) {
-      Node* node = new_node(NPLUS);
+      Node* node = new_node(NPLUS, tokens->ptr[p - 1]);
       node->lhs = lhs;
       node->rhs = mul();
       lhs = node;
     } else if (match(TMINUS)) {
-      Node* node = new_node(NMINUS);
+      Node* node = new_node(NMINUS, tokens->ptr[p - 1]);
       node->lhs = lhs;
       node->rhs = mul();
       lhs = node;
@@ -261,7 +261,7 @@ static Node* assign() {
       consume(); // =
       Node* rhs = assign();
 
-      Node* node = new_node(NASSIGN);
+      Node* node = new_node(NASSIGN, tokens->ptr[p - 1]);
       node->lhs = lhs;
       node->rhs = rhs;
       return node;
@@ -305,7 +305,7 @@ static Node* direct_decl(Type* ty) {
   if (la(0) != TIDENT) {
     parse_error("ident", lt(0));
   }
-  Node* node = new_node(NDEFVAR);
+  Node* node = new_node(NDEFVAR, lt(0));
   node->name = strdup(lt(0)->ident);
   node->type = ty;
   consume();
@@ -336,7 +336,7 @@ static Node* declaration() {
 };
 
 static Node* expr_stmt() {
-  Node* node = new_node(NEXPR_STMT);
+  Node* node = new_node(NEXPR_STMT, lt(0));
   node->expr = expr();
   if (!match(TSEMICOLON)) {
     parse_error(";", lt(0));
@@ -348,13 +348,15 @@ static Node* statement() {
   if (is_typename(lt(0))) {
     return declaration();
   } else if (match_ident("return")) {
-    Node* node = new_node(NRETURN);
+    Node* node = new_node(NRETURN, tokens->ptr[p - 1]);
     node->expr = expr();
     if (!match(TSEMICOLON)) {
       parse_error(";", lt(0));
     }
     return node;
   } else if (match_ident("if")) {
+    Token* if_token = tokens->ptr[p - 1];
+
     if (!match(TLPAREN)) {
       parse_error("(", lt(0));
     }
@@ -367,19 +369,19 @@ static Node* statement() {
 
     if (match_ident("else")) {
       Node* els = statement();
-      Node* node = new_node(NIFELSE);
+      Node* node = new_node(NIFELSE, if_token);
       node->cond = cond;
       node->then = then;
       node->els = els;
       return node;
     } else {
-      Node* node = new_node(NIF);
+      Node* node = new_node(NIF, if_token);
       node->cond = cond;
       node->then = then;
       return node;
     }
   } else if (match_ident("while")) {
-    Node* node = new_node(NWHILE);
+    Node* node = new_node(NWHILE, tokens->ptr[p - 1]);
 
     if (!match(TLPAREN)) {
       parse_error("(", lt(0));
@@ -393,7 +395,7 @@ static Node* statement() {
 
     return node;
   } else if (match_ident("for")) {
-    Node* node = new_node(NFOR);
+    Node* node = new_node(NFOR, tokens->ptr[p - 1]);
 
     if (!match(TLPAREN)) {
       parse_error("(", lt(0));
@@ -414,7 +416,7 @@ static Node* statement() {
 
     return node;
   } else if (match(TLBRACE)) {
-    Node* node = new_node(NBLOCK);
+    Node* node = new_node(NBLOCK, tokens->ptr[p - 1]);
     node->stmts = new_vec();
     while (la(0) != TRBRACE) {
       vec_push(node->stmts, statement());

@@ -1,8 +1,9 @@
 #include "hoc.h"
 
-Node* new_node(enum NodeTag tag) {
+Node* new_node(enum NodeTag tag, Token* token) {
   Node* node = calloc(1, sizeof(Node));
   node->tag = tag;
+  node->token = token;
   return node;
 }
 
