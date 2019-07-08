@@ -9,6 +9,8 @@
 #include <string.h>
 #include <stddef.h>
 
+extern char* src;
+
 typedef struct {
   void **ptr;
   size_t capacity;
@@ -50,6 +52,7 @@ typedef struct {
   enum TokenTag tag;
   int integer;
   char* ident;
+  char* start; // for error reporting
 } Token;
 
 enum NodeTag {
@@ -187,8 +190,6 @@ void gen_x86(Program* prog);
 void warn_token(Token* tok, char* msg);
 noreturn void bad_token(Token* tok, char* msg);
 void dump_token(Token* tok);
-
-// lex.c
 Vector* lex(FILE* file);
 
 // parse.c

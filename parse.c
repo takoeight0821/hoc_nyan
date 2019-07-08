@@ -30,7 +30,7 @@ static enum TokenTag la(size_t i) {
 }
 
 static void parse_error(const char* expected, Token* actual) {
-  bad_token(actual, format(" %s expected", expected));
+  bad_token(actual, format("%s expected", expected));
 }
 
 static int match(enum TokenTag tag) {
@@ -94,7 +94,7 @@ static Node* term() {
   if (match(TLPAREN)) {
     Node* node = add();
     if (!match(TRPAREN)) {
-      parse_error("[RPAREN]", lt(0));
+      parse_error(")", lt(0));
     }
     return node;
   } else if (la(0) == TIDENT && la(1) != TLPAREN) {
