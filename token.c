@@ -66,6 +66,12 @@ void dump_token(Token* tok) {
   case TRBRACE:
     eprintf("[RBRACE]");
     break;
+  case TLBRACK:
+    eprintf("[LBRACK]");
+    break;
+  case TRBRACK:
+    eprintf("[RBRACK]");
+    break;
   case TSEMICOLON:
     eprintf("[SEMICOLON]");
     break;

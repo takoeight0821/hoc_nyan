@@ -120,6 +120,12 @@ static Token* next_token() {
     case '}':
       consume();
       return new_token(TRBRACE);
+    case '[':
+      consume();
+      return new_token(TLBRACK);
+    case ']':
+      consume();
+      return new_token(TRBRACK);
     case ';':
       consume();
       return new_token(TSEMICOLON);

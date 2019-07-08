@@ -12,6 +12,8 @@ size_t size_of(Type* ty) {
     return 4;
   case TY_PTR:
     return 8;
+  default:
+    error("unreachable(size_of)");
   }
 }
 
@@ -43,6 +45,8 @@ char* show_type(Type* ty) {
     return format("int");
   case TY_PTR:
     return format("ptr(%s)", show_type(ty->ptr_to));
+  default:
+    error("unreachable(show_type)");
   }
 }
 

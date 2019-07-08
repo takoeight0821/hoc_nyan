@@ -34,6 +34,8 @@ enum TokenTag {
   TRPAREN,
   TLBRACE,
   TRBRACE,
+  TLBRACK,
+  TRBRACK,
   TSEMICOLON,
   TCOMMA,
   TEQ,
