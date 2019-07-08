@@ -66,7 +66,19 @@ void walk(Node* node) {
 
     node->type = node->lhs->type;
 
-    assert(node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT);
+    assert((node->lhs->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) ||
+           (node->lhs->type->ty == TY_INT && node->rhs->type->ty == TY_INT));
+
+    if (node->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) {
+      // ポインタの減算に対応
+      // ptr - n -> ptr - sizeof(typeof(*ptr)) * n
+      Node* new_rhs = new_node(NMUL);
+      new_rhs->lhs = node->rhs;
+      new_rhs->rhs = new_node(NINT);
+      new_rhs->rhs->integer = size_of(node->type->ptr_to);
+      walk(new_rhs);
+      node->rhs = new_rhs;
+    }
     break;
   }
   case NMUL: {

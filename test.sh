@@ -52,6 +52,7 @@ try 0 "int main () { int *x; int** y; return 0; }"
 try 1 "int main () { int *x; int y; y = 1; x = &y; return *x; }"
 try 1 "int main () { int *p; alloc4(&p, 1, 2, 4, 8); return *p; }"
 try 4 "int main () { int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 2; return *q; }"
+try 2 "int main () { int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 2; q = q - 1; return *q; }"
 try 0 "int* id_ptr(int* x) { return x; } int main() { int x; x = 0; return *(id_ptr(&x)); }"
 try 10 "int func(); int main() { return func(); } int func() { return 10; }"
 
