@@ -10,9 +10,9 @@ static char* func_end_label;
 static char* reg(Reg r, size_t s) {
   if (s == 4) {
     return reg32[r];
+  } else {
+    return reg64[r];
   }
-  assert(s == 8);
-  return reg64[r];
 }
 
 static char* new_label(char* name) {
@@ -63,17 +63,6 @@ void store(Reg src, size_t size) {
 
 void emit_node(Node*);
 
-void emit_lval(Node* node) {
-  if (node->tag == NVAR) {
-    emit("mov rax, rbp");
-    emit("sub rax, %zu", node->var->offset);
-    push(AX);
-  } else {
-    assert(node->tag == NDEREF);
-    emit_node(node->expr);
-  }
-}
-
 void emit_var(Var* var) {
   comment("start Var %s", var->name);
   emit("mov rax, rbp");
@@ -81,6 +70,18 @@ void emit_var(Var* var) {
   push(AX);
   comment("end Var %s", var->name);
 }
+
+void emit_lval(Node* node) {
+  if (node->tag == NVAR) {
+    emit_var(node->var);
+  } else {
+    assert(node->tag == NDEREF);
+    comment("start lval NDEREF");
+    emit_node(node->expr);
+    comment("end lval NDEREF");
+  }
+}
+
 
 void emit_node(Node* node) {
   switch (node->tag) {
@@ -92,9 +93,15 @@ void emit_node(Node* node) {
   case NVAR: {
     comment("start NVAR");
     emit_lval(node);
-    pop(AX);
-    load(AX, size_of(type_of(node)));
-    push(AX);
+
+    if (node->type->array_size == 0) {
+      pop(AX);
+      load(AX, size_of(type_of(node)));
+      push(AX);
+    } else {
+      comment("emit array var");
+    }
+
     comment("end NVAR");
     break;
   }
@@ -238,7 +245,9 @@ void emit_node(Node* node) {
   }
   case NASSIGN: {
     comment("start NASSIGN");
+    comment("  start lval");
     emit_lval(node->lhs);
+    comment("  end lval");
     emit_node(node->rhs);
     pop(DI);
     pop(AX);

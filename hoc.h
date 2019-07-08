@@ -91,6 +91,7 @@ enum TypeTag {
 typedef struct Type {
   enum TypeTag ty;
   struct Type* ptr_to;
+  size_t array_size;
 } Type;
 
 typedef struct {

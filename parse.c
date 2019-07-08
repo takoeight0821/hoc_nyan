@@ -81,7 +81,7 @@ static Type* type_specifier() {
 
   switch (base_type) {
   case INT:
-    *ty = (Type){TY_INT, NULL};
+    *ty = (Type){TY_INT, NULL, 0};
     break;
   default:
     return NULL;
@@ -255,20 +255,17 @@ static Node* add() {
 }
 
 static Node* assign() {
-  if (la(0) == TIDENT) {
-    if (la(1) == TEQUAL) {
-      Node* lhs = equality();
-      consume(); // =
-      Node* rhs = assign();
+  Node* node = equality();
 
-      Node* node = new_node(NASSIGN, tokens->ptr[p - 1]);
-      node->lhs = lhs;
-      node->rhs = rhs;
-      return node;
-    }
+  if (match(TEQUAL)) {
+    Node* lhs = node;
+    Node* rhs = assign();
+    node = new_node(NASSIGN, lhs->token);
+    node->lhs = lhs;
+    node->rhs = rhs;
   }
 
-  return equality();
+  return node;
 }
 
 static Node* expr() {
@@ -307,9 +304,23 @@ static Node* direct_decl(Type* ty) {
   }
   Node* node = new_node(NDEFVAR, lt(0));
   node->name = strdup(lt(0)->ident);
-  node->type = ty;
   consume();
 
+  if (match(TLBRACK)) {
+    Type* array_ty = new_type();
+    array_ty->ty = TY_PTR;
+    array_ty->ptr_to = ty;
+    array_ty->array_size = lt(0)->integer;
+    ty = array_ty;
+    if (!match(TINT)) {
+      parse_error("integer", lt(0));
+    }
+    if (!match(TRBRACK)) {
+      parse_error("]", lt(0));
+    }
+  }
+
+  node->type = ty;
   add_lvar(node->name, ty);
 
   return node;

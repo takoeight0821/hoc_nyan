@@ -12,7 +12,11 @@ size_t size_of(Type* ty) {
   case TY_INT:
     return 4;
   case TY_PTR:
-    return 8;
+    if (ty->array_size == 0) {
+      return 8;
+    } else {
+      return ty->array_size * size_of(ty->ptr_to);
+    }
   default:
     error("unreachable(size_of)");
   }
