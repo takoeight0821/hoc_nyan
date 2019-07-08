@@ -15,6 +15,7 @@ size_t size_of(Type* ty) {
     if (ty->array_size == 0) {
       return 8;
     } else {
+      // ty->array_size >= 1のときは配列型
       return ty->array_size * size_of(ty->ptr_to);
     }
   default:
@@ -22,7 +23,7 @@ size_t size_of(Type* ty) {
   }
 }
 
-Type* new_type() {
+Type* new_type(void) {
   Type* ty = calloc(1, sizeof(Type));
   return ty;
 }

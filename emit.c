@@ -99,6 +99,7 @@ void emit_node(Node* node) {
       load(AX, size_of(type_of(node)));
       push(AX);
     } else {
+      // nodeが配列型の変数の場合、lvalとしてコンパイルする（配列の先頭へのポインタになる）
       comment("emit array var");
     }
 

@@ -18,6 +18,19 @@ void sema(Program* prog) {
   }
 }
 
+Type* int_type() {
+  Type* t = new_type();
+  t->ty = TY_INT;
+  return t;
+}
+
+Type* ptr_ty(Type* ptr_to) {
+  Type* t = new_type();
+  t->ty = TY_PTR;
+  t->ptr_to = ptr_to;
+  return t;
+}
+
 Type* ret_type(char* name) {
   for (size_t i = 0; i < funcs->length; i++) {
     Function* fn = funcs->ptr[i];
@@ -25,9 +38,7 @@ Type* ret_type(char* name) {
       return fn->ret_type;
     }
   }
-  Type* t = new_type();
-  t->ty = TY_INT;
-  return t;
+  return int_type();
 }
 
 void walk(Node* node) {
@@ -35,8 +46,7 @@ void walk(Node* node) {
 
   switch (node->tag) {
   case NINT: {
-    node->type = new_type();
-    node->type->ty = TY_INT;
+    node->type = int_type();
     break;
   }
   case NVAR: {
@@ -47,66 +57,72 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    node->type = node->lhs->type;
-
-    if (node->lhs->type->ty == TY_PTR || node->type->ty == TY_INT) {
+    if (node->lhs->type->ty == TY_PTR || node->lhs->type->ty == TY_INT) {
       if (node->rhs->type->ty != TY_INT) {
-        type_error(new_type(TY_INT), node->rhs);
+        type_error(int_type(), node->rhs);
       }
     } else {
-      type_error(new_type(TY_INT), node->lhs);
+      type_error(int_type(), node->lhs);
     }
 
-    if (node->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) {
+    if (node->lhs->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) {
       // ポインタの加算に対応
       // ptr + n -> ptr + sizeof(typeof(*ptr)) * n
       Node* new_rhs = new_node(NMUL, node->rhs->token);
       new_rhs->lhs = node->rhs;
       new_rhs->rhs = new_node(NINT, node->rhs->token);
-      new_rhs->rhs->integer = size_of(node->type->ptr_to);
+      new_rhs->rhs->integer = size_of(node->lhs->type->ptr_to);
       walk(new_rhs);
       node->rhs = new_rhs;
+
+      node->type = ptr_ty(node->lhs->type->ptr_to);
+    } else {
+      node->type = int_type();
     }
+
     break;
   }
   case NMINUS: {
     walk(node->lhs);
     walk(node->rhs);
 
-    node->type = node->lhs->type;
-
-    if (node->lhs->type->ty == TY_PTR || node->type->ty == TY_INT) {
+    if (node->lhs->type->ty == TY_PTR || node->lhs->type->ty == TY_INT) {
       if (node->rhs->type->ty != TY_INT) {
-        type_error(new_type(TY_INT), node->rhs);
+        type_error(int_type(), node->rhs);
       }
     } else {
-      type_error(new_type(TY_INT), node->lhs);
+      type_error(int_type(), node->lhs);
     }
 
-    if (node->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) {
+    if (node->lhs->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) {
       // ポインタの減算に対応
       // ptr - n -> ptr - sizeof(typeof(*ptr)) * n
       Node* new_rhs = new_node(NMUL, node->rhs->token);
       new_rhs->lhs = node->rhs;
       new_rhs->rhs = new_node(NINT, node->rhs->token);
-      new_rhs->rhs->integer = size_of(node->type->ptr_to);
+      new_rhs->rhs->integer = size_of(node->lhs->type->ptr_to);
       walk(new_rhs);
       node->rhs = new_rhs;
+
+      node->type = ptr_ty(node->lhs->type->ptr_to);
+    } else {
+      node->type = int_type();
     }
+
     break;
   }
   case NMUL: {
     walk(node->lhs);
     walk(node->rhs);
 
-    node->type = node->lhs->type;
-
     if (node->lhs->type->ty != TY_INT) {
-      type_error(new_type(TY_INT), node->lhs);
+      type_error(int_type(), node->lhs);
     }
     if (node->rhs->type->ty != TY_INT) {
-      type_error(new_type(TY_INT), node->rhs);
+      type_error(int_type(), node->rhs);
     }
+
+    node->type = node->lhs->type;
 
     break;
   }
@@ -114,14 +130,14 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    node->type = node->lhs->type;
-
     if (node->lhs->type->ty != TY_INT) {
-      type_error(new_type(TY_INT), node->lhs);
+      type_error(int_type(), node->lhs);
     }
     if (node->rhs->type->ty != TY_INT) {
-      type_error(new_type(TY_INT), node->rhs);
+      type_error(int_type(), node->rhs);
     }
+
+    node->type = node->lhs->type;
 
     break;
   }
@@ -129,15 +145,14 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    node->type = new_type();
-    node->type->ty = TY_INT;
-
     if (node->lhs->type->ty != TY_INT) {
-      type_error(new_type(TY_INT), node->lhs);
+      type_error(int_type(), node->lhs);
     }
     if (node->rhs->type->ty != TY_INT) {
-      type_error(new_type(TY_INT), node->rhs);
+      type_error(int_type(), node->rhs);
     }
+
+    node->type = int_type();
 
     break;
   }
@@ -149,10 +164,10 @@ void walk(Node* node) {
     node->type->ty = TY_INT;
 
     if (node->lhs->type->ty != TY_INT) {
-      type_error(new_type(TY_INT), node->lhs);
+      type_error(int_type(), node->lhs);
     }
     if (node->rhs->type->ty != TY_INT) {
-      type_error(new_type(TY_INT), node->rhs);
+      type_error(int_type(), node->rhs);
     }
 
     break;
@@ -165,10 +180,10 @@ void walk(Node* node) {
     node->type->ty = TY_INT;
 
     if (node->lhs->type->ty != TY_INT) {
-      type_error(new_type(TY_INT), node->lhs);
+      type_error(int_type(), node->lhs);
     }
     if (node->rhs->type->ty != TY_INT) {
-      type_error(new_type(TY_INT), node->rhs);
+      type_error(int_type(), node->rhs);
     }
 
     break;
@@ -181,10 +196,10 @@ void walk(Node* node) {
     node->type->ty = TY_INT;
 
     if (node->lhs->type->ty != TY_INT) {
-      type_error(new_type(TY_INT), node->lhs);
+      type_error(int_type(), node->lhs);
     }
     if (node->rhs->type->ty != TY_INT) {
-      type_error(new_type(TY_INT), node->rhs);
+      type_error(int_type(), node->rhs);
     }
 
     break;
