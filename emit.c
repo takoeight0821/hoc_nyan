@@ -377,6 +377,12 @@ void emit_node(Node* node) {
     comment("end NBLOCK");
     break;
   }
+  case NSIZEOF: {
+    comment("start NSIZEOF");
+    pushi(size_of(type_of(node->expr)));
+    comment("end NSIZEOF");
+    break;
+  }
   default:
     eprintf("emit error: ");
     dump_node(node, 0);

@@ -244,5 +244,13 @@ void walk(Node* node) {
     node->type = NULL;
     break;
   }
+  case NSIZEOF: {
+    walk(node->expr);
+
+    node->type = new_type();
+    node->type->ty = TY_INT;
+
+    break;
+  }
   }
 }

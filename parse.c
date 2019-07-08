@@ -127,7 +127,11 @@ static Node* term() {
 }
 
 static Node* unary() {
-  if (match(TPLUS)) {
+  if (match_ident("sizeof")) {
+    Node* node = new_node(NSIZEOF);
+    node->expr = unary();
+    return node;
+  } else if (match(TPLUS)) {
     return term();
   } else if (match(TMINUS)) {
     Node* node = new_node(NMINUS);

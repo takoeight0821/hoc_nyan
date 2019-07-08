@@ -252,6 +252,14 @@ void dump_node(Node* node, int level) {
     eprintf("}\n");
     break;
   }
+  case NSIZEOF: {
+    indent(level);
+    eprintf("(sizeof\n");
+    dump_node(node->expr, level+1);
+    indent(level);
+    eprintf(")\n");
+    break;
+  }
   }
 }
 

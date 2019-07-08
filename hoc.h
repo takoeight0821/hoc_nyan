@@ -77,6 +77,7 @@ enum NodeTag {
     NWHILE,
     NFOR,
     NBLOCK,
+    NSIZEOF,
 };
 
 enum TypeTag {

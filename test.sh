@@ -55,5 +55,6 @@ try 4 "int main () { int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 2; return *
 try 2 "int main () { int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 2; q = q - 1; return *q; }"
 try 0 "int* id_ptr(int* x) { return x; } int main() { int x; x = 0; return *(id_ptr(&x)); }"
 try 10 "int func(); int main() { return func(); } int func() { return 10; }"
+try 4 "int main() { return sizeof(1); }"
 
 echo OK
