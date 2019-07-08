@@ -1,16 +1,18 @@
 #include "hoc.h"
 
-// ソースファイル
+// ソースコード
 // Vector* lex(FILE* file);で初期化
-static FILE* src;
-static char c;
+/* static FILE* src; */
+#define MAX_LENGTH 4096
+char* src;
+char* cur;
 
 static void consume() {
-  c = getc(src);
+  cur++;
 }
 
 static void whitespace() {
-  while (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+  while (*cur == ' ' || *cur == '\t' || *cur == '\n' || *cur == '\r') {
     consume();
   }
 }
@@ -24,8 +26,8 @@ static Token* new_token(enum TokenTag tag) {
 static Token* integer() {
   Token* t = new_token(TINT);
   t->integer = 0;
-  while (isdigit(c)) {
-    t->integer = t->integer * 10 + (c - '0');
+  while (isdigit(*cur)) {
+    t->integer = t->integer * 10 + (*cur - '0');
     consume();
   }
   return t;
@@ -34,11 +36,11 @@ static Token* integer() {
 static Token* ident() {
   Token* t = new_token(TIDENT);
   Vector* ident = new_vec();
-  vec_pushi(ident, c);
+  vec_pushi(ident, *cur);
   consume();
 
-  while (isalnum(c) || c == '_') {
-    vec_pushi(ident, c);
+  while (isalnum(*cur) || *cur == '_') {
+    vec_pushi(ident, *cur);
     consume();
   }
 
@@ -48,8 +50,8 @@ static Token* ident() {
 }
 
 static Token* next_token() {
-  while (c != EOF) {
-    switch (c) {
+  while (*cur != '\0') {
+    switch (*cur) {
     case ' ': case '\t': case '\n': case '\r':
       whitespace(); continue;
     case '0': case '1': case '2': case '3':
@@ -73,7 +75,7 @@ static Token* next_token() {
       return new_token(TAND);
     case '<':
       consume();
-      switch (c) {
+      switch (*cur) {
       case '=':
         consume();
         return new_token(TLE);
@@ -82,7 +84,7 @@ static Token* next_token() {
       }
     case '>':
       consume();
-      switch (c) {
+      switch (*cur) {
       case '=':
         consume();
         return new_token(TGE);
@@ -91,7 +93,7 @@ static Token* next_token() {
       }
     case '=':
       consume();
-      switch (c) {
+      switch (*cur) {
       case '=':
         consume();
         return new_token(TEQ);
@@ -100,13 +102,13 @@ static Token* next_token() {
       }
     case '!':
       consume();
-      switch (c) {
+      switch (*cur) {
       case '=':
         consume();
         return new_token(TNE);
       default:
         // TODO `not` operator
-        error("invalid character: %c\n", c);
+        error("invalid character: %c\n", *cur);
       }
     case '(':
       consume();
@@ -133,21 +135,32 @@ static Token* next_token() {
       consume();
       return new_token(TCOMMA);
     default:
-      if (isalpha(c) || c == '_') {
+      if (isalpha(*cur) || *cur == '_') {
         return ident();
       }
-      error("invalid character: %c\n", c);
+      error("invalid character: %c\n", *cur);
     }
   }
   return new_token(TEOF);
 }
 
+static char* read_file(FILE* file) {
+  Vector* buf = new_vec();
+
+  char c;
+  while ((c = fgetc(file)) != EOF) {
+    vec_pushi(buf, c);
+  }
+  vec_pushi(buf, 0);
+  return vec_to_string(buf);
+}
+
 Vector* lex(FILE* file) {
-  src = file;
+  src = read_file(file);
+  cur = src;
 
   Vector* v = new_vec();
   Token* t;
-  consume();
 
   while ((t = next_token())->tag != TEOF) {
     vec_push(v, t);
