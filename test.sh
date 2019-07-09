@@ -60,6 +60,9 @@ try 4 "int main() { return sizeof(1); }"
 try 1 "int main() { int arr[3]; *arr = 1; return *arr; }"
 try 4 "int main() { int arr[3]; int *p; p = arr + 1; *p = 4; return *p; }"
 try 4 "int main() { int arr[3]; *(arr + 1) = 4; return *(arr + 1); }"
+try 65 "int main() { char c; c = 65; return c; }"
+try 65 "int main() { char c; c = 65; putchar(c); return c; }"
+try 0 "int main() { char msg[3]; *msg = 104; *(msg + 1) = 105; *(msg + 2) = 0; puts(msg); return 0; }"
 try 4 "int main() { int arr[3]; arr[1] = 4; return arr[1]; }"
 
 echo OK

@@ -2,13 +2,16 @@
 
 static char* reg64[] = { "rax", "rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11" };
 static char* reg32[] = { "eax", "edi", "esi", "edx", "ecx", "r8d", "r9d", "r10d", "r11d" };
+static char* reg8[] = { "al", "dil", "sil", "dl", "cl", "r8b", "r9b", "r10b", "r11b" };
 static Reg argregs[] = {DI, SI, DX, CX, R8, R9};
 static unsigned int label_id = 0;
 static int stack_size = 0;
 static char* func_end_label;
 
 static char* reg(Reg r, size_t s) {
-  if (s == 4) {
+  if (s == 1) {
+    return reg8[r];
+  } else if (s == 4) {
     return reg32[r];
   } else {
     return reg64[r];
@@ -54,7 +57,13 @@ void pop(Reg dst) {
 }
 
 void load(Reg dst, size_t size) {
-  emit("mov %s, [rax]", reg(dst, size));
+  if (size == 1) {
+    // 8bitの値は自動では0拡張されないので、movzxを使う
+    // 32bit整数との演算を行うので32bitレジスタにロードする
+    emit("movzx %s, BYTE PTR [rax]", reg(dst, 4));
+  } else {
+   emit("mov %s, [rax]", reg(dst, size));
+  }
 }
 
 void store(Reg src, size_t size) {

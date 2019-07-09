@@ -41,6 +41,14 @@ Type* ret_type(char* name) {
   return int_type();
 }
 
+int integer_type(Type* ty) {
+  return (ty->ty == TY_CHAR) || (ty->ty == TY_INT);
+}
+
+int assignable(Type* lhs, Type* rhs) {
+  return (lhs->ty == rhs->ty) || (integer_type(lhs) && integer_type(rhs));
+}
+
 void walk(Node* node) {
   assert(node);
 
@@ -239,7 +247,7 @@ void walk(Node* node) {
 
     node->type = node->rhs->type;
 
-    if (node->lhs->type->ty != node->rhs->type->ty) {
+    if (!assignable(type_of(node->lhs), type_of(node->rhs))) {
       type_error(type_of(node->lhs), node->rhs);
     }
 

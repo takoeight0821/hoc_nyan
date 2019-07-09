@@ -67,6 +67,7 @@ static Type* type_specifier() {
 
   enum {
     INT = 1,
+    CHAR = 1 << 1,
   };
 
   int base_type = 0;
@@ -74,6 +75,8 @@ static Type* type_specifier() {
   for (;;) {
     if (match_ident("int")) {
       base_type += INT;
+    } else if (match_ident("char")) {
+      base_type += CHAR;
     } else {
       break;
     }
@@ -82,6 +85,9 @@ static Type* type_specifier() {
   switch (base_type) {
   case INT:
     *ty = (Type){TY_INT, NULL, 0};
+    break;
+  case CHAR:
+    *ty = (Type){TY_CHAR, NULL, 0};
     break;
   default:
     return NULL;
@@ -274,7 +280,7 @@ static Node* expr() {
 
 static int is_typename(Token* t) {
   if (t->tag == TIDENT) {
-    return streq(t->ident, "int");
+    return streq(t->ident, "int") || streq(t->ident, "char");
   } else {
     return 0;
   }

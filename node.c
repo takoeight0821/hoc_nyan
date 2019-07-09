@@ -11,6 +11,8 @@ size_t size_of(Type* ty) {
   switch (ty->ty) {
   case TY_INT:
     return 4;
+  case TY_CHAR:
+    return 1;
   case TY_PTR:
     if (ty->array_size == 0) {
       return 8;
@@ -49,6 +51,8 @@ char* show_type(Type* ty) {
   switch (ty->ty) {
   case TY_INT:
     return format("int");
+  case TY_CHAR:
+    return format("char");
   case TY_PTR:
     return format("ptr(%s)", show_type(ty->ptr_to));
   default:

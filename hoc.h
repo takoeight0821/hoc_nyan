@@ -85,6 +85,7 @@ enum NodeTag {
 
 enum TypeTag {
   TY_INT,
+  TY_CHAR,
   TY_PTR,
 };
 
