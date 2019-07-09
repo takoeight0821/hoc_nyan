@@ -60,7 +60,7 @@ void load(Reg dst, size_t size) {
   if (size == 1) {
     // 8bitの値は自動では0拡張されないので、movzxを使う
     // 32bit整数との演算を行うので32bitレジスタにロードする
-    emit("movzx %s, BYTE PTR [rax]", reg(dst, 4));
+    emit("movsx %s, BYTE PTR [rax]", reg(dst, 4));
   } else {
    emit("mov %s, [rax]", reg(dst, size));
   }
