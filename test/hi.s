@@ -16,6 +16,7 @@ main:
 # start NASSIGN
 #   start lval
 # start lval NDEREF
+# start NPLUS
 # start NVAR
 # start Var msg
 	mov rax, rbp
@@ -24,6 +25,23 @@ main:
 # end Var msg
 # emit array var
 # end NVAR
+# start NMUL
+# start NINT
+	push 0
+# end NINT
+# start NINT
+	push 1
+# end NINT
+	pop rdi
+	pop rax
+	imul edi
+	push rax
+# end NMUL
+	pop rdi
+	pop rax
+	add rax, rdi
+	push rax
+# end NPLUS
 # end lval NDEREF
 #   end lval
 # start NINT

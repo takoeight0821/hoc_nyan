@@ -155,7 +155,22 @@ static Node* unary() {
     node->expr = term();
     return node;
   } else {
-    return term();
+    Node* node = term();
+
+    if (match(TLBRACK)) {
+      Token* t = tokens->ptr[p - 1];
+      Node* offset = expr();
+      if (!match(TRBRACK)) {
+        parse_error("]", lt(0));
+      }
+      Node* deref = new_node(NDEREF, t);
+      deref->expr = new_node(NPLUS, t);
+      deref->expr->lhs = node;
+      deref->expr->rhs = offset;
+      node = deref;
+    }
+
+    return node;
   }
 }
 

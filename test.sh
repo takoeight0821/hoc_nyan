@@ -64,5 +64,6 @@ try 65 "int main() { char c; c = 65; return c; }"
 try 65 "int main() { char c; c = 65; putchar(c); return c; }"
 try 0 "int main() { char msg[3]; *msg = 104; *(msg + 1) = 105; *(msg + 2) = 0; puts(msg); return 0; }"
 try 4 "int main() { int arr[3]; arr[1] = 4; return arr[1]; }"
+try 0 "int main() { char msg[3]; msg[0] = 104; msg[1] = 105; msg[2] = 0; puts(msg); return 0; }"
 
 echo OK
