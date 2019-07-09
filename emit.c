@@ -7,7 +7,6 @@ static Reg argregs[] = {DI, SI, DX, CX, R8, R9};
 static unsigned int label_id = 0;
 static int stack_size = 0;
 static char* func_end_label;
-static char* data_label;
 
 static char* reg(Reg r, size_t s) {
   if (s == 1) {
@@ -52,8 +51,8 @@ void pushi(int src) {
   stack_size += 8;
 }
 
-void pushlabel(char* l, size_t i) {
-  emit("push OFFSET FLAT:%s%zu\n", l, i);
+void pushlabel(char* l) {
+  emit("push OFFSET FLAT:%s\n", l);
   stack_size += 8;
 }
 
@@ -410,7 +409,7 @@ void emit_node(Node* node) {
   }
   case NSTRING: {
     comment("start NSTRING");
-    pushlabel(data_label, node->str_offset);
+    pushlabel(format(".string_%zu", node->str_id));
     comment("end NSTRING");
     break;
   }
@@ -460,9 +459,8 @@ void gen_x86(Program* prog) {
   puts(".intel_syntax noprefix");
 
   puts(".text");
-  data_label = new_label("data");
   for (size_t i = 0; i < prog->strs->length; i++) {
-    printf("%s%zu:\n", data_label, i);
+    printf(".string_%zu:\n", i);
     emit(".string \"%s\"", prog->strs->ptr[i]);
   }
 

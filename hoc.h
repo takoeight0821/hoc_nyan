@@ -114,7 +114,7 @@ typedef struct Node {
   int integer; // integer literal
   Vector* stmts; // block
   struct Node* expr; // "return" or expression stmt or address-of or dereference
-  size_t str_offset; // string literal
+  size_t str_id; // string literal
 
   char* name; // function call, variable definition
 

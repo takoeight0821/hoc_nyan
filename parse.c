@@ -211,7 +211,7 @@ static Node* string() {
     parse_error("string", lt(0));
   }
 
-  node->str_offset = intern(str);
+  node->str_id = intern(str);
   return node;
 }
 
