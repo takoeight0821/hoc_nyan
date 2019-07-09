@@ -18,9 +18,15 @@ void sema(Program* prog) {
   }
 }
 
-Type* int_type() {
+Type* int_type(void) {
   Type* t = new_type();
   t->ty = TY_INT;
+  return t;
+}
+
+Type* char_type(void) {
+  Type* t = new_type();
+  t->ty = TY_CHAR;
   return t;
 }
 
@@ -332,6 +338,10 @@ void walk(Node* node) {
     node->type = new_type();
     node->type->ty = TY_INT;
 
+    break;
+  }
+  case NSTRING: {
+    node->type = ptr_ty(char_type());
     break;
   }
   }

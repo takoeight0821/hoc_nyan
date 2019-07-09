@@ -46,12 +46,14 @@ enum TokenTag {
   TGE,
   TLT,
   TGT,
+  TSTRING,
 };
 
 typedef struct {
   enum TokenTag tag;
   int integer;
   char* ident;
+  char* str; // string literal
   char* start; // for error reporting
 } Token;
 
@@ -81,6 +83,7 @@ enum NodeTag {
     NFOR,
     NBLOCK,
     NSIZEOF,
+    NSTRING,
 };
 
 enum TypeTag {
@@ -111,6 +114,7 @@ typedef struct Node {
   int integer; // integer literal
   Vector* stmts; // block
   struct Node* expr; // "return" or expression stmt or address-of or dereference
+  size_t str_offset; // string literal
 
   char* name; // function call, variable definition
 
@@ -141,6 +145,7 @@ typedef struct {
 
 typedef struct {
   Vector* funcs;
+  Vector* strs;
 } Program;
 
 // node.c

@@ -7,6 +7,7 @@ static Reg argregs[] = {DI, SI, DX, CX, R8, R9};
 static unsigned int label_id = 0;
 static int stack_size = 0;
 static char* func_end_label;
+static char* data_label;
 
 static char* reg(Reg r, size_t s) {
   if (s == 1) {
@@ -48,6 +49,11 @@ void push(Reg src) {
 
 void pushi(int src) {
   printf("\tpush %d\n", src);
+  stack_size += 8;
+}
+
+void pushlabel(char* l, size_t i) {
+  emit("push OFFSET FLAT:%s%zu\n", l, i);
   stack_size += 8;
 }
 
@@ -402,6 +408,12 @@ void emit_node(Node* node) {
     comment("end NSIZEOF");
     break;
   }
+  case NSTRING: {
+    comment("start NSTRING");
+    pushlabel(data_label, node->str_offset);
+    comment("end NSTRING");
+    break;
+  }
   default:
     eprintf("emit error: ");
     dump_node(node, 0);
@@ -446,6 +458,14 @@ void emit_function(Function* func) {
 
 void gen_x86(Program* prog) {
   puts(".intel_syntax noprefix");
+
+  puts(".text");
+  data_label = new_label("data");
+  for (size_t i = 0; i < prog->strs->length; i++) {
+    printf("%s%zu:\n", data_label, i);
+    emit(".string \"%s\"", prog->strs->ptr[i]);
+  }
+
   for (size_t i = 0; i < prog->funcs->length; i++) {
     emit_function(prog->funcs->ptr[i]);
   }

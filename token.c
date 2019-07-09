@@ -175,6 +175,23 @@ static Token* next_token() {
     case ',':
       consume();
       return new_token(TCOMMA, cur - 1);
+    case '\"': {
+      char* start = cur;
+      consume();
+      Vector* str = new_vec();
+      while(*cur != '\"' || *cur == '\0') {
+        vec_pushi(str, *cur);
+        consume();
+      }
+      if (*cur == '\0') {
+        print_line(cur);
+        error("invalid character: %c\n", *cur);
+      }
+      consume();
+      Token* tok = new_token(TSTRING, start);
+      tok->str = vec_to_string(str);
+      return tok;
+    }
     default:
       if (isalpha(*cur) || *cur == '_') {
         return ident(cur);
@@ -279,6 +296,9 @@ void dump_token(Token* tok) {
     break;
   case TCOMMA:
     eprintf("[COMMA]");
+    break;
+  case TSTRING:
+    eprintf("[STRING %s]", tok->str);
     break;
   case TEOF:
     eprintf("[EOF]");

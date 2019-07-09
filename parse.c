@@ -4,6 +4,8 @@ static Vector* tokens;
 static size_t p = 0; // 次の字句のインデックス
 static Map* local_env; // Map(char*, Var*)
 static size_t local_size = 0;
+static Vector* strs;
+static size_t strs_size = 0;
 
 static Var* new_var(char* name, Type* type, int offset) {
   Var* var = calloc(1, sizeof(Var));
@@ -15,6 +17,14 @@ static Var* new_var(char* name, Type* type, int offset) {
 
 static Var* find_var(char* name) {
   return map_get(local_env, name);
+}
+
+// 文字列リテラルのインターン
+static size_t intern(char* str) {
+  size_t offset = strs_size;
+  strs_size++;
+  vec_push(strs, str);
+  return offset;
 }
 
 static void consume() {
@@ -55,6 +65,7 @@ static Node* variable(Token* t);
 static Node* expr();
 static Node* term();
 static Node* integer();
+static Node* string();
 static Node* add();
 static Node* mul();
 static Node* unary();
@@ -127,6 +138,8 @@ static Node* term() {
         parse_error(",", lt(0));
       }
     }
+  } else if (la(0) == TSTRING) {
+    return string();
   } else {
     return integer();
   }
@@ -187,6 +200,18 @@ static Node* integer() {
   if (!match(TINT)) {
     parse_error("integer", lt(0));
   }
+  return node;
+}
+
+static Node* string() {
+  Node* node = new_node(NSTRING, lt(0));
+  char* str = lt(0)->str;
+
+  if (!match(TSTRING)) {
+    parse_error("string", lt(0));
+  }
+
+  node->str_offset = intern(str);
   return node;
 }
 
@@ -527,7 +552,7 @@ Function* funcdef() {
 
 Program* parse(Vector* token_vec) {
   tokens = token_vec;
-
+  strs = new_vec();
   local_env = new_map();
 
   Program* prog = calloc(1, sizeof(Program));
@@ -536,6 +561,8 @@ Program* parse(Vector* token_vec) {
   while (!match(TEOF)) {
     vec_push(prog->funcs, funcdef());
   }
+
+  prog->strs = strs;
 
   return prog;
 }
