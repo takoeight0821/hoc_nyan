@@ -51,8 +51,8 @@ void pushi(int src) {
   stack_size += 8;
 }
 
-void pushlabel(char* l) {
-  emit("push OFFSET FLAT:%s\n", l);
+void pushstring(char* l) {
+  emit("push QWORD PTR %s[rip]", l);
   stack_size += 8;
 }
 
@@ -409,7 +409,8 @@ void emit_node(Node* node) {
   }
   case NSTRING: {
     comment("start NSTRING");
-    pushlabel(format(".string_%zu", node->str_id));
+    /* pushlabel(format(".string_%zu", node->str_id)); */
+    pushstring(format(".string_%zu", node->str_id));
     comment("end NSTRING");
     break;
   }
@@ -460,8 +461,11 @@ void gen_x86(Program* prog) {
 
   puts(".text");
   for (size_t i = 0; i < prog->strs->length; i++) {
-    printf(".string_%zu:\n", i);
+    char* tmp = new_label("str");
+    printf("%s:\n", tmp);
     emit(".string \"%s\"", prog->strs->ptr[i]);
+    printf(".string_%zu:\n", i);
+    emit(".quad %s", tmp);
   }
 
   for (size_t i = 0; i < prog->funcs->length; i++) {

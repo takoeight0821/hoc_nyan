@@ -6,8 +6,8 @@ try() {
 
     echo "$input" > tmp_c
     ./hoc tmp_c > tmp.s
-    gcc -no-pie -c test.c -o test.o
-    gcc -no-pie -o tmp.out tmp.s test.o
+    gcc -c test.c -o test.o
+    gcc -o tmp.out tmp.s test.o
     ./tmp.out
     actual="$?"
 
