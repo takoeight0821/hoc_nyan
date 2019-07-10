@@ -52,7 +52,7 @@ void pushi(int src) {
 }
 
 void pushstring(char* l) {
-  emit("push QWORD PTR %s[rip]", l);
+  emit("push OFFSET FLAT:%s", l);
   stack_size += 8;
 }
 
@@ -432,7 +432,7 @@ void emit_function(Function* func) {
 
   func_end_label = new_label("end");
 
-  puts(".text");
+  /* puts(".text"); */
   printf(".global %s\n", func->name);
   printf("%s:\n", func->name);
 
@@ -462,10 +462,8 @@ void gen_x86(Program* prog) {
   puts(".text");
   for (size_t i = 0; i < prog->strs->length; i++) {
     char* tmp = new_label("str");
-    printf("%s:\n", tmp);
-    emit(".string \"%s\"", prog->strs->ptr[i]);
     printf(".string_%zu:\n", i);
-    emit(".quad %s", tmp);
+    emit(".string \"%s\"", prog->strs->ptr[i]);
   }
 
   for (size_t i = 0; i < prog->funcs->length; i++) {
