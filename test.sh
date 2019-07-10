@@ -66,5 +66,6 @@ try 0 "int main() { char msg[3]; *msg = 104; *(msg + 1) = 105; *(msg + 2) = 0; p
 try 4 "int main() { int arr[3]; arr[1] = 4; return arr[1]; }"
 try 0 "int main() { char msg[3]; msg[0] = 104; msg[1] = 105; msg[2] = 0; puts(msg); return 0; }"
 try 0 "int main() { char *msg; msg = \"hello, world\"; puts(msg); return 0; }"
+try 0 "int main() { puts(\"hello, \"); puts(\"world\"); return 0; }"
 
 echo OK
