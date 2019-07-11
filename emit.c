@@ -52,8 +52,8 @@ void pushi(int src) {
 }
 
 void pushstring(char* l) {
-  emit("push OFFSET FLAT:%s", l);
-  stack_size += 8;
+  emit("lea rax, %s[rip]", l);
+  push(AX);
 }
 
 void pop(Reg dst) {
@@ -79,8 +79,7 @@ void emit_node(Node*);
 
 void emit_var(Var* var) {
   comment("start Var %s", var->name);
-  emit("mov rax, rbp");
-  emit("sub rax, %zu", var->offset);
+  emit("lea rax, -%zu[rbp]", var->offset);
   push(AX);
   comment("end Var %s", var->name);
 }

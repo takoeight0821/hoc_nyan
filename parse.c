@@ -5,7 +5,6 @@ static size_t p = 0; // 次の字句のインデックス
 static Map* local_env; // Map(char*, Var*)
 static size_t local_size = 0;
 static Vector* strs;
-static size_t strs_size = 0;
 
 static Var* new_var(char* name, Type* type, int offset) {
   Var* var = calloc(1, sizeof(Var));
@@ -21,8 +20,7 @@ static Var* find_var(char* name) {
 
 // 文字列リテラルのインターン
 static size_t intern(char* str) {
-  size_t offset = strs_size;
-  strs_size++;
+  size_t offset = strs->length;
   vec_push(strs, str);
   return offset;
 }

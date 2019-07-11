@@ -6,11 +6,10 @@ try() {
 
     echo "$input" > tmp_c
     ./hoc tmp_c > tmp.s
-    gcc -static -c test.c -o test.o
-    gcc -static -o tmp.out tmp.s test.o
+    gcc -c test.c -o test.o
+    gcc -o tmp.out tmp.s test.o
     ./tmp.out
     actual="$?"
-
 
     if [ "$actual" = "$expected" ]; then
         echo "$input => $actual"
