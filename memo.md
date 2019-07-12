@@ -38,3 +38,8 @@ static Map* global_env; // Map(char*, GVar)
 グローバル変数の宣言が出てくると、GVarを生成してglobal_envに追加。
 変数名がlocal_envに無かったらglobal_envからGVarをルックアップしてNGVarを作成。
 あとはいい感じにコード生成する。
+
+# RAXレジスタの使い方
+
+今は単なる汎用レジスタ
+スタックトップの値をRAXに保存するようにすれば簡単に性能が改善できるんじゃ？
