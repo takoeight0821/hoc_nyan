@@ -9,5 +9,5 @@ int fib(int n) {
 }
 
 int main() {
-  return fib(3);
+  return fib(10);
 }

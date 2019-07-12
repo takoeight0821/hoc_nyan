@@ -460,7 +460,6 @@ void gen_x86(Program* prog) {
 
   puts(".text");
   for (size_t i = 0; i < prog->strs->length; i++) {
-    char* tmp = new_label("str");
     printf(".string_%zu:\n", i);
     emit(".string \"%s\"", prog->strs->ptr[i]);
   }
