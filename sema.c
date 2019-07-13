@@ -67,6 +67,10 @@ void walk(Node* node) {
     node->type = node->var->type;
     break;
   }
+  case NGVAR: {
+    node->type = node->gvar->type;
+    break;
+  }
   case NPLUS: {
     walk(node->lhs);
     walk(node->rhs);
@@ -272,6 +276,7 @@ void walk(Node* node) {
     node->type = new_type();
     node->type->ty = TY_PTR;
     node->type->ptr_to = node->expr->type;
+
     break;
   }
   case NDEREF: {

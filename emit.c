@@ -84,9 +84,18 @@ void emit_var(Var* var) {
   comment("end Var %s", var->name);
 }
 
+void emit_gvar(GVar* gvar) {
+  comment("start GVar %s", gvar->name);
+  emit("lea rax, %s[rip]", gvar->name);
+  push(AX);
+  comment("end GVar %s", gvar->name);
+}
+
 void emit_lval(Node* node) {
   if (node->tag == NVAR) {
     emit_var(node->var);
+  } else if (node->tag == NGVAR) {
+    emit_gvar(node->gvar);
   } else {
     assert(node->tag == NDEREF);
     comment("start lval NDEREF");
@@ -94,7 +103,6 @@ void emit_lval(Node* node) {
     comment("end lval NDEREF");
   }
 }
-
 
 void emit_node(Node* node) {
   switch (node->tag) {
@@ -117,6 +125,22 @@ void emit_node(Node* node) {
     }
 
     comment("end NVAR");
+    break;
+  }
+  case NGVAR: {
+    comment("start NGVAR");
+    emit_lval(node);
+
+    if (node->type->array_size == 0) {
+      pop(AX);
+      load(AX, size_of(type_of(node)));
+      push(AX);
+    } else {
+      // nodeが配列型の変数の場合、lvalとしてコンパイルする（配列の先頭へのポインタになる）
+      comment("emit array gvar");
+    }
+
+    comment("end NGVAR");
     break;
   }
   case NPLUS: {
@@ -458,12 +482,19 @@ void emit_function(Function* func) {
 void gen_x86(Program* prog) {
   puts(".intel_syntax noprefix");
 
-  puts(".text");
+  puts(".data");
   for (size_t i = 0; i < prog->strs->length; i++) {
     printf(".string_%zu:\n", i);
     emit(".string \"%s\"", prog->strs->ptr[i]);
   }
 
+  puts(".bss");
+  for (size_t i = 0; i < prog->globals->keys->length; i++) {
+    printf("%s:\n", prog->globals->keys->ptr[i]);
+    emit(".zero %zu", size_of(((GVar*)prog->globals->vals->ptr[i])->type));
+  }
+
+  puts(".text");
   for (size_t i = 0; i < prog->funcs->length; i++) {
     emit_function(prog->funcs->ptr[i]);
   }

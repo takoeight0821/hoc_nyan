@@ -4,6 +4,7 @@ static Vector* tokens;
 static size_t p = 0; // 次の字句のインデックス
 static Map* local_env; // Map(char*, Var*)
 static size_t local_size = 0;
+static Map* global_env;
 static Vector* strs;
 
 static Var* new_var(char* name, Type* type, int offset) {
@@ -16,6 +17,34 @@ static Var* new_var(char* name, Type* type, int offset) {
 
 static Var* find_var(char* name) {
   return map_get(local_env, name);
+}
+
+static void add_lvar(char* name, Type* ty) {
+  if (map_has_key(local_env, name)) {
+    error("%s is already defined\n", name);
+  }
+
+  local_size += size_of(ty);
+  Var* var = new_var(name, ty, local_size);
+  map_put(local_env, name, var);
+}
+
+static GVar* new_gvar(char* name, Type* type) {
+  GVar* gvar = calloc(1, sizeof(GVar));
+  gvar->name = strdup(name);
+  gvar->type = type;
+  return gvar;
+}
+
+static GVar* find_gvar(char* name) {
+  return map_get(global_env, name);
+}
+
+static void add_gvar(char* name, Type* type) {
+  if (map_has_key(global_env, name)) {
+    error("%s is already defined\n", name);
+  }
+  map_put(global_env, name, new_gvar(name, type));
 }
 
 // 文字列リテラルのインターン
@@ -189,6 +218,12 @@ static Node* variable(Token* t) {
   assert(t->tag == TIDENT);
   Node* node = new_node(NVAR, t);
   node->var = find_var(t->ident);
+
+  if (node->var == NULL) {
+    node = new_node(NGVAR, t);
+    node->gvar = find_gvar(t->ident);
+  }
+
   return node;
 }
 
@@ -329,17 +364,6 @@ static Type* ptr_to(Type* ty) {
   new_ty->ty = TY_PTR;
   new_ty->ptr_to = ty;
   return new_ty;
-}
-
-// TODO: 名前解決
-static void add_lvar(char* name, Type* ty) {
-  if (map_has_key(local_env, name)) {
-    error("%s is already defined\n", name);
-  }
-
-  local_size += size_of(ty);
-  Var* var = new_var(name, ty, local_size);
-  map_put(local_env, name, var);
 }
 
 static Node* direct_decl(Type* ty) {
@@ -498,8 +522,14 @@ Function* funcdef() {
   if (!match(TIDENT)) {
     parse_error("function name", lt(0));
   }
+
   if (!match(TLPAREN)) {
-    parse_error("(", lt(0));
+    add_gvar(name, ret_type);
+    if (match(TSEMICOLON)) {
+      return funcdef();
+    } else {
+      parse_error("( or ;", lt(0));
+    }
   }
 
   Vector* params = new_vec();
@@ -552,6 +582,7 @@ Program* parse(Vector* token_vec) {
   tokens = token_vec;
   strs = new_vec();
   local_env = new_map();
+  global_env = new_map();
 
   Program* prog = calloc(1, sizeof(Program));
   prog->funcs = new_vec();
@@ -561,6 +592,7 @@ Program* parse(Vector* token_vec) {
   }
 
   prog->strs = strs;
+  prog->globals = global_env;
 
   return prog;
 }

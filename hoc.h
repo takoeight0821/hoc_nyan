@@ -60,6 +60,7 @@ typedef struct {
 enum NodeTag {
     NINT,
     NVAR,
+    NGVAR,
     NPLUS,
     NMINUS,
     NMUL,
@@ -104,6 +105,11 @@ typedef struct {
   size_t offset;
 } Var;
 
+typedef struct {
+  Type* type;
+  char* name;
+} GVar;
+
 typedef struct Node {
   enum NodeTag tag;
   Token* token; // for error reporting
@@ -119,6 +125,7 @@ typedef struct Node {
   char* name; // function call, variable definition
 
   Var* var;
+  GVar* gvar;
 
   // function call
   Vector* args;
@@ -145,6 +152,7 @@ typedef struct {
 
 typedef struct {
   Vector* funcs;
+  Map* globals;
   Vector* strs;
 } Program;
 
