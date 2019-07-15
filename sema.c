@@ -67,10 +67,6 @@ void walk(Node* node) {
     node->type = node->var->type;
     break;
   }
-  case NGVAR: {
-    node->type = node->gvar->type;
-    break;
-  }
   case NPLUS: {
     walk(node->lhs);
     walk(node->rhs);

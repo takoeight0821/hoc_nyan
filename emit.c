@@ -78,24 +78,22 @@ void store(Reg src, size_t size) {
 void emit_node(Node*);
 
 void emit_var(Var* var) {
-  comment("start Var %s", var->name);
-  emit("lea rax, -%zu[rbp]", var->offset);
-  push(AX);
-  comment("end Var %s", var->name);
-}
-
-void emit_gvar(GVar* gvar) {
-  comment("start GVar %s", gvar->name);
-  emit("lea rax, %s[rip]", gvar->name);
-  push(AX);
-  comment("end GVar %s", gvar->name);
+  if (var->is_local) {
+   comment("start Var %s", var->name);
+   emit("lea rax, -%zu[rbp]", var->offset);
+   push(AX);
+   comment("end Var %s", var->name);
+  } else {
+   comment("start GVar %s", var->name);
+   emit("lea rax, %s[rip]", var->name);
+   push(AX);
+   comment("end GVar %s", var->name);
+  }
 }
 
 void emit_lval(Node* node) {
   if (node->tag == NVAR) {
     emit_var(node->var);
-  } else if (node->tag == NGVAR) {
-    emit_gvar(node->gvar);
   } else {
     assert(node->tag == NDEREF);
     comment("start lval NDEREF");
@@ -125,22 +123,6 @@ void emit_node(Node* node) {
     }
 
     comment("end NVAR");
-    break;
-  }
-  case NGVAR: {
-    comment("start NGVAR");
-    emit_lval(node);
-
-    if (node->type->array_size == 0) {
-      pop(AX);
-      load(AX, size_of(type_of(node)));
-      push(AX);
-    } else {
-      // nodeが配列型の変数の場合、lvalとしてコンパイルする（配列の先頭へのポインタになる）
-      comment("emit array gvar");
-    }
-
-    comment("end NGVAR");
     break;
   }
   case NPLUS: {
@@ -491,7 +473,7 @@ void gen_x86(Program* prog) {
   puts(".bss");
   for (size_t i = 0; i < prog->globals->keys->length; i++) {
     printf("%s:\n", prog->globals->keys->ptr[i]);
-    emit(".zero %zu", size_of(((GVar*)prog->globals->vals->ptr[i])->type));
+    emit(".zero %zu", size_of(((Var*)prog->globals->vals->ptr[i])->type));
   }
 
   puts(".text");

@@ -82,12 +82,6 @@ void dump_node(Node* node, int level) {
     dump_type(node->var->type);
     eprintf("\n");
     break;
-  case NGVAR:
-    indent(level);
-    eprintf("%s : ", node->gvar->name);
-    dump_type(node->gvar->type);
-    eprintf("\n");
-    break;
   case NPLUS:
     indent(level);
     eprintf("(+\n");

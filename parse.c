@@ -12,11 +12,16 @@ static Var* new_var(char* name, Type* type, int offset) {
   var->name = strdup(name);
   var->type = type;
   var->offset = offset;
+  var->is_local = true;
   return var;
 }
 
 static Var* find_var(char* name) {
-  return map_get(local_env, name);
+  Var* var = map_get(local_env, name);
+  if (var == NULL) {
+    var = map_get(global_env, name);
+  }
+  return var;
 }
 
 static void add_lvar(char* name, Type* ty) {
@@ -29,15 +34,12 @@ static void add_lvar(char* name, Type* ty) {
   map_put(local_env, name, var);
 }
 
-static GVar* new_gvar(char* name, Type* type) {
-  GVar* gvar = calloc(1, sizeof(GVar));
+static Var* new_gvar(char* name, Type* type) {
+  Var* gvar = calloc(1, sizeof(Var));
   gvar->name = strdup(name);
   gvar->type = type;
+  gvar->is_local = false;
   return gvar;
-}
-
-static GVar* find_gvar(char* name) {
-  return map_get(global_env, name);
 }
 
 static void add_gvar(char* name, Type* type) {
@@ -218,11 +220,6 @@ static Node* variable(Token* t) {
   assert(t->tag == TIDENT);
   Node* node = new_node(NVAR, t);
   node->var = find_var(t->ident);
-
-  if (node->var == NULL) {
-    node = new_node(NGVAR, t);
-    node->gvar = find_gvar(t->ident);
-  }
 
   return node;
 }
