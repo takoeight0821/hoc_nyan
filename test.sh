@@ -68,5 +68,6 @@ try 0 "int main() { char *msg; msg = \"hello, world\"; puts(msg); return 0; }"
 try 0 "int main() { puts(\"hello, \"); puts(\"world\"); return 0; }"
 try 1 "int a; int main() { a = 1; return a; }"
 try 2 "int* a; int main() { int b; b = 2; a = &b; return *a; }"
+try 1 "int a[2]; int main() { a[0] = 1; return a[0]; }"
 
 echo OK

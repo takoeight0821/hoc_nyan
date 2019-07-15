@@ -524,6 +524,20 @@ Function* funcdef() {
   }
 
   if (!match(TLPAREN)) {
+    if (match(TLBRACK)) {
+      Type* array_ty = new_type();
+      array_ty->ty = TY_PTR;
+      array_ty->ptr_to = ret_type;
+      array_ty->array_size = lt(0)->integer;
+      ret_type = array_ty;
+      if (!match(TINT)) {
+        parse_error("integer", lt(0));
+      }
+      if (!match(TRBRACK)) {
+        parse_error("]", lt(0));
+      }
+    }
+
     add_gvar(name, ret_type);
     if (match(TSEMICOLON)) {
       return funcdef();
