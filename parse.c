@@ -1,8 +1,13 @@
 #include "hoc.h"
 
+struct env {
+  Map* vars;
+  struct env* prev;
+};
+
 static Vector* tokens;
 static size_t p = 0; // 次の字句のインデックス
-static Map* local_env; // Map(char*, Var*)
+static struct env* local_env; // Map(char*, Var*)
 static size_t local_size = 0;
 static Map* global_env;
 static Vector* strs;
@@ -17,7 +22,7 @@ static Var* new_var(char* name, Type* type, int offset) {
 }
 
 static Var* find_var(char* name) {
-  Var* var = map_get(local_env, name);
+  Var* var = map_get(local_env->vars, name);
   if (var == NULL) {
     var = map_get(global_env, name);
   }
@@ -25,13 +30,13 @@ static Var* find_var(char* name) {
 }
 
 static void add_lvar(char* name, Type* ty) {
-  if (map_has_key(local_env, name)) {
+  if (map_has_key(local_env->vars, name)) {
     error("%s is already defined\n", name);
   }
 
   local_size += size_of(ty);
   Var* var = new_var(name, ty, local_size);
-  map_put(local_env, name, var);
+  map_put(local_env->vars, name, var);
 }
 
 static Var* new_gvar(char* name, Type* type) {
@@ -544,7 +549,7 @@ Function* funcdef() {
   }
 
   Vector* params = new_vec();
-  local_env = new_map();
+  local_env->vars = new_map();
   local_size = 0;
 
   for (;;) {
@@ -592,7 +597,8 @@ Function* funcdef() {
 Program* parse(Vector* token_vec) {
   tokens = token_vec;
   strs = new_vec();
-  local_env = new_map();
+  local_env = calloc(1, sizeof(struct env));
+  local_env->vars = new_map();
   global_env = new_map();
 
   Program* prog = calloc(1, sizeof(Program));
