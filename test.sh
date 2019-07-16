@@ -71,5 +71,6 @@ try 2 "int* a; int main() { int b; b = 2; a = &b; return *a; }"
 try 1 "int a[2]; int main() { a[0] = 1; return a[0]; }"
 try 2 "int main () { int a; a = 1; { int a; a = 2; return a; }}"
 try 1 "int main () { int a; a = 1; { int a; a = 2; } return a; }"
+try 0 "struct pair { int x; int y; }; int main() { struct pair p; p.x = 0; p.y = 1; return p.x; }"
 
 echo OK
