@@ -21,7 +21,7 @@ static Vector* strs;
 
 static Var* new_var(char* name, Type* type, int offset) {
   Var* var = calloc(1, sizeof(Var));
-  var->name = strdup(name);
+  var->name = name;
   var->type = type;
   var->offset = offset;
   var->is_local = true;
@@ -56,7 +56,7 @@ static void add_lvar(Token* tok, char* name, Type* ty) {
 
 static Var* new_gvar(char* name, Type* type) {
   Var* gvar = calloc(1, sizeof(Var));
-  gvar->name = strdup(name);
+  gvar->name = name;
   gvar->type = type;
   gvar->is_local = false;
   return gvar;
@@ -169,7 +169,7 @@ static Node* term() {
     return node;
   } else if (la(0) == TIDENT) {
     Node* node = new_node(NCALL, lt(0));
-    node->name = strdup(lt(0)->ident);
+    node->name = lt(0)->ident;
     node->args = new_vec();
     consume();
     if (!match(TLPAREN)) {
@@ -388,7 +388,7 @@ static Node* direct_decl(Type* ty) {
     parse_error("ident", lt(0));
   }
   Node* node = new_node(NDEFVAR, lt(0));
-  node->name = strdup(lt(0)->ident);
+  node->name = lt(0)->ident;
   consume();
 
   if (match(TLBRACK)) {
@@ -540,7 +540,7 @@ Function* funcdef() {
     ret_type = ptr_to(ret_type);
   }
 
-  char* name = strdup(lt(0)->ident);
+  char* name = lt(0)->ident;
 
   if (!match(TIDENT)) {
     parse_error("function name", lt(0));
