@@ -91,12 +91,21 @@ enum TypeTag {
   TY_INT,
   TY_CHAR,
   TY_PTR,
+  TY_STRUCT,
 };
 
 typedef struct Type {
   enum TypeTag ty;
+
+  // Pointer
   struct Type* ptr_to;
+
+  // Array
   size_t array_size;
+
+  // Struct
+  Map* struct_fields; // Map<Type*>
+  size_t field_offset;
 } Type;
 
 typedef struct {
