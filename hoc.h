@@ -91,6 +91,7 @@ enum NodeTag {
 enum TypeTag {
   TY_INT,
   TY_CHAR,
+  TY_VOID,
   TY_PTR,
   TY_STRUCT,
 };

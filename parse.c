@@ -156,6 +156,8 @@ static Type* type_specifier() {
     ty->ty = TY_INT;
   } else if (match_ident("char")) {
     ty->ty = TY_CHAR;
+  } else if (match_ident("void")) {
+    ty->ty = TY_VOID;
   } else if (match_ident("struct")) {
     Token* tok = tokens->ptr[p - 1];
     char* tag;
@@ -424,11 +426,15 @@ static Node* expr() {
 }
 
 static int is_typename(Token* t) {
+  char* typenames[] = { "int", "char", "void", "struct"};
   if (t->tag == TIDENT) {
-    return streq(t->ident, "int") || streq(t->ident, "char") || streq(t->ident, "struct");
-  } else {
-    return 0;
+    for (size_t i = 0; i < (sizeof(typenames) / sizeof(char*)); i++) {
+      if (streq(t->ident, typenames[i])) {
+        return 1;
+      }
+    }
   }
+  return 0;
 }
 
 static Type* ptr_to(Type* ty) {

@@ -13,6 +13,8 @@ size_t size_of(Type* ty) {
     return 4;
   case TY_CHAR:
     return 1;
+  case TY_VOID:
+    return 0;
   case TY_PTR:
     if (ty->array_size == 0) {
       return 8;
@@ -57,6 +59,9 @@ void dump_type(Type* ty) {
     break;
   case TY_CHAR:
     eprintf("char");
+    break;
+  case TY_VOID:
+    eprintf("void");
     break;
   case TY_PTR:
     eprintf("ptr(");
