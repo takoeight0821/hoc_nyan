@@ -192,6 +192,9 @@ static Token* next_token() {
       tok->str = vec_to_string(str);
       return tok;
     }
+    case '.':
+      consume();
+      return new_token(TDOT, cur - 1);
     default:
       if (isalpha(*cur) || *cur == '_') {
         return ident(cur);
@@ -299,6 +302,9 @@ void dump_token(Token* tok) {
     break;
   case TSTRING:
     eprintf("[STRING %s]", tok->str);
+    break;
+  case TDOT:
+    eprintf("[DOT]");
     break;
   case TEOF:
     eprintf("[EOF]");

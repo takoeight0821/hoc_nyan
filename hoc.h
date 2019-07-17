@@ -47,6 +47,7 @@ enum TokenTag {
   TLT,
   TGT,
   TSTRING,
+  TDOT,
 };
 
 typedef struct {
