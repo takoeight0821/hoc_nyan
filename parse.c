@@ -129,6 +129,22 @@ static Type* type_specifier() {
     ty->ty = TY_INT;
   } else if (match_ident("char")) {
     ty->ty = TY_CHAR;
+  } else if (match_ident("struct")) {
+    Token* tok = tokens->ptr[p - 1];
+    char* tag;
+
+    if (la(0) == TIDENT) {
+      tag = lt(0)->ident;
+      consume();
+    }
+
+    // struct definition
+    if (match(TLBRACE)) {
+      while(!match(TRBRACE)) {
+        consume();
+      }
+    }
+
   } else {
     ty = NULL;
   }
@@ -350,7 +366,7 @@ static Node* expr() {
 
 static int is_typename(Token* t) {
   if (t->tag == TIDENT) {
-    return streq(t->ident, "int") || streq(t->ident, "char");
+    return streq(t->ident, "int") || streq(t->ident, "char") || streq(t->ident, "struct");
   } else {
     return 0;
   }
@@ -386,7 +402,6 @@ static Node* direct_decl(Type* ty) {
   }
 
   node->type = ty;
-  add_lvar(node->token, node->name, ty);
 
   return node;
 }
@@ -400,13 +415,13 @@ static Node* declarator(Type* ty) {
 
 static Node* declaration() {
   // variable definition
-  Type* ty = type_specifier();
-
-  Node* decl = declarator(ty);
+  Node* decl = declarator(type_specifier());
 
   if (!match(TSEMICOLON)) {
     parse_error(";", lt(0));
   }
+
+  add_lvar(decl->token, decl->name, decl->type);
 
   return decl;
 };
@@ -523,7 +538,11 @@ Function* funcdef() {
   char* name = lt(0)->ident;
 
   if (!match(TIDENT)) {
-    parse_error("function name", lt(0));
+    if (match(TSEMICOLON)) {
+      // type definition
+      return funcdef();
+    }
+    parse_error("function name or ;", lt(0));
   }
 
   if (!match(TLPAREN)) {
@@ -555,8 +574,8 @@ Function* funcdef() {
 
   for (;;) {
     if (is_typename(lt(0))) {
-      Type* ty = type_specifier();
-      Node* param_decl = declarator(ty); // NDEFVAR
+      Node* param_decl = declarator(type_specifier()); // NDEFVAR
+      add_lvar(param_decl->token, param_decl->name, param_decl->type);
       Var* param = find_var(param_decl->token, param_decl->name);
 
       vec_push(params, param);
