@@ -125,32 +125,12 @@ static Node* statement();
 static Type* type_specifier() {
   Type* ty = calloc(1, sizeof(Type));
 
-  enum {
-    INT = 1,
-    CHAR = 1 << 1,
-  };
-
-  int base_type = 0;
-
-  for (;;) {
-    if (match_ident("int")) {
-      base_type += INT;
-    } else if (match_ident("char")) {
-      base_type += CHAR;
-    } else {
-      break;
-    }
-  }
-
-  switch (base_type) {
-  case INT:
-    *ty = (Type){TY_INT, NULL, 0};
-    break;
-  case CHAR:
-    *ty = (Type){TY_CHAR, NULL, 0};
-    break;
-  default:
-    return NULL;
+  if (match_ident("int")) {
+    ty->ty = TY_INT;
+  } else if (match_ident("char")) {
+    ty->ty = TY_CHAR;
+  } else {
+    ty = NULL;
   }
 
   return ty;
@@ -617,64 +597,6 @@ Function* funcdef() {
   return func;
 }
 
-void struct_field_def(char* tag) {
-  Type* ty = type_specifier();
-  while (match(TASTERISK)) {
-    ty = ptr_to(ty);
-  }
-
-  char* name = lt(0)->ident;
-  if (!match(TIDENT)) {
-    parse_error("ident", lt(0));
-  }
-
-  if (match(TLBRACK)) {
-    Type* array_ty = new_type();
-    array_ty->ty = TY_PTR;
-    array_ty->ptr_to = ty;
-    array_ty->array_size = lt(0)->integer;
-    ty = array_ty;
-    if (!match(TINT)) {
-      parse_error("integer", lt(0));
-    }
-    if (!match(TRBRACK)) {
-      parse_error("]", lt(0));
-    }
-  }
-
-  if (!match(TSEMICOLON)) {
-    parse_error(";", lt(0));
-  }
-
-  eprintf("DEBUG: struct field ");
-  dump_type(ty);
-  eprintf(" %s.%s\n", tag, name);
-}
-
-void structdef(void) {
-  if (!match_ident("struct")) {
-    parse_error("struct", lt(0));
-  }
-
-  if (!(la(0) == TIDENT)) {
-    parse_error("ident", lt(0));
-  }
-  char* tag = lt(0)->ident;
-  consume();
-
-  if (!match(TLBRACE)) {
-    parse_error("{", lt(0));
-  }
-
-  while(!match(TRBRACE)) {
-    struct_field_def(tag);
-  }
-
-  if (!match(TSEMICOLON)) {
-    parse_error("}", lt(0));
-  }
-}
-
 Program* parse(Vector* token_vec) {
   tokens = token_vec;
   strs = new_vec();
@@ -685,12 +607,7 @@ Program* parse(Vector* token_vec) {
   prog->funcs = new_vec();
 
   while (!match(TEOF)) {
-    if (la(0) == TIDENT && streq(lt(0)->ident, "struct") &&
-        la(1) == TIDENT && la(2) == TLBRACE) {
-      structdef();
-    } else {
-      vec_push(prog->funcs, funcdef());
-    }
+    vec_push(prog->funcs, funcdef());
   }
 
   prog->strs = strs;
