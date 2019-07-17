@@ -49,25 +49,35 @@ Type* type_of(Node* node) {
 }
 
 void dump_type(Type* ty) {
-  eprintf("%s", show_type(ty));
-}
-
-char* show_type(Type* ty) {
   assert(ty);
 
   switch (ty->ty) {
   case TY_INT:
-    return format("int");
+    eprintf("int");
+    break;
   case TY_CHAR:
-    return format("char");
+    eprintf("char");
+    break;
   case TY_PTR:
-    return format("ptr(%s)", show_type(ty->ptr_to));
+    eprintf("ptr(");
+    dump_type(ty->ptr_to);
+    eprintf(")");
+    break;
   case TY_STRUCT: {
-    return format("struct %s", ty->tag);
+    eprintf("struct %s {", ty->tag);
+    for (size_t i = 0; i < ty->struct_fields->keys->length; i++) {
+      Type* field = ty->struct_fields->vals->ptr[i];
+      eprintf("%s(+%zu) : ", ty->struct_fields->keys->ptr[i], field->field_offset);
+      dump_type(field);
+      eprintf(",");
+    }
+    eprintf("}");
+    break;
   }
   default:
     error("unreachable(show_type)");
   }
+
 }
 
 static char* show_indent(int level) {

@@ -179,7 +179,7 @@ static Type* type_specifier() {
         }
       }
 
-      // TODO: field_offsetを設定
+      set_field_offset(ty);
       map_put(local_env->tags, tag, ty);
     }
 

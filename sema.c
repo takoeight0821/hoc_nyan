@@ -5,7 +5,12 @@ Vector* funcs; // Vector(Function*)
 void walk(Node*);
 
 noreturn void type_error(Type* expected, Node* node) {
-  bad_token(node->token, format("type error: expected %s, but got %s", show_type(expected), show_type(type_of(node))));
+  eprintf("expected ");
+  dump_type(expected);
+  eprintf(", but got ");
+  dump_type(type_of(node));
+  eprintf("\n");
+  bad_token(node->token, "type error");
 }
 
 // 各Nodeの.typeを埋める
