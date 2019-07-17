@@ -20,6 +20,13 @@ size_t size_of(Type* ty) {
       // ty->array_size >= 1のときは配列型
       return ty->array_size * size_of(ty->ptr_to);
     }
+  case TY_STRUCT: {
+    size_t s = 0;
+    for (size_t i = 0; i < ty->struct_fields->keys->length; i++) {
+      s += size_of(ty->struct_fields->vals->ptr[i]);
+    }
+    return s;
+  }
   default:
     error("unreachable(size_of)");
   }
@@ -55,6 +62,9 @@ char* show_type(Type* ty) {
     return format("char");
   case TY_PTR:
     return format("ptr(%s)", show_type(ty->ptr_to));
+  case TY_STRUCT: {
+    return format("struct %s", ty->tag);
+  }
   default:
     error("unreachable(show_type)");
   }

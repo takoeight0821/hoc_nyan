@@ -104,6 +104,7 @@ typedef struct Type {
   size_t array_size;
 
   // Struct
+  char* tag;
   Map* struct_fields; // Map<Type*>
   size_t field_offset;
 } Type;

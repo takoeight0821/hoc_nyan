@@ -2,12 +2,14 @@
 
 struct env {
   Map* vars;
+  Map* tags;
   struct env* prev;
 };
 
 struct env* new_env(struct env* prev) {
   struct env* env = calloc(1, sizeof(struct env));
   env->vars = new_map();
+  env->tags = new_map();
   env->prev = prev;
   return env;
 }
@@ -76,6 +78,21 @@ static size_t intern(char* str) {
   return offset;
 }
 
+static Type* find_tag(char* tag) {
+  Type* ty = NULL;
+  for (struct env* env = local_env; ty == NULL && env != NULL; env = env->prev) {
+    ty = map_get(env->tags, tag);
+  }
+
+  if (ty == NULL) {
+    ty = new_type();
+    ty->ty = TY_STRUCT;
+    ty->tag = tag;
+  }
+
+  return ty;
+}
+
 static void consume() {
   p++;
 }
@@ -121,6 +138,16 @@ static Node* unary();
 static Node* equality();
 static Node* relational();
 static Node* statement();
+static Node* declarator(Type* ty);
+
+void set_field_offset(Type* t) {
+  size_t offset = 0;
+  for (size_t i = 0; i < t->struct_fields->keys->length; i++) {
+    Type* field = t->struct_fields->vals->ptr[i];
+    field->field_offset = offset;
+    offset += size_of(field);
+  }
+}
 
 static Type* type_specifier() {
   Type* ty = calloc(1, sizeof(Type));
@@ -135,14 +162,29 @@ static Type* type_specifier() {
 
     if (la(0) == TIDENT) {
       tag = lt(0)->ident;
+      ty = find_tag(tag);
       consume();
+    } else {
+      parse_error("ident", lt(0));
     }
 
     // struct definition
     if (match(TLBRACE)) {
+      ty->struct_fields = new_map();
       while(!match(TRBRACE)) {
-        consume();
+        Node* field = declarator(type_specifier());
+        map_put(ty->struct_fields, field->name, field->type);
+        if (!match(TSEMICOLON)) {
+          parse_error(";", lt(0));
+        }
       }
+
+      // TODO: field_offsetを設定
+      map_put(local_env->tags, tag, ty);
+    }
+
+    if (ty->struct_fields == NULL) {
+      bad_token(tok, format("struct %s is not defined\n", tag));
     }
 
   } else {
@@ -619,7 +661,7 @@ Function* funcdef() {
 Program* parse(Vector* token_vec) {
   tokens = token_vec;
   strs = new_vec();
-  local_env = NULL;
+  local_env = new_env(NULL);
   global_env = new_map();
 
   Program* prog = calloc(1, sizeof(Program));
