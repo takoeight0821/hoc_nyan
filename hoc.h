@@ -76,6 +76,7 @@ enum NodeTag {
     NCALL,
     NADDR,
     NDEREF,
+    NMEMBER,
     NEXPR_STMT,
     NRETURN,
     NIF,
@@ -116,11 +117,6 @@ typedef struct {
   bool is_local;
 } Var;
 
-/* typedef struct { */
-/*   Type* type; */
-/*   char* name; */
-/* } GVar; */
-
 typedef struct Node {
   enum NodeTag tag;
   Token* token; // for error reporting
@@ -130,7 +126,7 @@ typedef struct Node {
   struct Node* rhs; // right-hand side
   int integer; // integer literal
   Vector* stmts; // block
-  struct Node* expr; // "return" or expression stmt or address-of or dereference
+  struct Node* expr; // "return" or expression stmt or address-of or dereference or subscription
   size_t str_id; // string literal
 
   char* name; // function call, variable definition

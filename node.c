@@ -99,7 +99,8 @@ void dump_node(Node* node, int level) {
   case NVAR:
     indent(level);
     eprintf("%s : ", node->var->name);
-    dump_type(node->var->type);
+    /* dump_type(node->var->type); */
+    dump_type(node->type);
     eprintf("\n");
     break;
   case NPLUS:
@@ -220,6 +221,15 @@ void dump_node(Node* node, int level) {
     indent(level);
     eprintf("(*\n");
     dump_node(node->expr, level+1);
+    indent(level);
+    eprintf(")\n");
+    break;
+  case NMEMBER:
+    indent(level);
+    eprintf("(.\n");
+    dump_node(node->expr, level+1);
+    indent(level+1);
+    eprintf("%s\n", node->name);
     indent(level);
     eprintf(")\n");
     break;

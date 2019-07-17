@@ -232,30 +232,47 @@ static Node* term() {
   }
 }
 
+static Node* postfix() {
+  Node* e = term();
+  if (match(TDOT)) {
+    Token* tok = tokens->ptr[p - 1];
+    char* name = lt(0)->ident;
+    if (!match(TIDENT)) {
+      parse_error("ident", lt(0));
+    }
+    Node* node = new_node(NMEMBER, tok);
+    node->expr = e;
+    node->name = name;
+    return node;
+  } else {
+    return e;
+  }
+}
+
 static Node* unary() {
   if (match_ident("sizeof")) {
     Node* node = new_node(NSIZEOF, tokens->ptr[p - 1]);
     node->expr = unary();
     return node;
   } else if (match(TPLUS)) {
-    return term();
+    return postfix();
   } else if (match(TMINUS)) {
     Node* node = new_node(NMINUS, tokens->ptr[p - 1]);
     Node* zero = new_node(NINT, tokens->ptr[p - 1]);
     zero->integer = 0;
     node->lhs = zero;
-    node->rhs = term();
+    node->rhs = postfix();
     return node;
   } else if (match(TAND)) {
     Node* node = new_node(NADDR, tokens->ptr[p - 1]);
-    node->expr = term();
+    node->expr = postfix();
     return node;
   } else if (match(TASTERISK)) {
     Node* node = new_node(NDEREF, tokens->ptr[p - 1]);
-    node->expr = term();
+    node->expr = postfix();
     return node;
   } else {
-    Node* node = term();
+    Node* node = postfix();
 
     if (match(TLBRACK)) {
       Token* t = tokens->ptr[p - 1];
@@ -428,13 +445,14 @@ static Node* direct_decl(Type* ty) {
   Node* node = new_node(NDEFVAR, lt(0));
   node->name = lt(0)->ident;
   consume();
+  node->type = ty;
 
   if (match(TLBRACK)) {
     Type* array_ty = new_type();
     array_ty->ty = TY_PTR;
     array_ty->ptr_to = ty;
     array_ty->array_size = lt(0)->integer;
-    ty = array_ty;
+    node->type = array_ty;
     if (!match(TINT)) {
       parse_error("integer", lt(0));
     }
@@ -442,8 +460,6 @@ static Node* direct_decl(Type* ty) {
       parse_error("]", lt(0));
     }
   }
-
-  node->type = ty;
 
   return node;
 }

@@ -75,5 +75,7 @@ try 2 "int main () { int a; a = 1; { int a; a = 2; return a; }}"
 try 1 "int main () { int a; a = 1; { int a; a = 2; } return a; }"
 try 0 "struct pair { int x; int y; }; int main() { struct pair p; return 0; }"
 try 0 "struct pair { int x; int y; }; int main() { struct pair p; p.x = 0; p.y = 1; return p.x; }"
+try 1 "struct pair { int x; int y; }; int main() { struct pair p; p.x = 0; p.y = 1; return p.x + p.y; }"
+try 2 "struct pair { int x; int y; }; int main() { struct pair p; p.x = 1; p.y = 2; return p.y; }"
 
 echo OK

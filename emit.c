@@ -94,6 +94,15 @@ void emit_var(Var* var) {
 void emit_lval(Node* node) {
   if (node->tag == NVAR) {
     emit_var(node->var);
+  } else if (node->tag == NMEMBER) {
+    comment("start lval NMEMBER");
+    emit_lval(node->expr);
+    Type* field_ty = map_get(type_of(node->expr)->struct_fields, node->name);
+    size_t offset = field_ty->field_offset;
+    pop(AX);
+    emit("lea rax, %zu[rax]", offset);
+    push(AX);
+    comment("end lval NMEMBER");
   } else {
     assert(node->tag == NDEREF);
     comment("start lval NDEREF");
@@ -324,6 +333,15 @@ void emit_node(Node* node) {
     load(AX, size_of(node->expr->type->ptr_to));
     push(AX);
     comment("end NDEREF");
+    break;
+  }
+  case NMEMBER: {
+    comment("start NMEMBER");
+    emit_lval(node);
+    pop(AX);
+    load(AX, size_of(node->type));
+    push(AX);
+    comment("end NMEMBER");
     break;
   }
   case NEXPR_STMT:

@@ -289,6 +289,12 @@ void walk(Node* node) {
     assert(node->type);
     break;
   }
+  case NMEMBER: {
+    walk(node->expr);
+    node->type = map_get(node->expr->type->struct_fields, node->name);
+    assert(node->type);
+    break;
+  }
   case NEXPR_STMT: {
     walk(node->expr);
 
@@ -303,6 +309,7 @@ void walk(Node* node) {
   }
   case NIF: {
     walk(node->cond);
+    walk(node->then);
 
     node->type = NULL;
     break;
