@@ -77,5 +77,8 @@ try 1 "struct pair { int x; int y; }; int main() { struct pair p; p.x = 0; p.y =
 try 2 "struct pair { int x; int y; }; int main() { struct pair p; p.x = 1; p.y = 2; return p.y; }"
 try 0 "void f() { } int main() { f(); return 0; }"
 try 0 "struct pair { char* x; char* y; }; void f(struct pair* p) { puts((*p).x); } int main() { struct pair p; p.x = \"x\"; p.y = \"y\"; f(&p); return 0; }"
+try 0 "int main () { long a; return 0; }"
+try 0 "int main () { long a; a = 1; return 0; }"
+try 1 "int main () { long a; a = 1; int b; b = a; return b; }"
 
 echo OK
