@@ -485,12 +485,12 @@ void gen_x86(Program* prog) {
   puts(".data");
   for (size_t i = 0; i < prog->strs->length; i++) {
     printf(".string_%zu:\n", i);
-    emit(".string \"%s\"", prog->strs->ptr[i]);
+    emit(".string \"%s\"", (char*)prog->strs->ptr[i]);
   }
 
   puts(".bss");
   for (size_t i = 0; i < prog->globals->keys->length; i++) {
-    printf("%s:\n", prog->globals->keys->ptr[i]);
+    printf("%s:\n", (char*)prog->globals->keys->ptr[i]);
     emit(".zero %zu", size_of(((Var*)prog->globals->vals->ptr[i])->type));
   }
 

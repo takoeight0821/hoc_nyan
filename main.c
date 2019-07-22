@@ -43,6 +43,10 @@ void runtest() {
 
 int main(int argc, char** argv)
 {
+  if (argc < 1) {
+    error("./hoc file_name\n");
+  }
+
   if (streq(argv[1], "-test")) {
     runtest();
     return 0;
