@@ -29,18 +29,6 @@ intptr_t vec_popi(Vector* v) {
   return (intptr_t)vec_pop(v);
 }
 
-char* vec_to_string(Vector* v) {
-  char* str = calloc(v->length + 1, sizeof(char));
-
-  for (size_t i = 0; i < v->length; i++) {
-    str[i] = (char)(intptr_t)(v->ptr[i]);
-  }
-
-  str[v->length] = '\0';
-
-  return str;
-}
-
 Map *new_map() {
   Map *map = calloc(1, sizeof(Map));
   map->keys = new_vec();

@@ -175,19 +175,12 @@ void dump_function(Function* func);
 Type* type_of(Node* node);
 size_t size_of(Type* ty);
 
-// utils.c
-noreturn void error(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
-char *format(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
-void eprintf(const char* fmt, ...);
-int streq(char* s0, char* s1);
-
 // containers.c
 Vector* new_vec();
 void vec_push(Vector* v, void* elem);
 void vec_pushi(Vector* v, intptr_t elem);
 void* vec_pop(Vector* v);
 intptr_t vec_popi(Vector* v);
-char* vec_to_string(Vector* v);
 Map* new_map();
 void map_put(Map *map, char *key, void *val);
 void map_puti(Map *map, char *key, intptr_t val);
@@ -221,3 +214,21 @@ Program* parse(Vector* tokens);
 
 // sema.c
 void sema(Program* prog);
+
+// utils.c
+noreturn void error(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+char *format(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+void eprintf(const char* fmt, ...);
+int streq(char* s0, char* s1);
+
+typedef struct {
+  char* buf;
+  size_t capacity;
+  size_t length;
+} StringBuilder;
+
+StringBuilder* new_sb(void);
+void sb_putc(StringBuilder*, char);
+void sb_puts(StringBuilder*, char*);
+char* sb_run(StringBuilder*);
+void sb_destory(StringBuilder*);

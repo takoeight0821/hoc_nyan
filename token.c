@@ -75,16 +75,17 @@ static Token* integer(char* start) {
 
 static Token* ident(char* start) {
   Token* t = new_token(TIDENT, start);
-  Vector* ident = new_vec();
-  vec_pushi(ident, *cur);
+  StringBuilder* sb = new_sb();
+  /* Vector* ident = new_vec(); */
+  sb_putc(sb, *cur);
   consume();
 
   while (isalnum(*cur) || *cur == '_') {
-    vec_pushi(ident, *cur);
+    sb_putc(sb, *cur);
     consume();
   }
 
-  t->ident = vec_to_string(ident);
+  t->ident = sb_run(sb);
 
   return t;
 }
@@ -178,9 +179,9 @@ static Token* next_token() {
     case '\"': {
       char* start = cur;
       consume();
-      Vector* str = new_vec();
+      StringBuilder* sb = new_sb();
       while(*cur != '\"' || *cur == '\0') {
-        vec_pushi(str, *cur);
+        sb_putc(sb, *cur);
         consume();
       }
       if (*cur == '\0') {
@@ -189,7 +190,7 @@ static Token* next_token() {
       }
       consume();
       Token* tok = new_token(TSTRING, start);
-      tok->str = vec_to_string(str);
+      tok->str = sb_run(sb);
       return tok;
     }
     case '.':
@@ -207,14 +208,13 @@ static Token* next_token() {
 }
 
 static char* read_file(FILE* file) {
-  Vector* buf = new_vec();
+  StringBuilder* sb = new_sb();
 
   char c;
   while ((c = fgetc(file)) != EOF) {
-    vec_pushi(buf, c);
+    sb_putc(sb, c);
   }
-  vec_pushi(buf, 0);
-  return vec_to_string(buf);
+  return sb_run(sb);
 }
 
 Vector* lex(FILE* file) {
