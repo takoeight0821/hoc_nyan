@@ -95,7 +95,7 @@ void init_type_map(void) {
 }
 
 static Type* find_type(char* name) {
-  return clone_type(map_get(type_map, name));
+  return map_get(type_map, name);
 }
 
 static Type* find_tag(char* tag) {
@@ -110,7 +110,7 @@ static Type* find_tag(char* tag) {
     ty->tag = tag;
   }
 
-  return clone_type(ty);
+  return ty;
 }
 
 static void consume() {
@@ -163,8 +163,10 @@ static Node* declarator(Type* ty);
 void set_field_offset(Type* t) {
   size_t offset = 0;
   for (size_t i = 0; i < t->struct_fields->keys->length; i++) {
-    Type* field = t->struct_fields->vals->ptr[i];
+    // field_offsetを書き換えるのでクローン
+    Type* field = clone_type(t->struct_fields->vals->ptr[i]);
     field->field_offset = offset;
+    t->struct_fields->vals->ptr[i] = field;
     offset += size_of(field);
   }
 }
@@ -186,6 +188,10 @@ static Type* type_specifier() {
 
     // struct definition
     if (match(TLBRACE)) {
+      if (ty->struct_fields != NULL) {
+        ty = clone_type(ty); // 同名の異なる型の定義なのでクローンする
+      }
+
       ty->struct_fields = new_map();
       while(!match(TRBRACE)) {
         Node* field = declarator(type_specifier());
