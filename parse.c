@@ -526,7 +526,7 @@ static Node* expr_stmt() {
 };
 
 static Node* statement() {
-  if (is_typename(lt(0)) && la(1) != TEQUAL && la(1) != TLBRACK ) {
+  if (is_typename(lt(0)) && la(1) != TEQUAL && la(1) != TLBRACK) {
     return declaration();
   } else if (match_ident("return")) {
     Node* node = new_node(NRETURN, tokens->ptr[p - 1]);
