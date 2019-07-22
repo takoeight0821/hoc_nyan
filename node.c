@@ -48,6 +48,37 @@ Type* clone_type(Type* t) {
   return new;
 }
 
+Type* void_type(void) {
+  Type* t = new_type();
+  t->ty = TY_VOID;
+  return t;
+}
+
+Type* char_type(void) {
+  Type* t = new_type();
+  t->ty = TY_CHAR;
+  return t;
+}
+
+Type* int_type(void) {
+  Type* t = new_type();
+  t->ty = TY_INT;
+  return t;
+}
+
+Type* long_type(void) {
+  Type* t = new_type();
+  t->ty = TY_INT;
+  return t;
+}
+
+Type* ptr_to(Type* type) {
+  Type* new_ty = calloc(1, sizeof(Type));
+  new_ty->ty = TY_PTR;
+  new_ty->ptr_to = type;
+  return new_ty;
+}
+
 Type* type_of(Node* node) {
   if (node->type) {
     return node->type;

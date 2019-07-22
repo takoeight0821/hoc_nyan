@@ -79,18 +79,10 @@ static size_t intern(char* str) {
 }
 
 void init_type_map(void) {
-  Type* ty = new_type();
-  ty->ty = TY_VOID;
-  map_put(type_map, "void", ty);
-  ty = new_type();
-  ty->ty = TY_CHAR;
-  map_put(type_map, "char", ty);
-  ty = new_type();
-  ty->ty = TY_INT;
-  map_put(type_map, "int", ty);
-  ty = new_type();
-  ty->ty = TY_LONG;
-  map_put(type_map, "long", ty);
+  map_put(type_map, "void", void_type());
+  map_put(type_map, "char", char_type());
+  map_put(type_map, "int", int_type());
+  map_put(type_map, "long", long_type());
 }
 
 static Type* find_type(char* name) {
@@ -139,7 +131,7 @@ static int match(enum TokenTag tag) {
   }
 }
 
-static int match_ident(char* name) {
+static int match_keyword(char* name) {
   if (la(0) == TIDENT && streq(lt(0)->ident, name)) {
     consume();
     return 1;
@@ -175,7 +167,7 @@ void set_field_offset(Type* t) {
 static Type* type_specifier() {
   Type* ty = calloc(1, sizeof(Type));
 
-  if (match_ident("struct")) {
+  if (match_keyword("struct")) {
     Token* tok = tokens->ptr[p - 1];
     char* tag;
 
@@ -278,7 +270,7 @@ static Node* postfix() {
 }
 
 static Node* unary() {
-  if (match_ident("sizeof")) {
+  if (match_keyword("sizeof")) {
     Node* node = new_node(NSIZEOF, tokens->ptr[p - 1]);
     node->expr = unary();
     return node;
@@ -465,13 +457,6 @@ static int is_typename(Token* t) {
   return 0;
 }
 
-static Type* ptr_to(Type* ty) {
-  Type* new_ty = calloc(1, sizeof(Type));
-  new_ty->ty = TY_PTR;
-  new_ty->ptr_to = ty;
-  return new_ty;
-}
-
 static Node* direct_decl(Type* ty) {
   if (la(0) != TIDENT) {
     parse_error("ident", lt(0));
@@ -535,14 +520,14 @@ static Node* expr_stmt() {
 static Node* statement() {
   if (is_typename(lt(0))) {
     return declaration();
-  } else if (match_ident("return")) {
+  } else if (match_keyword("return")) {
     Node* node = new_node(NRETURN, tokens->ptr[p - 1]);
     node->expr = expr();
     if (!match(TSEMICOLON)) {
       parse_error(";", lt(0));
     }
     return node;
-  } else if (match_ident("if")) {
+  } else if (match_keyword("if")) {
     Token* if_token = tokens->ptr[p - 1];
 
     if (!match(TLPAREN)) {
@@ -555,7 +540,7 @@ static Node* statement() {
 
     Node* then = statement();
 
-    if (match_ident("else")) {
+    if (match_keyword("else")) {
       Node* els = statement();
       Node* node = new_node(NIFELSE, if_token);
       node->cond = cond;
@@ -568,7 +553,7 @@ static Node* statement() {
       node->then = then;
       return node;
     }
-  } else if (match_ident("while")) {
+  } else if (match_keyword("while")) {
     Node* node = new_node(NWHILE, tokens->ptr[p - 1]);
 
     if (!match(TLPAREN)) {
@@ -582,7 +567,7 @@ static Node* statement() {
     node->body = statement();
 
     return node;
-  } else if (match_ident("for")) {
+  } else if (match_keyword("for")) {
     Node* node = new_node(NFOR, tokens->ptr[p - 1]);
 
     if (!match(TLPAREN)) {
@@ -740,7 +725,7 @@ Program* parse(Vector* token_vec) {
   prog->funcs = new_vec();
 
   while (!match(TEOF)) {
-    if (match_ident("typedef")) {
+    if (match_keyword("typedef")) {
       type_alias_def();
     } else {
       vec_push(prog->funcs, funcdef());

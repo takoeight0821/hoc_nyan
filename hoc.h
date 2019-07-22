@@ -162,6 +162,13 @@ typedef struct {
 Node* new_node(enum NodeTag tag, Token* token);
 Type* new_type(void);
 Type* clone_type(Type*);
+
+Type* void_type(void);
+Type* char_type(void);
+Type* int_type(void);
+Type* long_type(void);
+Type* ptr_to(Type* type);
+
 void dump_node(Node* node, int level);
 void dump_type(Type* ty);
 void dump_function(Function* func);
@@ -169,7 +176,6 @@ Type* type_of(Node* node);
 size_t size_of(Type* ty);
 
 // utils.c
-
 noreturn void error(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 char *format(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 void eprintf(const char* fmt, ...);

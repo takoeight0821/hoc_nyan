@@ -5,6 +5,7 @@ Vector* funcs; // Vector(Function*)
 void walk(Node*);
 
 noreturn void type_error(Type* expected, Node* node) {
+  // TODO: string builderを使ってうまいことshow_typeを作る
   eprintf("expected ");
   dump_type(expected);
   eprintf(", but got ");
@@ -21,25 +22,6 @@ void sema(Program* prog) {
     if (fn->body)
       walk(fn->body);
   }
-}
-
-Type* int_type(void) {
-  Type* t = new_type();
-  t->ty = TY_INT;
-  return t;
-}
-
-Type* char_type(void) {
-  Type* t = new_type();
-  t->ty = TY_CHAR;
-  return t;
-}
-
-Type* ptr_ty(Type* ptr_to) {
-  Type* t = new_type();
-  t->ty = TY_PTR;
-  t->ptr_to = ptr_to;
-  return t;
 }
 
 Type* ret_type(char* name) {
@@ -96,7 +78,7 @@ void walk(Node* node) {
       walk(new_rhs);
       node->rhs = new_rhs;
 
-      node->type = ptr_ty(node->lhs->type->ptr_to);
+      node->type = ptr_to(node->lhs->type->ptr_to);
     } else {
       node->type = int_type();
     }
@@ -125,7 +107,7 @@ void walk(Node* node) {
       walk(new_rhs);
       node->rhs = new_rhs;
 
-      node->type = ptr_ty(node->lhs->type->ptr_to);
+      node->type = ptr_to(node->lhs->type->ptr_to);
     } else {
       node->type = int_type();
     }
@@ -356,7 +338,7 @@ void walk(Node* node) {
     break;
   }
   case NSTRING: {
-    node->type = ptr_ty(char_type());
+    node->type = ptr_to(char_type());
     break;
   }
   }
