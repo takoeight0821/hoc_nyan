@@ -61,6 +61,7 @@ typedef struct {
 enum NodeTag {
     NINT,
     NVAR,
+    NGVAR,
     NPLUS,
     NMINUS,
     NMUL,
@@ -112,13 +113,6 @@ typedef struct Type {
   size_t field_offset;
 } Type;
 
-typedef struct {
-  Type* type;
-  char* name;
-  size_t offset;
-  bool is_local;
-} Var;
-
 typedef struct Node {
   enum NodeTag tag;
   Token* token; // for error reporting
@@ -131,10 +125,9 @@ typedef struct Node {
   struct Node* expr; // "return" or expression stmt or address-of or dereference or subscription
   size_t str_id; // string literal
 
-  char* name; // function call, variable definition
+  char* name; // function call, variable definition, variable
 
-  Var* var;
-  /* GVar* gvar; */
+  size_t offset; // local variable
 
   // function call
   Vector* args;

@@ -77,23 +77,21 @@ void store(Reg src, size_t size) {
 
 void emit_node(Node*);
 
-void emit_var(Var* var) {
-  if (var->is_local) {
-   comment("start Var %s", var->name);
-   emit("lea rax, -%zu[rbp]", var->offset);
-   push(AX);
-   comment("end Var %s", var->name);
-  } else {
-   comment("start GVar %s", var->name);
-   emit("lea rax, %s[rip]", var->name);
-   push(AX);
-   comment("end GVar %s", var->name);
-  }
+void emit_var(Node* var) {
+  comment("start lval NVAR %s", var->name);
+  emit("lea rax, -%zu[rbp]", var->offset);
+  push(AX);
+  comment("end lval NVAR %s", var->name);
 }
 
 void emit_lval(Node* node) {
   if (node->tag == NVAR) {
-    emit_var(node->var);
+    emit_var(node);
+  } else if (node->tag == NGVAR) {
+    comment("start lval NGVAR");
+    emit("lea rax, %s[rip]", node->name);
+    push(AX);
+    comment("end lval NGVAR");
   } else if (node->tag == NMEMBER) {
     comment("start lval NMEMBER");
     emit_lval(node->expr);
@@ -132,6 +130,22 @@ void emit_node(Node* node) {
     }
 
     comment("end NVAR");
+    break;
+  }
+  case NGVAR: {
+    comment("start NGVAR");
+    emit_lval(node);
+
+    if (node->type->array_size == 0) {
+      pop(AX);
+      load(AX, size_of(type_of(node)));
+      push(AX);
+    } else {
+      // nodeが配列型の変数の場合、lvalとしてコンパイルする（配列の先頭へのポインタになる）
+      comment("emit array var");
+    }
+
+    comment("end NGVAR");
     break;
   }
   case NPLUS: {
@@ -465,7 +479,7 @@ void emit_function(Function* func) {
   stack_size += func->local_size;
 
   for (size_t i = 0; i < func->params->length; i++) {
-    Var* param = func->params->ptr[i];
+    Node* param = func->params->ptr[i];
     emit_var(param);
     store(argregs[i], size_of(param->type));
   }
@@ -491,7 +505,7 @@ void gen_x86(Program* prog) {
   puts(".bss");
   for (size_t i = 0; i < prog->globals->keys->length; i++) {
     printf("%s:\n", (char*)prog->globals->keys->ptr[i]);
-    emit(".zero %zu", size_of(((Var*)prog->globals->vals->ptr[i])->type));
+    emit(".zero %zu", size_of(((Node*)prog->globals->vals->ptr[i])->type));
   }
 
   puts(".text");

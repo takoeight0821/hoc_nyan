@@ -1,40 +1,40 @@
 #include "hoc.h"
 
-struct env {
-  Map* vars;
-  Map* tags;
-  struct env* prev;
-};
+typedef struct LVar {
+  struct LVar *next;
+  char* name;
+  Type* type;
+  int offset;
+} LVar;
 
-struct env* new_env(struct env* prev) {
-  struct env* env = calloc(1, sizeof(struct env));
-  env->vars = new_map();
-  env->tags = new_map();
-  env->prev = prev;
-  return env;
-}
+typedef struct Tag {
+  struct Tag* next;
+  Type* ty;
+} Tag;
 
 static Vector* tokens;
 static size_t p = 0; // 次の字句のインデックス
-static struct env* local_env; // Map(char*, Var*)
+static LVar* local_env;
 static size_t local_size = 0;
-static Map* global_env;
+static Tag* tag_env;
+static Map* global_env; // Map<Node*>
 static Map* type_map; // Map<Type*>
 static Vector* strs;
 
-static Var* new_var(char* name, Type* type, int offset) {
-  Var* var = calloc(1, sizeof(Var));
+static Node* new_var(Token* tok, char* name, Type* type, size_t offset) {
+  Node* var = new_node(NVAR, tok);
   var->name = name;
   var->type = type;
   var->offset = offset;
-  var->is_local = true;
   return var;
 }
 
-static Var* find_var(Token* tok, char* name) {
-  Var* var = NULL;
-  for (struct env* env = local_env; var == NULL && env != NULL; env = env->prev) {
-    var = map_get(env->vars, name);
+static Node* find_var(Token* tok, char* name) {
+  Node* var = NULL;
+  for (LVar* env = local_env; var == NULL && env != NULL; env = env->next) {
+    if (streq(name, env->name)) {
+      var = new_var(tok, env->name, env->type, env->offset);
+    }
   }
 
   if (var == NULL) {
@@ -48,28 +48,27 @@ static Var* find_var(Token* tok, char* name) {
 }
 
 static void add_lvar(Token* tok, char* name, Type* ty) {
-  if (map_has_key(local_env->vars, name)) {
-    bad_token(tok, format("%s is already defined\n", name));
-  }
-
   local_size += size_of(ty);
-  Var* var = new_var(name, ty, local_size);
-  map_put(local_env->vars, name, var);
+  LVar* lvar = calloc(sizeof(LVar), 1);
+  lvar->name = name;
+  lvar->type = ty;
+  lvar->offset = local_size;
+  lvar->next = local_env;
+  local_env = lvar;
 }
 
-static Var* new_gvar(char* name, Type* type) {
-  Var* gvar = calloc(1, sizeof(Var));
+static Node* new_gvar(Token* tok, char* name, Type* type) {
+  Node* gvar = new_node(NGVAR, tok);
   gvar->name = name;
   gvar->type = type;
-  gvar->is_local = false;
   return gvar;
 }
 
-static void add_gvar(char* name, Type* type) {
+static void add_gvar(Token* tok, char* name, Type* type) {
   if (map_has_key(global_env, name)) {
     error("%s is already defined\n", name);
   }
-  map_put(global_env, name, new_gvar(name, type));
+  map_put(global_env, name, new_gvar(tok, name, type));
 }
 
 // 文字列リテラルのインターン
@@ -100,8 +99,10 @@ static Type* find_type(char* name) {
 
 static Type* find_tag(char* tag) {
   Type* ty = NULL;
-  for (struct env* env = local_env; ty == NULL && env != NULL; env = env->prev) {
-    ty = map_get(env->tags, tag);
+  for (Tag* env = tag_env; ty == NULL && env != NULL; env = env->next) {
+    if (streq(tag, env->ty->tag)) {
+      ty = env->ty;
+    }
   }
 
   if (ty == NULL) {
@@ -147,7 +148,7 @@ static int match_ident(char* name) {
   }
 }
 
-static Node* variable(Token* t);
+static Node* variable();
 static Node* expr();
 static Node* term();
 static Node* integer();
@@ -202,7 +203,10 @@ static Type* type_specifier() {
       }
 
       set_field_offset(ty);
-      map_put(local_env->tags, tag, ty);
+      Tag* tag = calloc(sizeof(Tag), 1);
+      tag->ty = ty;
+      tag->next = tag_env;
+      tag_env = tag;
     }
 
     if (ty->struct_fields == NULL) {
@@ -227,8 +231,7 @@ static Node* term() {
     }
     return node;
   } else if (la(0) == TIDENT && la(1) != TLPAREN) {
-    Node* node = variable(lt(0));
-    consume();
+    Node* node = variable();
     return node;
   } else if (la(0) == TIDENT) {
     Node* node = new_node(NCALL, lt(0));
@@ -316,11 +319,10 @@ static Node* unary() {
   }
 }
 
-static Node* variable(Token* t) {
-  assert(t->tag == TIDENT);
-  Node* node = new_node(NVAR, t);
-  node->var = find_var(t, t->ident);
-
+static Node* variable() {
+  assert(la(0) == TIDENT);
+  Node* node = find_var(lt(0), lt(0)->ident);
+  consume();
   return node;
 }
 
@@ -600,7 +602,7 @@ static Node* statement() {
     Node* node = new_node(NBLOCK, tokens->ptr[p - 1]);
     node->stmts = new_vec();
 
-    local_env = new_env(local_env); // start scope
+    LVar* tmp = local_env; // start scope
 
     while (la(0) != TRBRACE) {
       vec_push(node->stmts, statement());
@@ -610,7 +612,7 @@ static Node* statement() {
       parse_error("}", lt(0));
     }
 
-    local_env = local_env->prev; // end scope
+    local_env = tmp; // end scope
 
     return node;
   } else {
@@ -626,6 +628,7 @@ Function* funcdef() {
   }
 
   char* name = lt(0)->ident;
+  Token* tok = lt(0);
 
   if (!match(TIDENT)) {
     if (match(TSEMICOLON)) {
@@ -650,7 +653,7 @@ Function* funcdef() {
       }
     }
 
-    add_gvar(name, ret_type);
+    add_gvar(tok, name, ret_type);
     if (match(TSEMICOLON)) {
       return funcdef();
     } else {
@@ -659,14 +662,14 @@ Function* funcdef() {
   }
 
   Vector* params = new_vec();
-  local_env = new_env(local_env); // start scope
+  LVar* tmp = local_env; // start scope
   local_size = 0;
 
   for (;;) {
     if (is_typename(lt(0))) {
       Node* param_decl = declarator(type_specifier()); // NDEFVAR
       add_lvar(param_decl->token, param_decl->name, param_decl->type);
-      Var* param = find_var(param_decl->token, param_decl->name);
+      Node* param = find_var(param_decl->token, param_decl->name);
 
       vec_push(params, param);
       if (match(TCOMMA))
@@ -694,7 +697,7 @@ Function* funcdef() {
 
   Node* body = statement();
 
-  local_env = local_env->prev; // end scope
+  local_env = tmp; // end scope
 
   Function* func = calloc(1, sizeof(Function));
   func->name = name;
@@ -721,7 +724,8 @@ void type_alias_def(void) {
 Program* parse(Vector* token_vec) {
   tokens = token_vec;
   strs = new_vec();
-  local_env = new_env(NULL);
+  local_env = NULL;
+  tag_env = NULL;
   global_env = new_map();
   type_map = new_map();
 

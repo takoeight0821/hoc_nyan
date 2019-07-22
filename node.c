@@ -51,9 +51,6 @@ Type* clone_type(Type* t) {
 Type* type_of(Node* node) {
   if (node->type) {
     return node->type;
-  } else if (node->tag == NVAR) {
-    node->type = node->var->type;
-    return node->type;
   } else {
     error("node must be type checked");
   }
@@ -112,8 +109,13 @@ void dump_node(Node* node, int level) {
     break;
   case NVAR:
     indent(level);
-    eprintf("%s : ", node->var->name);
-    /* dump_type(node->var->type); */
+    eprintf("%s : ", node->name);
+    dump_type(node->type);
+    eprintf("\n");
+    break;
+  case NGVAR:
+    indent(level);
+    eprintf("%s : ", node->name);
     dump_type(node->type);
     eprintf("\n");
     break;
@@ -328,8 +330,8 @@ void dump_function(Function* func) {
   for (size_t i = 0; i < func->params->length; i++) {
     if (i != 0)
       eprintf(", ");
-    dump_type(((Var*)func->params->ptr[i])->type);
-    eprintf(" %s", ((Var*)func->params->ptr[i])->name);
+    dump_type(((Node*)func->params->ptr[i])->type);
+    eprintf(" %s", ((Node*)func->params->ptr[i])->name);
   }
   eprintf(")\n");
 

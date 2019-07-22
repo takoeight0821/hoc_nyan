@@ -69,8 +69,9 @@ void walk(Node* node) {
     break;
   }
   case NVAR: {
-    assert(node->var);
-    node->type = node->var->type;
+    break;
+  }
+  case NGVAR: {
     break;
   }
   case NPLUS: {
