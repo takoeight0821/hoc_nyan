@@ -526,7 +526,7 @@ static Node* expr_stmt() {
 };
 
 static Node* statement() {
-  if (is_typename(lt(0))) {
+  if (is_typename(lt(0)) && la(1) != TEQUAL && la(1) != TLBRACK ) {
     return declaration();
   } else if (match_ident("return")) {
     Node* node = new_node(NRETURN, tokens->ptr[p - 1]);
@@ -706,6 +706,18 @@ Function* funcdef() {
   return func;
 }
 
+void type_alias_def(void) {
+  Type* ty = type_specifier();
+  if (la(0) != TIDENT) {
+    parse_error("ident", lt(0));
+  }
+  map_put(type_map, lt(0)->ident, ty);
+  consume();
+  if (!match(TSEMICOLON)) {
+    parse_error(";", lt(0));
+  }
+}
+
 Program* parse(Vector* token_vec) {
   tokens = token_vec;
   strs = new_vec();
@@ -719,7 +731,11 @@ Program* parse(Vector* token_vec) {
   prog->funcs = new_vec();
 
   while (!match(TEOF)) {
-    vec_push(prog->funcs, funcdef());
+    if (match_ident("typedef")) {
+      type_alias_def();
+    } else {
+      vec_push(prog->funcs, funcdef());
+    }
   }
 
   prog->strs = strs;
