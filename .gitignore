@@ -4,6 +4,7 @@
 tmp/
 main
 hoc
+.clang_complete
 
 # Prerequisites
 *.d
