@@ -80,5 +80,6 @@ try 0 "struct pair { char* x; char* y; }; void f(struct pair* p) { puts((*p).x);
 try 0 "int main () { long a; return 0; }"
 try 0 "int main () { long a; a = 1; return 0; }"
 try 1 "int main () { long a; a = 1; int b; b = a; return b; }"
+try 0 "typedef a int; int main() { a a; a = 0; return a; }"
 
 echo OK

@@ -42,6 +42,17 @@ Type* new_type(void) {
   return ty;
 }
 
+Type* clone_type(Type* t) {
+  Type* new = new_type();
+  new->ty = t->ty;
+  new->ptr_to = t->ptr_to;
+  new->array_size = t->array_size;
+  new->tag = t->tag;
+  new->struct_fields = t->struct_fields;
+  new->field_offset = t->field_offset;
+  return new;
+}
+
 Type* type_of(Node* node) {
   if (node->type) {
     return node->type;

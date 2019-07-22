@@ -19,6 +19,7 @@ static size_t p = 0; // 次の字句のインデックス
 static struct env* local_env; // Map(char*, Var*)
 static size_t local_size = 0;
 static Map* global_env;
+static Map* type_map; // Map<Type*>
 static Vector* strs;
 
 static Var* new_var(char* name, Type* type, int offset) {
@@ -78,6 +79,25 @@ static size_t intern(char* str) {
   return offset;
 }
 
+void init_type_map(void) {
+  Type* ty = new_type();
+  ty->ty = TY_VOID;
+  map_put(type_map, "void", ty);
+  ty = new_type();
+  ty->ty = TY_CHAR;
+  map_put(type_map, "char", ty);
+  ty = new_type();
+  ty->ty = TY_INT;
+  map_put(type_map, "int", ty);
+  ty = new_type();
+  ty->ty = TY_LONG;
+  map_put(type_map, "long", ty);
+}
+
+static Type* find_type(char* name) {
+  return clone_type(map_get(type_map, name));
+}
+
 static Type* find_tag(char* tag) {
   Type* ty = NULL;
   for (struct env* env = local_env; ty == NULL && env != NULL; env = env->prev) {
@@ -90,7 +110,7 @@ static Type* find_tag(char* tag) {
     ty->tag = tag;
   }
 
-  return ty;
+  return clone_type(ty);
 }
 
 static void consume() {
@@ -152,15 +172,16 @@ void set_field_offset(Type* t) {
 static Type* type_specifier() {
   Type* ty = calloc(1, sizeof(Type));
 
-  if (match_ident("void")) {
-    ty->ty = TY_VOID;
-  } else if (match_ident("char")) {
-    ty->ty = TY_CHAR;
-  } else if (match_ident("int")) {
-    ty->ty = TY_INT;
-  } else if (match_ident("long")) {
-    ty->ty = TY_LONG;
-  } else if (match_ident("struct")) {
+  /* if (match_ident("void")) { */
+  /*   ty->ty = TY_VOID; */
+  /* } else if (match_ident("char")) { */
+  /*   ty->ty = TY_CHAR; */
+  /* } else if (match_ident("int")) { */
+  /*   ty->ty = TY_INT; */
+  /* } else if (match_ident("long")) { */
+  /*   ty->ty = TY_LONG; */
+  /* } else  */
+  if (match_ident("struct")) {
     Token* tok = tokens->ptr[p - 1];
     char* tag;
 
@@ -191,6 +212,9 @@ static Type* type_specifier() {
       bad_token(tok, format("struct %s is not defined\n", tag));
     }
 
+  } else if (la(0) == TIDENT && map_has_key(type_map, lt(0)->ident)) {
+    ty = find_type(lt(0)->ident);
+    consume();
   } else {
     ty = NULL;
   }
@@ -428,10 +452,13 @@ static Node* expr() {
 }
 
 static int is_typename(Token* t) {
-  char* typenames[] = { "void", "char", "int", "long", "struct"};
+  if (t->tag == TIDENT && streq(t->ident, "struct")) {
+    return 1;
+  }
+
   if (t->tag == TIDENT) {
-    for (size_t i = 0; i < (sizeof(typenames) / sizeof(char*)); i++) {
-      if (streq(t->ident, typenames[i])) {
+    for (size_t i = 0; i < type_map->keys->length; i++) {
+      if (streq(t->ident, type_map->keys->ptr[i])) {
         return 1;
       }
     }
@@ -687,6 +714,9 @@ Program* parse(Vector* token_vec) {
   strs = new_vec();
   local_env = new_env(NULL);
   global_env = new_map();
+  type_map = new_map();
+
+  init_type_map();
 
   Program* prog = calloc(1, sizeof(Program));
   prog->funcs = new_vec();
