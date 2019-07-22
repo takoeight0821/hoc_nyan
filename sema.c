@@ -53,7 +53,7 @@ Type* ret_type(char* name) {
 }
 
 int integer_type(Type* ty) {
-  return (ty->ty == TY_CHAR) || (ty->ty == TY_INT);
+  return (ty->ty == TY_CHAR) || (ty->ty == TY_INT) || (ty->ty == TY_LONG);
 }
 
 int assignable(Type* lhs, Type* rhs) {

@@ -152,12 +152,14 @@ void set_field_offset(Type* t) {
 static Type* type_specifier() {
   Type* ty = calloc(1, sizeof(Type));
 
-  if (match_ident("int")) {
-    ty->ty = TY_INT;
+  if (match_ident("void")) {
+    ty->ty = TY_VOID;
   } else if (match_ident("char")) {
     ty->ty = TY_CHAR;
-  } else if (match_ident("void")) {
-    ty->ty = TY_VOID;
+  } else if (match_ident("int")) {
+    ty->ty = TY_INT;
+  } else if (match_ident("long")) {
+    ty->ty = TY_LONG;
   } else if (match_ident("struct")) {
     Token* tok = tokens->ptr[p - 1];
     char* tag;
@@ -426,7 +428,7 @@ static Node* expr() {
 }
 
 static int is_typename(Token* t) {
-  char* typenames[] = { "int", "char", "void", "struct"};
+  char* typenames[] = { "void", "char", "int", "long", "struct"};
   if (t->tag == TIDENT) {
     for (size_t i = 0; i < (sizeof(typenames) / sizeof(char*)); i++) {
       if (streq(t->ident, typenames[i])) {

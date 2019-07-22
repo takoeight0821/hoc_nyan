@@ -8,13 +8,16 @@ Node* new_node(enum NodeTag tag, Token* token) {
 }
 
 size_t size_of(Type* ty) {
+  assert(ty);
   switch (ty->ty) {
-  case TY_INT:
-    return 4;
-  case TY_CHAR:
-    return 1;
   case TY_VOID:
     return 0;
+  case TY_CHAR:
+    return 1;
+  case TY_INT:
+    return 4;
+  case TY_LONG:
+    return 8;
   case TY_PTR:
     if (ty->array_size == 0) {
       return 8;
@@ -29,9 +32,9 @@ size_t size_of(Type* ty) {
     }
     return s;
   }
-  default:
-    error("unreachable(size_of)");
   }
+
+  error("unreachable(size_of)");
 }
 
 Type* new_type(void) {
@@ -54,14 +57,17 @@ void dump_type(Type* ty) {
   assert(ty);
 
   switch (ty->ty) {
-  case TY_INT:
-    eprintf("int");
+  case TY_VOID:
+    eprintf("void");
     break;
   case TY_CHAR:
     eprintf("char");
     break;
-  case TY_VOID:
-    eprintf("void");
+  case TY_INT:
+    eprintf("int");
+    break;
+  case TY_LONG:
+    eprintf("long");
     break;
   case TY_PTR:
     eprintf("ptr(");
@@ -79,10 +85,7 @@ void dump_type(Type* ty) {
     eprintf("}");
     break;
   }
-  default:
-    error("unreachable(show_type)");
   }
-
 }
 
 static char* show_indent(int level) {

@@ -89,9 +89,10 @@ enum NodeTag {
 };
 
 enum TypeTag {
-  TY_INT,
-  TY_CHAR,
   TY_VOID,
+  TY_CHAR,
+  TY_INT,
+  TY_LONG,
   TY_PTR,
   TY_STRUCT,
 };
