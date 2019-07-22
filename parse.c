@@ -479,6 +479,11 @@ static Node* direct_decl(Type* ty) {
   Node* node = new_node(NDEFVAR, lt(0));
   node->name = lt(0)->ident;
   consume();
+
+  if (map_has_key(type_map, node->name)) {
+    bad_token(tokens->ptr[p - 1], format("%s is a type name.", node->name));
+  }
+
   node->type = ty;
 
   if (match(TLBRACK)) {
@@ -528,7 +533,7 @@ static Node* expr_stmt() {
 };
 
 static Node* statement() {
-  if (is_typename(lt(0)) && la(1) != TEQUAL && la(1) != TLBRACK) {
+  if (is_typename(lt(0))) {
     return declaration();
   } else if (match_ident("return")) {
     Node* node = new_node(NRETURN, tokens->ptr[p - 1]);
