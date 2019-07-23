@@ -27,8 +27,8 @@ size_t size_of(Type* ty) {
     }
   case TY_STRUCT: {
     size_t s = 0;
-    for (size_t i = 0; i < ty->struct_fields->keys->length; i++) {
-      s += size_of(ty->struct_fields->vals->ptr[i]);
+    for (Field* f = ty->fields; f != NULL; f = f->next) {
+      s += size_of(f->type);
     }
     return s;
   }
@@ -87,6 +87,24 @@ Type* type_of(Node* node) {
   }
 }
 
+Type* field_type(Field* fields, char* name) {
+  for (Field* f = fields; f != NULL; f = f->next) {
+    if (streq(f->name, name)) {
+      return f->type;
+    }
+  }
+  error("unreachable(field_type)");
+}
+
+size_t field_offset(Field* fields, char* name) {
+  for (Field* f = fields; f != NULL; f = f->next) {
+    if (streq(f->name, name)) {
+      return f->offset;
+    }
+  }
+  error("unreachable(field_offset)");
+}
+
 void show_type_(StringBuilder* sb, Type* ty) {
   assert(ty);
   switch (ty->ty) {
@@ -109,10 +127,9 @@ void show_type_(StringBuilder* sb, Type* ty) {
     break;
   case TY_STRUCT: {
     sb_puts(sb, format("struct %s {", ty->tag));
-    for (size_t i = 0; i < ty->struct_fields->keys->length; i++) {
-      Type* field = ty->struct_fields->vals->ptr[i];
-      sb_puts(sb, format("%s(+%zu) : ", (char*)ty->struct_fields->keys->ptr[i], field->field_offset));
-      show_type_(sb, field);
+    for (Field* f = ty->fields; f != NULL; f = f->next) {
+      sb_puts(sb, format("%s(+%zu) : ", f->name, f->offset));
+      show_type_(sb, f->type);
       sb_puts(sb, ",");
     }
     sb_puts(sb, "}");

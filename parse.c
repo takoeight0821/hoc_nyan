@@ -155,12 +155,9 @@ static Node* declarator(Type* ty);
 
 void set_field_offset(Type* t) {
   size_t offset = 0;
-  for (size_t i = 0; i < t->struct_fields->keys->length; i++) {
-    // field_offsetを書き換えるのでクローン
-    Type* field = clone_type(t->struct_fields->vals->ptr[i]);
-    field->field_offset = offset;
-    t->struct_fields->vals->ptr[i] = field;
-    offset += size_of(field);
+  for (Field* f = t->fields; f != NULL; f = f->next) {
+    f->offset = offset;
+    offset += size_of(f->type);
   }
 }
 
@@ -181,14 +178,18 @@ static Type* type_specifier() {
 
     // struct definition
     if (match(TLBRACE)) {
-      if (ty->struct_fields != NULL) {
+      if (ty->fields != NULL) {
         ty = clone_type(ty); // 同名の異なる型の定義なのでクローンする
       }
 
-      ty->struct_fields = new_map();
+      ty->fields = NULL;
       while(!match(TRBRACE)) {
         Node* field = declarator(type_specifier());
-        map_put(ty->struct_fields, field->name, field->type);
+        Field* new = calloc(sizeof(Field), 1);
+        new->name = field->name;
+        new->type = field->type;
+        new->next = ty->fields;
+        ty->fields = new;
         if (!match(TSEMICOLON)) {
           parse_error(";", lt(0));
         }
@@ -201,7 +202,7 @@ static Type* type_specifier() {
       tag_env = ltag;
     }
 
-    if (ty->struct_fields == NULL) {
+    if (ty->fields == NULL) {
       bad_token(tok, format("struct %s is not defined\n", tag));
     }
 

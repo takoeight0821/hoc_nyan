@@ -98,6 +98,8 @@ enum TypeTag {
   TY_STRUCT,
 };
 
+typedef struct Field Field;
+
 typedef struct Type {
   enum TypeTag ty;
 
@@ -109,9 +111,15 @@ typedef struct Type {
 
   // Struct
   char* tag;
-  Map* struct_fields; // Map<Type*>
-  size_t field_offset;
+  Field* fields;
 } Type;
+
+typedef struct Field {
+  Field* next;
+  char* name;
+  Type* type;
+  size_t offset;
+} Field;
 
 typedef struct Node {
   enum NodeTag tag;
@@ -173,8 +181,11 @@ void dump_node(Node* node, int level);
 char* show_type(Type* ty);
 void dump_type(Type* ty);
 void dump_function(Function* func);
+
 Type* type_of(Node* node);
 size_t size_of(Type* ty);
+Type* field_type(Field* fields, char* name);
+size_t field_offset(Field* fields, char* name);
 
 // containers.c
 Vector* new_vec();

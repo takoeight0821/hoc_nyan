@@ -95,8 +95,7 @@ void emit_lval(Node* node) {
   } else if (node->tag == NMEMBER) {
     comment("start lval NMEMBER");
     emit_lval(node->expr);
-    Type* field_ty = map_get(type_of(node->expr)->struct_fields, node->name);
-    size_t offset = field_ty->field_offset;
+    size_t offset = field_offset(type_of(node->expr)->fields, node->name);
     pop(AX);
     emit("lea rax, %zu[rax]", offset);
     push(AX);

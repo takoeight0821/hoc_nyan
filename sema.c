@@ -268,7 +268,7 @@ void walk(Node* node) {
   }
   case NMEMBER: {
     walk(node->expr);
-    node->type = map_get(node->expr->type->struct_fields, node->name);
+    node->type = field_type(node->expr->type->fields, node->name);
     assert(node->type);
     break;
   }
