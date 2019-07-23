@@ -7,16 +7,16 @@ typedef struct LVar {
   int offset;
 } LVar;
 
-typedef struct LTag {
-  struct LTag* next;
+typedef struct Tag {
+  struct Tag* next;
   Type* ty;
-} LTag;
+} Tag;
 
 static Vector* tokens;
 static size_t p = 0; // 次の字句のインデックス
 static LVar* local_env;
 static size_t local_size = 0;
-static LTag* tag_env;
+static Tag* tag_env;
 static Map* global_env; // Map<Node*>
 static Map* type_map; // Map<Type*>
 static Vector* strs;
@@ -89,18 +89,18 @@ static Type* find_type(char* name) {
   return map_get(type_map, name);
 }
 
-static Type* find_tag(char* tag) {
+static Type* find_tag(char* tag_name) {
   Type* ty = NULL;
-  for (LTag* ltag = tag_env; ty == NULL && ltag != NULL; ltag = ltag->next) {
-    if (streq(tag, ltag->ty->tag)) {
-      ty = ltag->ty;
+  for (Tag* tag = tag_env; ty == NULL && tag != NULL; tag = tag->next) {
+    if (streq(tag_name, tag->ty->tag)) {
+      ty = tag->ty;
     }
   }
 
   if (ty == NULL) {
     ty = new_type();
     ty->ty = TY_STRUCT;
-    ty->tag = tag;
+    ty->tag = tag_name;
   }
 
   return ty;
@@ -196,10 +196,10 @@ static Type* type_specifier() {
       }
 
       set_field_offset(ty);
-      LTag* ltag = calloc(sizeof(LTag), 1);
-      ltag->ty = ty;
-      ltag->next = tag_env;
-      tag_env = ltag;
+      Tag* tag = calloc(sizeof(Tag), 1);
+      tag->ty = ty;
+      tag->next = tag_env;
+      tag_env = tag;
     }
 
     if (ty->fields == NULL) {
