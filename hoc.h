@@ -170,6 +170,7 @@ Type* long_type(void);
 Type* ptr_to(Type* type);
 
 void dump_node(Node* node, int level);
+char* show_type(Type* ty);
 void dump_type(Type* ty);
 void dump_function(Function* func);
 Type* type_of(Node* node);

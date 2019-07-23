@@ -87,39 +87,48 @@ Type* type_of(Node* node) {
   }
 }
 
-void dump_type(Type* ty) {
+void show_type_(StringBuilder* sb, Type* ty) {
   assert(ty);
-
   switch (ty->ty) {
   case TY_VOID:
-    eprintf("void");
+    sb_puts(sb, "void");
     break;
   case TY_CHAR:
-    eprintf("char");
+    sb_puts(sb, "char");
     break;
   case TY_INT:
-    eprintf("int");
+    sb_puts(sb, "int");
     break;
   case TY_LONG:
-    eprintf("long");
+    sb_puts(sb, "long");
     break;
   case TY_PTR:
-    eprintf("ptr(");
-    dump_type(ty->ptr_to);
-    eprintf(")");
+    sb_puts(sb, "ptr(");
+    show_type_(sb, ty->ptr_to);
+    sb_puts(sb, ")");
     break;
   case TY_STRUCT: {
-    eprintf("struct %s {", ty->tag);
+    sb_puts(sb, format("struct %s {", ty->tag));
     for (size_t i = 0; i < ty->struct_fields->keys->length; i++) {
       Type* field = ty->struct_fields->vals->ptr[i];
-      eprintf("%s(+%zu) : ", ty->struct_fields->keys->ptr[i], field->field_offset);
-      dump_type(field);
-      eprintf(",");
+      sb_puts(sb, format("%s(+%zu) : ", (char*)ty->struct_fields->keys->ptr[i], field->field_offset));
+      show_type_(sb, field);
+      sb_puts(sb, ",");
     }
-    eprintf("}");
+    sb_puts(sb, "}");
     break;
   }
   }
+}
+
+char* show_type(Type* ty) {
+  StringBuilder* sb = new_sb();
+  show_type_(sb, ty);
+  return sb_run(sb);
+}
+
+void dump_type(Type* ty) {
+  eprintf(show_type(ty));
 }
 
 static char* show_indent(int level) {

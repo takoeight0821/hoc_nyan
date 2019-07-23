@@ -5,13 +5,7 @@ Vector* funcs; // Vector(Function*)
 void walk(Node*);
 
 noreturn void type_error(Type* expected, Node* node) {
-  // TODO: string builderを使ってうまいことshow_typeを作る
-  eprintf("expected ");
-  dump_type(expected);
-  eprintf(", but got ");
-  dump_type(type_of(node));
-  eprintf("\n");
-  bad_token(node->token, "type error");
+  bad_token(node->token, format("expected %s, but got %s\n", show_type(expected), show_type(type_of(node))));
 }
 
 // 各Nodeの.typeを埋める
