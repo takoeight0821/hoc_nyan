@@ -81,5 +81,6 @@ try 0 "int main () { long a; return 0; }"
 try 0 "int main () { long a; a = 1; return 0; }"
 try 1 "int main () { long a; a = 1; int b; b = a; return b; }"
 try 0 "typedef int a; int main() { a b; b = 0; return b; }"
+try 1 "int main() { long* a; int* b; *a = 1; b = a; return *b; }"
 
 echo OK
