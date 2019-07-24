@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "hoc.h"
 
 void expect(int line, int expected, int actual) {
