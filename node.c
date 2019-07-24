@@ -68,7 +68,7 @@ Type* int_type(void) {
 
 Type* long_type(void) {
   Type* t = new_type();
-  t->ty = TY_INT;
+  t->ty = TY_LONG;
   return t;
 }
 
