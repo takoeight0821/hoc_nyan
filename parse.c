@@ -21,7 +21,7 @@ typedef struct TypeDef {
 typedef struct Enum {
   struct Enum* next;
   char* name;
-  int val;
+  Node* val;
 } Enum;
 
 static Token* tokens;
@@ -67,8 +67,8 @@ static Node* find_var(Token* tok, char* name) {
   if (var == NULL) {
     for (Enum* env = enum_env; var == NULL && env != NULL; env = env->next) {
       if (streq(name, env->name)) {
-        var = new_node(NINT, tok);
-        var->integer = env->val;
+        var = env->val;
+        var->token = tok;
       }
     }
   }
@@ -100,7 +100,8 @@ static void add_gvar(Token* tok, char* name, Type* type) {
 static void add_enum(char* name, int val) {
   Enum* e = calloc(1, sizeof(Enum));
   e->name = name;
-  e->val = val;
+  e->val = new_node(NINT, NULL);
+  e->val->integer = val;
   e->next = enum_env;
   enum_env = e;
 }
