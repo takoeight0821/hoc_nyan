@@ -9,8 +9,14 @@ typedef struct LVar {
 
 typedef struct Tag {
   struct Tag* next;
-  Type* ty;
+  Type* type;
 } Tag;
+
+typedef struct TypeDef {
+  struct TypeDef* next;
+  char* name;
+  Type* type;
+} TypeDef;
 
 static Vector* tokens;
 static size_t p = 0; // 次の字句のインデックス
@@ -18,7 +24,8 @@ static LVar* local_env;
 static size_t local_size = 0;
 static Tag* tag_env;
 static GVar* global_env;
-static Map* type_map; // Map<Type*>
+/* static Map* type_map; // Map<Type*> */
+static TypeDef* typedefs;
 static Vector* strs;
 
 static Node* new_var(Token* tok, char* name, Type* type, size_t offset) {
@@ -83,22 +90,35 @@ static size_t intern(char* str) {
   return offset;
 }
 
-void init_type_map(void) {
-  map_put(type_map, "void", void_type());
-  map_put(type_map, "char", char_type());
-  map_put(type_map, "int", int_type());
-  map_put(type_map, "long", long_type());
+void add_typedef(char* name, Type* type) {
+  TypeDef* td = calloc(1, sizeof(TypeDef));
+  td->name = name;
+  td->type = type;
+  td->next = typedefs;
+  typedefs = td;
+}
+
+void init_typedef(void) {
+  add_typedef("void", void_type());
+  add_typedef("char", char_type());
+  add_typedef("int", int_type());
+  add_typedef("long", long_type());
 }
 
 static Type* find_type(char* name) {
-  return map_get(type_map, name);
+  for (TypeDef* td = typedefs; td != NULL; td = td->next) {
+    if (streq(name, td->name)) {
+      return td->type;
+    }
+  }
+  return NULL;
 }
 
 static Type* find_tag(char* tag_name) {
   Type* ty = NULL;
   for (Tag* tag = tag_env; ty == NULL && tag != NULL; tag = tag->next) {
-    if (streq(tag_name, tag->ty->tag)) {
-      ty = tag->ty;
+    if (streq(tag_name, tag->type->tag)) {
+      ty = tag->type;
     }
   }
 
@@ -202,7 +222,7 @@ static Type* type_specifier() {
 
       set_field_offset(ty);
       Tag* tag = calloc(sizeof(Tag), 1);
-      tag->ty = ty;
+      tag->type = ty;
       tag->next = tag_env;
       tag_env = tag;
     }
@@ -211,7 +231,7 @@ static Type* type_specifier() {
       bad_token(tok, format("struct %s is not defined\n", tag));
     }
 
-  } else if (la(0) == TIDENT && map_has_key(type_map, lt(0)->ident)) {
+  } else if (la(0) == TIDENT && find_type(lt(0)->ident)) {
     ty = find_type(lt(0)->ident);
     consume();
   } else {
@@ -454,8 +474,8 @@ static int is_typename(Token* t) {
   }
 
   if (t->tag == TIDENT) {
-    for (size_t i = 0; i < type_map->keys->length; i++) {
-      if (streq(t->ident, type_map->keys->ptr[i])) {
+    for (TypeDef* td = typedefs; td != NULL; td = td->next) {
+      if (streq(t->ident, td->name)) {
         return 1;
       }
     }
@@ -471,7 +491,7 @@ static Node* direct_decl(Type* ty) {
   node->name = lt(0)->ident;
   consume();
 
-  if (map_has_key(type_map, node->name)) {
+  if (find_type(node->name)) {
     bad_token(tokens->ptr[p - 1], format("%s is a type name.", node->name));
   }
 
@@ -710,7 +730,7 @@ void type_alias_def(void) {
   if (la(0) != TIDENT) {
     parse_error("ident", lt(0));
   }
-  map_put(type_map, lt(0)->ident, ty);
+  add_typedef(lt(0)->ident, ty);
   consume();
   if (!match(TSEMICOLON)) {
     parse_error(";", lt(0));
@@ -720,12 +740,12 @@ void type_alias_def(void) {
 Program* parse(Vector* token_vec) {
   tokens = token_vec;
   strs = new_vec();
-  local_env = NULL;
-  tag_env = NULL;
-  global_env = NULL;
-  type_map = new_map();
+  /* local_env = NULL; */
+  /* tag_env = NULL; */
+  /* global_env = NULL; */
+  /* typedefs = NULL; */
 
-  init_type_map();
+  init_typedef();
 
   Program* prog = calloc(1, sizeof(Program));
   prog->funcs = new_vec();
