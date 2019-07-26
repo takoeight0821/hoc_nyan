@@ -24,7 +24,6 @@ static LVar* local_env;
 static size_t local_size = 0;
 static Tag* tag_env;
 static GVar* global_env;
-/* static Map* type_map; // Map<Type*> */
 static TypeDef* typedefs;
 static Vector* strs;
 
@@ -740,10 +739,6 @@ void type_alias_def(void) {
 Program* parse(Vector* token_vec) {
   tokens = token_vec;
   strs = new_vec();
-  /* local_env = NULL; */
-  /* tag_env = NULL; */
-  /* global_env = NULL; */
-  /* typedefs = NULL; */
 
   init_typedef();
 

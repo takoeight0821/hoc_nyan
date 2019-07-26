@@ -17,11 +17,6 @@ typedef struct {
   size_t length;
 } Vector;
 
-typedef struct {
-  Vector *keys;
-  Vector *vals;
-} Map;
-
 enum TokenTag {
   TEOF,
   TINT,
@@ -199,12 +194,6 @@ void vec_push(Vector* v, void* elem);
 void vec_pushi(Vector* v, intptr_t elem);
 void* vec_pop(Vector* v);
 intptr_t vec_popi(Vector* v);
-Map* new_map();
-void map_put(Map *map, char *key, void *val);
-void map_puti(Map *map, char *key, intptr_t val);
-void *map_get(Map *map, char *key);
-intptr_t map_geti(Map *map, char *key);
-int map_has_key(Map *map, char *key);
 
 // emit.c
 typedef enum {
