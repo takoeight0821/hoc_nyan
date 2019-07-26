@@ -5,6 +5,8 @@ test() {
     ./hoc test/tmp.c > test/tmp.s
     gcc -static -o test/tmp.out test/tmp.s
     ./test/tmp.out
+
+    rm test/tmp.c test/tmp.s test/tmp.out
 }
 
 try() {
@@ -26,12 +28,6 @@ try() {
     fi
 }
 
-try 3 "int main () { 1; 2; return 3; }"
-try 1 "int main () {if (0) { return 0; } else { return 1; }}"
-try 1 "int id(int x) { return x; } int main() { return id(1); }"
-try 1 "int id(int x) { return x; } int main() { return id(id(1)); }"
-try 2 "int id(int x) { return x; } int main() { return id(id(1) + 1); }"
-try 0 "int main () { while (0) { return 1; } return 0; }"
 try 1 "int main () { int x; x = 0; x = x + 1; return x; }"
 try 55 "int main () { int x; int sum; x = 10; sum = 0; while (x != 0) { sum = sum + x; x = x - 1; } return sum; }"
 try 0 "int main () { int x; int y; x = y = 0; return x; }"
