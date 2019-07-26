@@ -160,6 +160,7 @@ static void consume() {
 
 static Token* lt(size_t i) {
   Token* t = tokens;
+  // i回nextをたどるとi+1個目の要素になる
   for (; i > 0; i--) {
     t = t->next;
   }
