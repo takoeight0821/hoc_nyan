@@ -82,5 +82,8 @@ try 0 "int main () { long a; a = 1; return 0; }"
 try 1 "int main () { long a; a = 1; int b; b = a; return b; }"
 try 0 "typedef int a; int main() { a b; b = 0; return b; }"
 try 1 "int main() { long* a; int* b; *a = 1; b = a; return *b; }"
+try 0 "enum Enum { A, B, C }; int main() { return A; }"
+try 2 "enum Enum { A, B, C, }; int main() { return C; }"
+try 1 "enum Enum { A, B, C }; enum Enum f() { return B; } int main() { return f(); }"
 
 echo OK

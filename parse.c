@@ -18,10 +18,17 @@ typedef struct TypeDef {
   Type* type;
 } TypeDef;
 
+typedef struct Enum {
+  struct Enum* next;
+  char* name;
+  int val;
+} Enum;
+
 static Token* tokens;
 static LVar* local_env;
 static size_t local_size = 0;
 static Tag* tag_env;
+static Enum* enum_env;
 static GVar* global_env;
 static TypeDef* typedefs;
 static Vector* strs;
@@ -58,6 +65,15 @@ static Node* find_var(Token* tok, char* name) {
   }
 
   if (var == NULL) {
+    for (Enum* env = enum_env; var == NULL && env != NULL; env = env->next) {
+      if (streq(name, env->name)) {
+        var = new_node(NINT, tok);
+        var->integer = env->val;
+      }
+    }
+  }
+
+  if (var == NULL) {
     bad_token(tok, format("%s is not defined\n", name));
   }
   return var;
@@ -79,6 +95,14 @@ static void add_gvar(Token* tok, char* name, Type* type) {
   gvar->type = type;
   gvar->next = global_env;
   global_env = gvar;
+}
+
+static void add_enum(char* name, int val) {
+  Enum* e = calloc(1, sizeof(Enum));
+  e->name = name;
+  e->val = val;
+  e->next = enum_env;
+  enum_env = e;
 }
 
 // 文字列リテラルのインターン
@@ -234,6 +258,26 @@ static Type* type_specifier() {
 
     if (ty->fields == NULL) {
       bad_token(tok, format("struct %s is not defined\n", tag));
+    }
+
+  } else if (match_keyword("enum")) {
+    ty = int_type();
+
+    match(TIDENT); // タグは読み飛ばす
+
+    if (match(TLBRACE)) {
+      int val = 0;
+      while (!match(TRBRACE)) {
+        char* name = lt(0)->ident;
+        if (!match(TIDENT)) {
+          parse_error("ident", lt(0));
+        }
+        add_enum(name, val);
+        val++;
+        if (la(0) != TRBRACE && !match(TCOMMA)) {
+          parse_error(",", lt(0));
+        }
+      }
     }
 
   } else if (la(0) == TIDENT && find_type(lt(0)->ident)) {
