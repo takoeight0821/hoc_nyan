@@ -1,13 +1,19 @@
 #!/bin/bash
 
+test() {
+    gcc -E -P test/test.c > test/tmp.c
+    ./hoc test/tmp.c > test/tmp.s
+    gcc -static -o test/tmp.out test/tmp.s
+    ./test/tmp.out
+}
+
 try() {
     expected="$1"
     input="$2"
 
     echo "$input" > tmp_c
     ./hoc tmp_c > tmp.s
-    gcc -c test.c -o test.o
-    gcc -static -o tmp.out tmp.s test.o
+    gcc -static -o tmp.out tmp.s
     ./tmp.out
     actual="$?"
 
@@ -20,23 +26,6 @@ try() {
     fi
 }
 
-try 0 "int main () {return 0;}"
-try 42 "int main () {return 40 + 2;}"
-try 42 "int main () {return 2 + 4 * 10;}"
-try 21 "int main () {return 42 / 2;}"
-try 15 "int main () {return 5*(9-6);}"
-try 4 "int main () {return (3+5)/2;}"
-try 42 "int main () { int a; a = 42; return a; }"
-try 42 "int main () { int var; var = 4; return var * 10 + 2;}"
-try 0 "int main () {return 3 + -3;}"
-try 0 "int main () {return 8 - (3 + 5);}"
-try 0 "int main () {return 15 + (-3*+5);}"
-try 1 "int main () {return 1 <= 1;}"
-try 1 "int main () {return 42 == 4 * 10 + 2;}"
-try 1 "int main () {return 1 < 2;}"
-try 1 "int main () {return 2 > 1;}"
-try 1 "int main () {if (1) return 1;}"
-try 2 "int main () {if (0) return 1; else return 2;}"
 try 3 "int main () { 1; 2; return 3; }"
 try 1 "int main () {if (0) { return 0; } else { return 1; }}"
 try 1 "int id(int x) { return x; } int main() { return id(1); }"
@@ -50,9 +39,6 @@ try 55 "int main () { int i; int sum; sum = 0; for (i = 1; i <= 10; i = i + 1) {
 try 0 "int main () { int *x; int** y; return 0; }"
 try 1 "int main () { int *x; int y; y = 1; x = &y; return *x; }"
 try 2 "int main () { int *x; int y; y = 1; x = &y; *x = 2; return *x; }"
-try 1 "int main () { int *p; alloc4(&p, 1, 2, 4, 8); return *p; }"
-try 4 "int main () { int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 2; return *q; }"
-try 2 "int main () { int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 2; q = q - 1; return *q; }"
 try 0 "int* id_ptr(int* x) { return x; } int main() { int x; x = 0; return *(id_ptr(&x)); }"
 try 10 "int func(); int main() { return func(); } int func() { return 10; }"
 try 4 "int main() { return sizeof(1); }"
@@ -85,5 +71,8 @@ try 1 "int main() { long* a; int* b; *a = 1; b = a; return *b; }"
 try 0 "enum Enum { A, B, C }; int main() { return A; }"
 try 2 "enum Enum { A, B, C, }; int main() { return C; }"
 try 1 "enum Enum { A, B, C }; enum Enum f() { return B; } int main() { return f(); }"
+try 0 "extern void* stderr; int main() { return 0; }"
+
+test
 
 echo OK

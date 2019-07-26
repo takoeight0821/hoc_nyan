@@ -52,7 +52,7 @@ void pushi(int src) {
 }
 
 void pushstring(char* l) {
-  emit("lea rax, %s[rip]", l);
+  emit("lea rax, %s", l);
   push(AX);
 }
 
@@ -89,7 +89,7 @@ void emit_lval(Node* node) {
     emit_var(node);
   } else if (node->tag == NGVAR) {
     comment("start lval NGVAR");
-    emit("lea rax, %s[rip]", node->name);
+    emit("lea rax, %s", node->name);
     push(AX);
     comment("end lval NGVAR");
   } else if (node->tag == NMEMBER) {
@@ -504,9 +504,10 @@ void gen_x86(Program* prog) {
   puts(".bss");
 
   for (GVar* gvar = prog->globals; gvar != NULL; gvar = gvar->next) {
-    printf("%s:\n", gvar->name);
-    emit(".zero %zu", size_of(gvar->type));
-
+    if (!gvar->is_extern) {
+      printf("%s:\n", gvar->name);
+      emit(".zero %zu", size_of(gvar->type));
+    }
   }
 
   puts(".text");
