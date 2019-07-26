@@ -17,7 +17,7 @@ static size_t p = 0; // 次の字句のインデックス
 static LVar* local_env;
 static size_t local_size = 0;
 static Tag* tag_env;
-static Map* global_env; // Map<Node*>
+static GVar* global_env;
 static Map* type_map; // Map<Type*>
 static Vector* strs;
 
@@ -29,6 +29,13 @@ static Node* new_var(Token* tok, char* name, Type* type, size_t offset) {
   return var;
 }
 
+static Node* new_gvar(Token* tok, char* name, Type* type) {
+  Node* gvar = new_node(NGVAR, tok);
+  gvar->name = name;
+  gvar->type = type;
+  return gvar;
+}
+
 static Node* find_var(Token* tok, char* name) {
   Node* var = NULL;
   for (LVar* env = local_env; var == NULL && env != NULL; env = env->next) {
@@ -38,7 +45,11 @@ static Node* find_var(Token* tok, char* name) {
   }
 
   if (var == NULL) {
-    var = map_get(global_env, name);
+    for (GVar* env = global_env; var == NULL && env != NULL; env = env->next) {
+      if (streq(name, env->name)) {
+        var = new_gvar(tok, env->name, env->type);
+      }
+    }
   }
 
   if (var == NULL) {
@@ -57,18 +68,12 @@ static void add_lvar(Token* tok, char* name, Type* ty) {
   local_env = lvar;
 }
 
-static Node* new_gvar(Token* tok, char* name, Type* type) {
-  Node* gvar = new_node(NGVAR, tok);
+static void add_gvar(Token* tok, char* name, Type* type) {
+  GVar* gvar = calloc(sizeof(GVar), 1);
   gvar->name = name;
   gvar->type = type;
-  return gvar;
-}
-
-static void add_gvar(Token* tok, char* name, Type* type) {
-  if (map_has_key(global_env, name)) {
-    error("%s is already defined\n", name);
-  }
-  map_put(global_env, name, new_gvar(tok, name, type));
+  gvar->next = global_env;
+  global_env = gvar;
 }
 
 // 文字列リテラルのインターン
@@ -717,7 +722,7 @@ Program* parse(Vector* token_vec) {
   strs = new_vec();
   local_env = NULL;
   tag_env = NULL;
-  global_env = new_map();
+  global_env = NULL;
   type_map = new_map();
 
   init_type_map();

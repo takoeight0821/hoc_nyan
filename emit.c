@@ -502,9 +502,11 @@ void gen_x86(Program* prog) {
   }
 
   puts(".bss");
-  for (size_t i = 0; i < prog->globals->keys->length; i++) {
-    printf("%s:\n", (char*)prog->globals->keys->ptr[i]);
-    emit(".zero %zu", size_of(((Node*)prog->globals->vals->ptr[i])->type));
+
+  for (GVar* gvar = prog->globals; gvar != NULL; gvar = gvar->next) {
+    printf("%s:\n", gvar->name);
+    emit(".zero %zu", size_of(gvar->type));
+
   }
 
   puts(".text");

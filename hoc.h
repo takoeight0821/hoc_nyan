@@ -160,9 +160,15 @@ typedef struct {
   size_t local_size;
 } Function;
 
+typedef struct GVar {
+  struct GVar *next;
+  char* name;
+  Type* type;
+} GVar;
+
 typedef struct {
   Vector* funcs;
-  Map* globals;
+  GVar* globals;
   Vector* strs;
 } Program;
 
