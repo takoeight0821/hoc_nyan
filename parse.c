@@ -705,7 +705,7 @@ Function* funcdef() {
   if (!match(TIDENT)) {
     if (match(TSEMICOLON)) {
       // type definition
-      return funcdef();
+      return NULL;
     }
     parse_error("function name or ;", lt(0));
   }
@@ -713,7 +713,7 @@ Function* funcdef() {
   if (!match(TLPAREN)) {
     tokens = back;
     global_var();
-    return funcdef();
+    return NULL;
   }
 
   Vector* params = new_vec();
@@ -790,25 +790,36 @@ void global_var(void) {
     parse_error("function name or ;", lt(0));
   }
 
-  if (!match(TLPAREN)) {
-    if (match(TLBRACK)) {
-      Type* array_ty = new_type();
-      array_ty->ty = TY_PTR;
-      array_ty->ptr_to = type;
-      array_ty->array_size = lt(0)->integer;
-      type = array_ty;
-      if (!match(TINT)) {
-        parse_error("integer", lt(0));
-      }
-      if (!match(TRBRACK)) {
-        parse_error("]", lt(0));
-      }
+  if (match(TLBRACK)) {
+    Type* array_ty = new_type();
+    array_ty->ty = TY_PTR;
+    array_ty->ptr_to = type;
+    array_ty->array_size = lt(0)->integer;
+    type = array_ty;
+    if (!match(TINT)) {
+      parse_error("integer", lt(0));
     }
+    if (!match(TRBRACK)) {
+      parse_error("]", lt(0));
+    }
+  }
 
-    add_gvar(tok, name, type);
-    if (!match(TSEMICOLON)) {
-      parse_error(";", lt(0));
-    }
+  add_gvar(tok, name, type);
+  if (!match(TSEMICOLON)) {
+    parse_error("global_var: ;", lt(0));
+  }
+}
+
+Function* toplevel() {
+  if (match_keyword("typedef")) {
+    type_alias_def();
+    return NULL;
+  } else if (match_keyword("extern")) {
+    global_var();
+    global_env->is_extern = true;
+    return NULL;
+  } else {
+    return funcdef();
   }
 }
 
@@ -822,13 +833,9 @@ Program* parse(Token* t) {
   prog->funcs = new_vec();
 
   while (tokens) {
-    if (match_keyword("typedef")) {
-      type_alias_def();
-    } else if (match_keyword("extern")) {
-      global_var();
-      global_env->is_extern = true;
-    } else {
-      vec_push(prog->funcs, funcdef());
+    Function* func = toplevel();
+    if (func) {
+       vec_push(prog->funcs, func);
     }
   }
 

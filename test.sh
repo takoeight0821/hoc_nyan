@@ -1,74 +1,10 @@
 #!/bin/bash
 
-test() {
-    gcc -E -P test/test.c > test/tmp.c
-    ./hoc test/tmp.c > test/tmp.s
-    gcc -static -o test/tmp.out test/tmp.s
-    ./test/tmp.out
+gcc -E -P test/test.c > test/tmp.c
+./hoc test/tmp.c > test/tmp.s
+gcc -static -o test/tmp.out test/tmp.s
+./test/tmp.out
 
-    rm test/tmp.c test/tmp.s test/tmp.out
-}
-
-try() {
-    expected="$1"
-    input="$2"
-
-    echo "$input" > tmp_c
-    ./hoc tmp_c > tmp.s
-    gcc -static -o tmp.out tmp.s
-    ./tmp.out
-    actual="$?"
-
-    if [ "$actual" = "$expected" ]; then
-        echo "$input => $actual"
-        rm tmp_c tmp.s tmp.out
-    else
-        echo "$expected expected, but got $actual"
-        exit 1
-    fi
-}
-
-try 1 "int main () { int x; x = 0; x = x + 1; return x; }"
-try 55 "int main () { int x; int sum; x = 10; sum = 0; while (x != 0) { sum = sum + x; x = x - 1; } return sum; }"
-try 0 "int main () { int x; int y; x = y = 0; return x; }"
-try 55 "int main () { int i; int sum; sum = 0; for (i = 1; i <= 10; i = i + 1) { sum = sum + i; } return sum; }"
-try 0 "int main () { int *x; int** y; return 0; }"
-try 1 "int main () { int *x; int y; y = 1; x = &y; return *x; }"
-try 2 "int main () { int *x; int y; y = 1; x = &y; *x = 2; return *x; }"
-try 0 "int* id_ptr(int* x) { return x; } int main() { int x; x = 0; return *(id_ptr(&x)); }"
-try 10 "int func(); int main() { return func(); } int func() { return 10; }"
-try 4 "int main() { return sizeof(1); }"
-try 1 "int main() { int arr[3]; *arr = 1; return *arr; }"
-try 4 "int main() { int arr[3]; int *p; p = arr + 1; *p = 4; return *p; }"
-try 4 "int main() { int arr[3]; *(arr + 1) = 4; return *(arr + 1); }"
-try 65 "int main() { char c; c = 65; return c; }"
-try 65 "int main() { char c; c = 65; putchar(c); return c; }"
-try 0 "int main() { char msg[3]; *msg = 104; *(msg + 1) = 105; *(msg + 2) = 0; puts(msg); return 0; }"
-try 4 "int main() { int arr[3]; arr[1] = 4; return arr[1]; }"
-try 0 "int main() { char msg[3]; msg[0] = 104; msg[1] = 105; msg[2] = 0; puts(msg); return 0; }"
-try 0 "int main() { char *msg; msg = \"hello, world\"; puts(msg); return 0; }"
-try 0 "int main() { puts(\"hello, \"); puts(\"world\"); return 0; }"
-try 1 "int a; int main() { a = 1; return a; }"
-try 2 "int* a; int main() { int b; b = 2; a = &b; return *a; }"
-try 1 "int a[2]; int main() { a[0] = 1; return a[0]; }"
-try 2 "int main () { int a; a = 1; { int a; a = 2; return a; }}"
-try 1 "int main () { int a; a = 1; { int a; a = 2; } return a; }"
-try 0 "struct pair { int x; int y; }; int main() { struct pair p; return 0; }"
-try 0 "struct pair { int x; int y; }; int main() { struct pair p; p.x = 0; p.y = 1; return p.x; }"
-try 1 "struct pair { int x; int y; }; int main() { struct pair p; p.x = 0; p.y = 1; return p.x + p.y; }"
-try 2 "struct pair { int x; int y; }; int main() { struct pair p; p.x = 1; p.y = 2; return p.y; }"
-try 0 "void f() { } int main() { f(); return 0; }"
-try 0 "struct pair { char* x; char* y; }; void f(struct pair* p) { puts((*p).x); } int main() { struct pair p; p.x = \"x\"; p.y = \"y\"; f(&p); return 0; }"
-try 0 "int main () { long a; return 0; }"
-try 0 "int main () { long a; a = 1; return 0; }"
-try 1 "int main () { long a; a = 1; int b; b = a; return b; }"
-try 0 "typedef int a; int main() { a b; b = 0; return b; }"
-try 1 "int main() { long* a; int* b; *a = 1; b = a; return *b; }"
-try 0 "enum Enum { A, B, C }; int main() { return A; }"
-try 2 "enum Enum { A, B, C, }; int main() { return C; }"
-try 1 "enum Enum { A, B, C }; enum Enum f() { return B; } int main() { return f(); }"
-try 0 "extern void* stderr; int main() { return 0; }"
-
-test
+rm test/tmp.c test/tmp.s test/tmp.out
 
 echo OK
