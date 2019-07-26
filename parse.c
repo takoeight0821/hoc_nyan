@@ -294,7 +294,7 @@ static Type* type_specifier() {
 
 static Node* term() {
   if (match(TLPAREN)) {
-    Node* node = add();
+    Node* node = expr();
     if (!match(TRPAREN)) {
       parse_error(")", lt(0));
     }
@@ -690,7 +690,10 @@ static Node* statement() {
   }
 }
 
+void global_var(void);
+
 Function* funcdef() {
+  Token* back = lt(0);
   Type* ret_type = type_specifier();
 
   while (match(TASTERISK)) {
@@ -698,7 +701,6 @@ Function* funcdef() {
   }
 
   char* name = lt(0)->ident;
-  Token* tok = lt(0);
 
   if (!match(TIDENT)) {
     if (match(TSEMICOLON)) {
@@ -709,26 +711,9 @@ Function* funcdef() {
   }
 
   if (!match(TLPAREN)) {
-    if (match(TLBRACK)) {
-      Type* array_ty = new_type();
-      array_ty->ty = TY_PTR;
-      array_ty->ptr_to = ret_type;
-      array_ty->array_size = lt(0)->integer;
-      ret_type = array_ty;
-      if (!match(TINT)) {
-        parse_error("integer", lt(0));
-      }
-      if (!match(TRBRACK)) {
-        parse_error("]", lt(0));
-      }
-    }
-
-    add_gvar(tok, name, ret_type);
-    if (match(TSEMICOLON)) {
-      return funcdef();
-    } else {
-      parse_error("( or ;", lt(0));
-    }
+    tokens = back;
+    global_var();
+    return funcdef();
   }
 
   Vector* params = new_vec();
@@ -791,6 +776,42 @@ void type_alias_def(void) {
   }
 }
 
+void global_var(void) {
+  Type* type = type_specifier();
+
+  while (match(TASTERISK)) {
+    type = ptr_to(type);
+  }
+
+  char* name = lt(0)->ident;
+  Token* tok = lt(0);
+
+  if (!match(TIDENT)) {
+    parse_error("function name or ;", lt(0));
+  }
+
+  if (!match(TLPAREN)) {
+    if (match(TLBRACK)) {
+      Type* array_ty = new_type();
+      array_ty->ty = TY_PTR;
+      array_ty->ptr_to = type;
+      array_ty->array_size = lt(0)->integer;
+      type = array_ty;
+      if (!match(TINT)) {
+        parse_error("integer", lt(0));
+      }
+      if (!match(TRBRACK)) {
+        parse_error("]", lt(0));
+      }
+    }
+
+    add_gvar(tok, name, type);
+    if (!match(TSEMICOLON)) {
+      parse_error(";", lt(0));
+    }
+  }
+}
+
 Program* parse(Token* t) {
   tokens = t;
   strs = new_vec();
@@ -803,6 +824,9 @@ Program* parse(Token* t) {
   while (tokens) {
     if (match_keyword("typedef")) {
       type_alias_def();
+    } else if (match_keyword("extern")) {
+      global_var();
+      global_env->is_extern = true;
     } else {
       vec_push(prog->funcs, funcdef());
     }
