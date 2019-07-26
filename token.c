@@ -4,7 +4,6 @@
 #define MAX_LENGTH 4096
 
 // ソースコード
-// Vector* lex(FILE* file);で初期化
 char* src;
 char* cur;
 
@@ -76,7 +75,6 @@ static Token* integer(char* start) {
 static Token* ident(char* start) {
   Token* t = new_token(TIDENT, start);
   StringBuilder* sb = new_sb();
-  /* Vector* ident = new_vec(); */
   sb_putc(sb, *cur);
   consume();
 
