@@ -217,19 +217,25 @@ static char* read_file(FILE* file) {
   return sb_run(sb);
 }
 
-Vector* lex(FILE* file) {
+Token* lex(FILE* file) {
   src = read_file(file);
   cur = src;
 
-  Vector* v = new_vec();
+  Token* current = NULL;
+  Token* head;
   Token* t;
 
   while ((t = next_token())->tag != TEOF) {
-    vec_push(v, t);
+    if (current) {
+      current->next = t;
+      current = current->next;
+    } else {
+      current = t;
+      head = current;
+    }
   }
 
-  vec_push(v, t); // push EOF
-  return v;
+  return head;
 }
 
 void dump_token(Token* tok) {

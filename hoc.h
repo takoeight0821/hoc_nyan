@@ -45,7 +45,8 @@ enum TokenTag {
   TDOT,
 };
 
-typedef struct {
+typedef struct Token {
+  struct Token* next;
   enum TokenTag tag;
   int integer;
   char* ident;
@@ -214,10 +215,10 @@ void gen_x86(Program* prog);
 void warn_token(Token* tok, char* msg);
 noreturn void bad_token(Token* tok, char* msg);
 void dump_token(Token* tok);
-Vector* lex(FILE* file);
+Token* lex(FILE* file);
 
 // parse.c
-Program* parse(Vector* tokens);
+Program* parse(Token* tokens);
 
 // sema.c
 void sema(Program* prog);

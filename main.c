@@ -41,10 +41,10 @@ int main(int argc, char** argv)
     return -1;
   }
 
-  Vector* tokens = lex(fp);
+  Token* tokens = lex(fp);
 
-  for (size_t i = 0; i < tokens->length; i++) {
-    dump_token(tokens->ptr[i]);
+  for (Token* t = tokens; t != NULL; t = t->next) {
+    dump_token(t);
   }
   eprintf("\n");
 
