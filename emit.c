@@ -360,7 +360,6 @@ void emit_node(Node* node) {
   case NEXPR_STMT:
     comment("start NEXPR_STMT");
     emit_node(node->expr);
-    pop(AX); // pop unused value
     comment("end NEXPR_STMT");
     break;
   case NRETURN:
