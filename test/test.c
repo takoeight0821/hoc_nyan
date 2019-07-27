@@ -5,6 +5,7 @@ int fprintf();
 int exit();
 int putchar(char c);
 int puts(char* msg);
+void* malloc(long size);
 
 #define EXPECT(expected, expr)                                          \
   {                                                                     \
@@ -148,6 +149,7 @@ int main() {
   }
   EXPECT(10, func());
   EXPECT(4, sizeof(1));
+  EXPECT(4, sizeof(int));
   {
     int arr[3];
     *arr = 1;
@@ -277,6 +279,13 @@ int main() {
   EXPECT(0, 1 && 0 || 0);
   EXPECT(1, 7%2);
   EXPECT(65, 'A');
+  {
+    struct pair* a;
+    a = malloc(sizeof(struct pair));
+    (*a).x = 4;
+    (*a).y = 2;
+    EXPECT(42, (*a).x * 10 + (*a).y);
+  }
   return 0;
 }
 

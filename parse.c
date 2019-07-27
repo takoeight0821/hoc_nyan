@@ -196,6 +196,7 @@ static Token* match_keyword(char* name) {
   }
 }
 
+static int is_typename(Token* t);
 static Node* variable();
 static Node* expr();
 static Node* term();
@@ -351,8 +352,26 @@ static Node* postfix() {
 static Node* unary() {
   Token* tok;
   if ((tok = match_keyword("sizeof"))) {
-    Node* node = new_node(NSIZEOF, tok);
-    node->expr = unary();
+    if (!match(TLPAREN)) {
+      parse_error("(", lt(0));
+    }
+    Node* node;
+    if (is_typename(lt(0))) {
+      // sizeof(type)は計算してしまってNINTノードにする
+      Type* type = type_specifier();
+      while (match(TASTERISK)) {
+        type = ptr_to(type);
+      }
+      node = new_node(NINT, tok);
+      node->integer = size_of(type);
+    } else {
+      // sizeof(expr)はsemaで型付けしてemitで計算する
+      node = new_node(NSIZEOF, tok);
+      node->expr = unary();
+    }
+    if (!match(TRPAREN)) {
+      parse_error(")", lt(0));
+    }
     return node;
   } else if (match(TPLUS)) {
     return postfix();
