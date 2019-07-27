@@ -111,7 +111,23 @@ static Token* next_token() {
       return new_token(TSLASH, cur - 1);
     case '&':
       consume();
-      return new_token(TAND, cur - 1);
+      switch (*cur) {
+      case '&':
+        consume();
+        return new_token(TAND_AND, cur - 2);
+      default:
+        return new_token(TAND, cur - 1);
+      }
+    case '|':
+      consume();
+      switch (*cur) {
+      case '|':
+        consume();
+        return new_token(TOR_OR, cur - 2);
+      default:
+        print_line(cur);
+        error("invalid character: %c\n", *cur);
+      }
     case '<':
       consume();
       switch (*cur) {
@@ -313,6 +329,13 @@ void dump_token(Token* tok) {
     break;
   case TNOT:
     eprintf("[NOT]");
+    break;
+  case TAND_AND:
+    eprintf("[AND_AND]");
+    break;
+  case TOR_OR:
+    eprintf("[OR_OR]");
+    break;
   case TEOF:
     eprintf("[EOF]");
     break;

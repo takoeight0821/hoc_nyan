@@ -272,6 +272,9 @@ int main() {
   EXPECT(1, !0);
   EXPECT(0, !(1 == 1));
   EXPECT(1, !(1 != 1));
+  EXPECT(1, 1 && 1);
+  EXPECT(1, 0 || 1);
+  EXPECT(0, 1 && 0 || 0);
   return 0;
 }
 

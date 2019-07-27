@@ -206,6 +206,8 @@ static Node* mul();
 static Node* unary();
 static Node* equality();
 static Node* relational();
+static Node* logical_and();
+static Node* logical_or();
 static Node* statement();
 static Node* declarator(Type* ty);
 
@@ -420,6 +422,36 @@ static Node* string() {
   return node;
 }
 
+static Node* logical_or() {
+  Node* lhs = logical_and();
+  Token* tok;
+  for (;;) {
+    if ((tok = match(TOR_OR))) {
+      Node* node = new_node(NLOGOR, tok);
+      node->lhs = lhs;
+      node->rhs = logical_and();
+      lhs = node;
+    } else {
+      return lhs;
+    }
+  }
+}
+
+static Node* logical_and() {
+  Node* lhs = equality();
+  Token* tok;
+  for (;;) {
+    if ((tok = match(TAND_AND))) {
+      Node* node = new_node(NLOGAND, tok);
+      node->lhs = lhs;
+      node->rhs = equality();
+      lhs = node;
+    } else {
+      return lhs;
+    }
+  }
+}
+
 static Node* equality() {
   Node* lhs = relational();
   Token* tok;
@@ -510,7 +542,7 @@ static Node* add() {
 }
 
 static Node* assign() {
-  Node* node = equality();
+  Node* node = logical_or();
 
   if (match(TEQUAL)) {
     Node* lhs = node;

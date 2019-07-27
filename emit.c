@@ -291,6 +291,60 @@ void emit_node(Node* node) {
     comment("end NNOT");
     break;
   }
+  case NLOGAND: {
+    comment("start NLOGAND");
+    char* when_false = new_label("when_false");
+    char* when_true = new_label("when_true");
+
+    emit_node(node->lhs);
+    pop(AX);
+    emit("cmp %s, 0", reg(AX, size_of(type_of(node->lhs))));
+    emit("je %s", when_false);
+
+    emit_node(node->rhs);
+    pop(AX);
+    emit("cmp %s, 0", reg(AX, size_of(type_of(node->rhs))));
+    emit("je %s", when_false);
+
+    emit("mov rax, 1");
+    emit("jmp %s", when_true);
+
+    printf("%s:\n", when_false);
+    emit("mov rax, 0");
+    printf("%s:\n", when_true);
+    push(AX);
+    comment("end NLOGAND");
+    break;
+  }
+  case NLOGOR: {
+    comment("start NLOGAND");
+    char* when_false = new_label("when_false");
+    char* when_true = new_label("when_true");
+    char* next = new_label("next");
+
+    emit_node(node->lhs);
+    pop(AX);
+    emit("cmp %s, 0", reg(AX, size_of(type_of(node->lhs))));
+    emit("jne %s", when_true);
+
+    emit_node(node->rhs);
+    pop(AX);
+    emit("cmp %s, 0", reg(AX, size_of(type_of(node->rhs))));
+    emit("je %s", when_false);
+
+    printf("%s:\n", when_true);
+    emit("mov rax, 1");
+    push(AX);
+    emit("jmp %s", next);
+
+    printf("%s:\n", when_false);
+    emit("mov rax, 0");
+    push(AX);
+
+    printf("%s:\n", next);
+    comment("end NLOGAND");
+    break;
+  }
   case NDEFVAR: {
     comment("start NDEFVAR");
     comment("end NDEFVAR");

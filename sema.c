@@ -235,6 +235,18 @@ void walk(Node* node) {
     }
     break;
   }
+  case NLOGAND: {
+    walk(node->lhs);
+    walk(node->rhs);
+    node->type = node->rhs->type;
+    break;
+  }
+  case NLOGOR: {
+    walk(node->lhs);
+    walk(node->rhs);
+    node->type = node->rhs->type;
+    break;
+  }
   case NDEFVAR: {
     break;
   }

@@ -44,6 +44,8 @@ enum TokenTag {
   TSTRING,
   TDOT,
   TNOT,
+  TAND_AND,
+  TOR_OR,
 };
 
 typedef struct Token {
@@ -70,6 +72,8 @@ enum NodeTag {
     NEQ,
     NNE,
     NNOT,
+    NLOGAND,
+    NLOGOR,
     NDEFVAR,
     NASSIGN,
     NCALL,
