@@ -211,6 +211,18 @@ static Token* next_token() {
       tok->str = sb_run(sb);
       return tok;
     }
+    case '\'': {
+      consume();
+      Token* t = new_token(TINT, cur - 1);
+      t->integer = *cur;
+      consume();
+      if (*cur != '\'') {
+        print_line(cur);
+        error("invalid character: %c\n", *cur);
+      }
+      consume();
+      return t;
+    }
     case '.':
       consume();
       return new_token(TDOT, cur - 1);
