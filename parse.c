@@ -344,6 +344,17 @@ static Node* postfix() {
     node->expr = e;
     node->name = name;
     return node;
+  } else if ((tok = match(TARROW))) {
+    char* name = lt(0)->ident;
+    if (!match(TIDENT)) {
+      parse_error("ident", lt(0));
+    }
+    Node* deref = new_node(NDEREF, tok);
+    deref->expr = e;
+    Node* node = new_node(NMEMBER, tok);
+    node->expr = deref;
+    node->name = name;
+    return node;
   } else {
     return e;
   }

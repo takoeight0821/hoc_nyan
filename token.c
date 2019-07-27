@@ -102,7 +102,13 @@ static Token* next_token() {
       return new_token(TPLUS, cur - 1);
     case '-':
       consume();
-      return new_token(TMINUS, cur - 1);
+      switch(*cur) {
+      case '>':
+        consume();
+        return new_token(TARROW, cur - 2);
+      default:
+        return new_token(TMINUS, cur - 1);
+      }
     case '*':
       consume();
       return new_token(TASTERISK, cur - 1);

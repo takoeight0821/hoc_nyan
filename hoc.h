@@ -47,6 +47,7 @@ enum TokenTag {
   TAND_AND,
   TOR_OR,
   TPERCENT,
+  TARROW,
 };
 
 typedef struct Token {
