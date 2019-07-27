@@ -54,12 +54,11 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (node->lhs->type->ty == TY_PTR || node->lhs->type->ty == TY_INT) {
-      if (node->rhs->type->ty != TY_INT) {
-        type_error(int_type(), node->rhs);
-      }
-    } else {
+    if (!(node->lhs->type->ty == TY_PTR || integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
+    }
+    if (!(integer_type(node->rhs->type))) {
+      type_error(int_type(), node->rhs);
     }
 
     if (node->lhs->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) {
@@ -83,12 +82,11 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (node->lhs->type->ty == TY_PTR || node->lhs->type->ty == TY_INT) {
-      if (node->rhs->type->ty != TY_INT) {
-        type_error(int_type(), node->rhs);
-      }
-    } else {
+    if (!(node->lhs->type->ty == TY_PTR || integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
+    }
+    if (!(integer_type(node->rhs->type))) {
+      type_error(int_type(), node->rhs);
     }
 
     if (node->lhs->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) {
@@ -112,142 +110,128 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (node->lhs->type->ty != TY_INT) {
+    if (!(integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (node->rhs->type->ty != TY_INT) {
+    if (!(integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
     node->type = node->lhs->type;
-
     break;
   }
   case NDIV: {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (node->lhs->type->ty != TY_INT) {
+    if (!(integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (node->rhs->type->ty != TY_INT) {
+    if (!(integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
     node->type = node->lhs->type;
-
     break;
   }
   case NMOD: {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (node->lhs->type->ty != TY_INT) {
+    if (!(integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (node->rhs->type->ty != TY_INT) {
+    if (!(integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
     node->type = node->lhs->type;
-
     break;
   }
   case NLT: {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (node->lhs->type->ty != TY_INT) {
+    if (!(integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (node->rhs->type->ty != TY_INT) {
+    if (!(integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
     node->type = int_type();
-
     break;
   }
   case NLE: {
     walk(node->lhs);
     walk(node->rhs);
 
-    node->type = new_type();
-    node->type->ty = TY_INT;
-
-    if (node->lhs->type->ty != TY_INT) {
+    if (!(integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (node->rhs->type->ty != TY_INT) {
+    if (!(integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
+    node->type = int_type();
     break;
   }
   case NGT: {
     walk(node->lhs);
     walk(node->rhs);
 
-    node->type = new_type();
-    node->type->ty = TY_INT;
-
-    if (node->lhs->type->ty != TY_INT) {
+    if (!(integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (node->rhs->type->ty != TY_INT) {
+    if (!(integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
+    node->type = int_type();
     break;
   }
   case NGE: {
     walk(node->lhs);
     walk(node->rhs);
 
-    node->type = new_type();
-    node->type->ty = TY_INT;
-
-    if (node->lhs->type->ty != TY_INT) {
+    if (!(integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (node->rhs->type->ty != TY_INT) {
+    if (!(integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
+    node->type = int_type();
     break;
   }
   case NEQ: {
     walk(node->lhs);
     walk(node->rhs);
 
-    node->type = new_type();
-    node->type->ty = TY_INT;
-
     if (node->lhs->type->ty != node->rhs->type->ty) {
       type_error(type_of(node->lhs), node->rhs);
     }
 
+    node->type = int_type();
     break;
   }
   case NNE: {
     walk(node->lhs);
     walk(node->rhs);
 
-    node->type = new_type();
-    node->type->ty = TY_INT;
-
     if (node->lhs->type->ty != node->rhs->type->ty) {
       type_error(type_of(node->lhs), node->rhs);
     }
 
+    node->type = int_type();
     break;
   }
   case NNOT: {
     walk(node->expr);
-    node->type = int_type();
-    if (node->expr->type->ty != TY_INT) {
+    if (!integer_type(node->expr->type)) {
       type_error(int_type(), node->expr);
     }
+    node->type = int_type();
     break;
   }
   case NLOGAND: {
