@@ -275,6 +275,7 @@ int main() {
   EXPECT(1, 1 && 1);
   EXPECT(1, 0 || 1);
   EXPECT(0, 1 && 0 || 0);
+  EXPECT(1, 7%2);
   return 0;
 }
 

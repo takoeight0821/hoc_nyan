@@ -46,6 +46,7 @@ enum TokenTag {
   TNOT,
   TAND_AND,
   TOR_OR,
+  TPERCENT,
 };
 
 typedef struct Token {
@@ -65,6 +66,7 @@ enum NodeTag {
     NMINUS,
     NMUL,
     NDIV,
+    NMOD,
     NLT,
     NLE,
     NGT,

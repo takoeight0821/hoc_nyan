@@ -196,6 +196,19 @@ void emit_node(Node* node) {
     comment("end NDIV");
     break;
   }
+  case NMOD: {
+    comment("start NMOD");
+    emit_node(node->lhs);
+    emit_node(node->rhs);
+    pop(DI);
+    pop(AX);
+    emit("mov %s, %d", reg64[DX], 0);
+    size_t size = size_of(type_of(node->lhs));
+    emit("div %s", reg(DI, size));
+    push(DX);
+    comment("end NMOD");
+    break;
+  }
   case NLT: {
     comment("start NLT");
     emit_node(node->lhs);

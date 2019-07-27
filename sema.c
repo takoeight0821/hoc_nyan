@@ -138,6 +138,21 @@ void walk(Node* node) {
 
     break;
   }
+  case NMOD: {
+    walk(node->lhs);
+    walk(node->rhs);
+
+    if (node->lhs->type->ty != TY_INT) {
+      type_error(int_type(), node->lhs);
+    }
+    if (node->rhs->type->ty != TY_INT) {
+      type_error(int_type(), node->rhs);
+    }
+
+    node->type = node->lhs->type;
+
+    break;
+  }
   case NLT: {
     walk(node->lhs);
     walk(node->rhs);

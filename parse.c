@@ -515,6 +515,11 @@ static Node* mul() {
       node->lhs = lhs;
       node->rhs = unary();
       lhs = node;
+    } else if ((tok = match(TPERCENT))) {
+      Node* node = new_node(NMOD, tok);
+      node->lhs = lhs;
+      node->rhs = unary();
+      lhs = node;
     } else {
       return lhs;
     }

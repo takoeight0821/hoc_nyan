@@ -128,6 +128,9 @@ static Token* next_token() {
         print_line(cur);
         error("invalid character: %c\n", *cur);
       }
+    case '%':
+      consume();
+      return new_token(TPERCENT, cur - 1);
     case '<':
       consume();
       switch (*cur) {
@@ -335,6 +338,9 @@ void dump_token(Token* tok) {
     break;
   case TOR_OR:
     eprintf("[OR_OR]");
+    break;
+  case TPERCENT:
+    eprintf("[PERCENT]");
     break;
   case TEOF:
     eprintf("[EOF]");
