@@ -4,7 +4,7 @@ Vector* funcs; // Vector(Function*)
 
 void walk(Node*);
 
-noreturn void type_error(Type* expected, Node* node) {
+void type_error(Type* expected, Node* node) {
   bad_token(node->token, format("expected %s, but got %s\n", show_type(expected), show_type(type_of(node))));
 }
 

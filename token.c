@@ -40,7 +40,7 @@ void warn_token(Token* tok, char* msg) {
   eprintf("%s\n", msg);
 }
 
-noreturn void bad_token(Token* tok, char* msg) {
+void bad_token(Token* tok, char* msg) {
   warn_token(tok, msg);
   exit(1);
 }
