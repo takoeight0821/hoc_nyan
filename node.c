@@ -256,6 +256,12 @@ void dump_node(Node* node, int level) {
     indent(level);
     eprintf(")\n");
     break;
+  case NNOT:
+    indent(level);
+    eprintf("(!\n");
+    dump_node(node->expr, level+1);
+    eprintf(")\n");
+    break;
   case NDEFVAR: {
     indent(level);
     eprintf("(");

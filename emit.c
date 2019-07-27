@@ -280,6 +280,17 @@ void emit_node(Node* node) {
     comment("end NNE");
     break;
   }
+  case NNOT: {
+    comment("start NNOT");
+    emit_node(node->expr);
+    pop(AX);
+    emit("cmp %s, 0", reg(AX, 4));
+    emit("sete al");
+    emit("movzb rax, al");
+    push(AX);
+    comment("end NNOT");
+    break;
+  }
   case NDEFVAR: {
     comment("start NDEFVAR");
     comment("end NDEFVAR");

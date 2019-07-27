@@ -146,9 +146,10 @@ static Token* next_token() {
         consume();
         return new_token(TNE, cur - 2);
       default:
-        // TODO `not` operator
-        print_line(cur);
-        error("invalid character: %c\n", *cur);
+        return new_token(TNOT, cur - 1);
+        /* // TODO `not` operator */
+        /* print_line(cur); */
+        /* error("invalid character: %c\n", *cur); */
       }
     case '(':
       consume();
@@ -310,6 +311,8 @@ void dump_token(Token* tok) {
   case TDOT:
     eprintf("[DOT]");
     break;
+  case TNOT:
+    eprintf("[NOT]");
   case TEOF:
     eprintf("[EOF]");
     break;

@@ -260,14 +260,18 @@ int main() {
     b = a;
     EXPECT(1, b);
   }
-  /* { */
-  /*   type_a a; */
-  /*   a = 0; */
-  /*   EXPECT(0, a); */
-  /* } */
+  {
+    type_a a;
+    a = 0;
+    EXPECT(0, a);
+  }
   EXPECT(0, A);
   EXPECT(1, B);
   EXPECT(2, C);
+  EXPECT(0, !1);
+  EXPECT(1, !0);
+  EXPECT(0, !(1 == 1));
+  EXPECT(1, !(1 != 1));
   return 0;
 }
 

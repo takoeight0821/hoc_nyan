@@ -227,6 +227,14 @@ void walk(Node* node) {
 
     break;
   }
+  case NNOT: {
+    walk(node->expr);
+    node->type = int_type();
+    if (node->expr->type->ty != TY_INT) {
+      type_error(int_type(), node->expr);
+    }
+    break;
+  }
   case NDEFVAR: {
     break;
   }

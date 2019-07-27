@@ -369,6 +369,10 @@ static Node* unary() {
     Node* node = new_node(NDEREF, tok);
     node->expr = postfix();
     return node;
+  } else if ((tok = match(TNOT))) {
+    Node* node = new_node(NNOT, tok);
+    node->expr = postfix();
+    return node;
   } else {
     Node* node = postfix();
 
