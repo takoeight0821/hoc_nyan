@@ -6,6 +6,7 @@ int exit();
 int putchar(char c);
 int puts(char* msg);
 void* malloc(long size);
+void* calloc(long count, long size);
 
 #define EXPECT(expected, expr)                                          \
   {                                                                     \
@@ -292,6 +293,16 @@ int main() {
     a->x = 4;
     a->y = 2;
     EXPECT(42, a->x * 10 + a->y);
+  }
+  {
+    int *a;
+    a = calloc(10, sizeof(int));
+    int *b[3];
+    b[0] = a;
+    b[1] = a;
+    b[2] = a;
+    a[4] = 42;
+    EXPECT(42, b[0][4]);
   }
   return 0;
 }

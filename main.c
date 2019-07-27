@@ -54,9 +54,9 @@ int main(int argc, char** argv)
 
   sema(prog);
 
-  /* for (size_t i = 0; i < prog->funcs->length; i++) { */
-  /*   dump_function(prog->funcs->ptr[i]); */
-  /* } */
+  for (size_t i = 0; i < prog->funcs->length; i++) {
+    dump_function(prog->funcs->ptr[i]);
+  }
 
   gen_x86(prog);
 

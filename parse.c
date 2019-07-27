@@ -333,30 +333,43 @@ static Node* term() {
 }
 
 static Node* postfix() {
-  Node* e = term();
+  Node* node = term();
   Token* tok;
-  if ((tok = match(TDOT))) {
-    char* name = lt(0)->ident;
-    if (!match(TIDENT)) {
-      parse_error("ident", lt(0));
+
+  for (;;) {
+    if ((tok = match(TDOT))) {
+      char* name = lt(0)->ident;
+      if (!match(TIDENT)) {
+        parse_error("ident", lt(0));
+      }
+      Node* e = new_node(NMEMBER, tok);
+      e->expr = node;
+      e->name = name;
+      node = e;
+    } else if ((tok = match(TARROW))) {
+       char* name = lt(0)->ident;
+       if (!match(TIDENT)) {
+         parse_error("ident", lt(0));
+       }
+       Node* deref = new_node(NDEREF, tok);
+       deref->expr = node;
+       Node* e = new_node(NMEMBER, tok);
+       e->expr = deref;
+       e->name = name;
+       node = e;
+    } else if ((tok = match(TLBRACK))) {
+      Node* offset = expr();
+      if (!match(TRBRACK)) {
+        parse_error("]", lt(0));
+      }
+      Node* e = new_node(NDEREF, tok);
+      e->expr = new_node(NPLUS, tok);
+      e->expr->lhs = node;
+      e->expr->rhs = offset;
+      node = e;
+    } else {
+      return node;
     }
-    Node* node = new_node(NMEMBER, tok);
-    node->expr = e;
-    node->name = name;
-    return node;
-  } else if ((tok = match(TARROW))) {
-    char* name = lt(0)->ident;
-    if (!match(TIDENT)) {
-      parse_error("ident", lt(0));
-    }
-    Node* deref = new_node(NDEREF, tok);
-    deref->expr = e;
-    Node* node = new_node(NMEMBER, tok);
-    node->expr = deref;
-    node->name = name;
-    return node;
-  } else {
-    return e;
   }
 }
 
@@ -407,19 +420,6 @@ static Node* unary() {
     return node;
   } else {
     Node* node = postfix();
-
-    if ((tok = match(TLBRACK))) {
-      Node* offset = expr();
-      if (!match(TRBRACK)) {
-        parse_error("]", lt(0));
-      }
-      Node* deref = new_node(NDEREF, tok);
-      deref->expr = new_node(NPLUS, tok);
-      deref->expr->lhs = node;
-      deref->expr->rhs = offset;
-      node = deref;
-    }
-
     return node;
   }
 }
