@@ -286,6 +286,13 @@ int main() {
     (*a).y = 2;
     EXPECT(42, (*a).x * 10 + (*a).y);
   }
+  {
+    struct pair* a;
+    a = malloc(sizeof(struct pair));
+    a->x = 4;
+    a->y = 2;
+    EXPECT(42, a->x * 10 + a->y);
+  }
   return 0;
 }
 
