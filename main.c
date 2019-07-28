@@ -27,6 +27,7 @@ void runtest() {
 
 int main(int argc, char** argv)
 {
+  bool dump = false;
   if (argc < 1) {
     error("./hoc file_name\n");
   }
@@ -36,26 +37,32 @@ int main(int argc, char** argv)
     return 0;
   }
 
+  if (streq(argv[1], "-dump")) {
+    dump = true;
+  }
+
   FILE* fp;
-  if ((fp = fopen(argv[1], "r")) == NULL) {
+  if ((fp = fopen(argv[dump ? 2 : 1], "r")) == NULL) {
     return -1;
   }
 
   Token* tokens = lex(fp);
-
-  /* for (Token* t = tokens; t != NULL; t = t->next) { */
-  /*   dump_token(t); */
-  /* } */
-  /* eprintf("\n"); */
-
   fclose(fp);
 
-  Program* prog = parse(tokens);
+  if (dump) {
+    for (Token* t = tokens; t != NULL; t = t->next) {
+      dump_token(t);
+    }
+    eprintf("\n");
+  }
 
+  Program* prog = parse(tokens);
   sema(prog);
 
-  for (size_t i = 0; i < prog->funcs->length; i++) {
-    dump_function(prog->funcs->ptr[i]);
+  if (dump) {
+    for (size_t i = 0; i < prog->funcs->length; i++) {
+      dump_function(prog->funcs->ptr[i]);
+    }
   }
 
   gen_x86(prog);
