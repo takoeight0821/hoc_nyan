@@ -48,6 +48,7 @@ enum TokenTag {
   TOR_OR,
   TPERCENT,
   TARROW,
+  TPLUS_PLUS,
 };
 
 typedef struct Token {
