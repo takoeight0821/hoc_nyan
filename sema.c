@@ -29,11 +29,15 @@ Type* ret_type(char* name) {
 }
 
 int integer_type(Type* ty) {
-  return (ty->ty == TY_CHAR) || (ty->ty == TY_INT) || (ty->ty == TY_LONG);
+  return (ty->ty == TY_CHAR) || (ty->ty == TY_INT) || (ty->ty == TY_LONG) || (ty->ty == TY_PTR);
 }
 
 int assignable(Type* lhs, Type* rhs) {
   return (lhs->ty == rhs->ty) || (integer_type(lhs) && integer_type(rhs));
+}
+
+int is_equal_type(Type* t1, Type* t2) {
+  return (integer_type(t1) && integer_type(t2)) || t1->ty == t2->ty;
 }
 
 void walk(Node* node) {
@@ -208,7 +212,7 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (node->lhs->type->ty != node->rhs->type->ty) {
+    if (!is_equal_type(node->lhs->type, node->rhs->type)) {
       type_error(type_of(node->lhs), node->rhs);
     }
 
@@ -219,7 +223,7 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (node->lhs->type->ty != node->rhs->type->ty) {
+    if (!is_equal_type(node->lhs->type, node->rhs->type)) {
       type_error(type_of(node->lhs), node->rhs);
     }
 
