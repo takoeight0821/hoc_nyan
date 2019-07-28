@@ -308,6 +308,13 @@ int main() {
     int a = 42;
     EXPECT(42, a);
   }
+  {
+    int sum = 0;
+    for (int a = 0; a < 10; a = a + 1) {
+      sum = sum + a;
+    }
+    EXPECT(45, sum);
+  }
   return 0;
 }
 

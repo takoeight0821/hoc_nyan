@@ -658,10 +658,6 @@ static Node* declaration() {
     decl->rhs = assign();
   }
 
-  if (!match(TSEMICOLON)) {
-    parse_error(";", lt(0));
-  }
-
   return decl;
 };
 
@@ -677,7 +673,11 @@ static Node* expr_stmt() {
 static Node* statement() {
   Token* tok;
   if (is_typename(lt(0))) {
-    return declaration();
+    Node* node = declaration();
+    if (!match(TSEMICOLON)) {
+      parse_error(";", lt(0));
+    }
+    return node;
   } else if ((tok = match_keyword("return"))) {
     Node* node = new_node(NRETURN, tok);
     node->expr = expr();
@@ -726,22 +726,33 @@ static Node* statement() {
   } else if ((tok = match_keyword("for"))) {
     Node* node = new_node(NFOR, tok);
 
+    LVar* tmp = local_env;
     if (!match(TLPAREN)) {
       parse_error("(", lt(0));
     }
-    node->init = expr();
+
+    if (is_typename(lt(0))) {
+      node->init = declaration();
+    } else {
+      node->init = expr();
+    }
+
     if (!match(TSEMICOLON)) {
       parse_error(";", lt(0));
     }
     node->cond = expr();
+
     if (!match(TSEMICOLON)) {
       parse_error(";", lt(0));
     }
     node->step = expr();
+
     if(!match(TRPAREN)) {
       parse_error(")", lt(0));
     }
     node->body = statement();
+
+    local_env = tmp;
 
     return node;
   } else if ((tok = match(TLBRACE))) {
