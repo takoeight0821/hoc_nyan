@@ -304,6 +304,10 @@ int main() {
     a[4] = 42;
     EXPECT(42, b[0][4]);
   }
+  {
+    int a = 42;
+    EXPECT(42, a);
+  }
   return 0;
 }
 

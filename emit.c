@@ -360,6 +360,16 @@ void emit_node(Node* node) {
   }
   case NDEFVAR: {
     comment("start NDEFVAR");
+    if (node->lhs && node->rhs) {
+      comment("  start lval");
+      emit_lval(node->lhs);
+      comment("  end lval");
+      emit_node(node->rhs);
+      pop(DI);
+      pop(AX);
+      store(DI, size_of(type_of(node->lhs)));
+      push(DI);
+    }
     comment("end NDEFVAR");
     break;
   }

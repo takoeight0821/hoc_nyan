@@ -650,12 +650,17 @@ static Node* declarator(Type* ty) {
 static Node* declaration() {
   // variable definition
   Node* decl = declarator(type_specifier());
+  add_lvar(decl->token, decl->name, decl->type);
+
+  Token* tok;
+  if ((tok = match(TEQUAL))) {
+    decl->lhs = find_var(tok, decl->name);
+    decl->rhs = assign();
+  }
 
   if (!match(TSEMICOLON)) {
     parse_error(";", lt(0));
   }
-
-  add_lvar(decl->token, decl->name, decl->type);
 
   return decl;
 };

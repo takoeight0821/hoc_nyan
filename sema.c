@@ -247,6 +247,12 @@ void walk(Node* node) {
     break;
   }
   case NDEFVAR: {
+    if (node->lhs) {
+      walk(node->lhs);
+    }
+    if (node->rhs) {
+      walk(node->rhs);
+    }
     break;
   }
   case NASSIGN: {
