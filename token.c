@@ -366,6 +366,9 @@ void dump_token(Token* tok) {
   case TPERCENT:
     eprintf("[PERCENT]");
     break;
+  case TARROW:
+    eprintf("[ARROW]");
+    break;
   case TPLUS_PLUS:
     eprintf("[PLUS_PLUS]");
     break;
