@@ -28,18 +28,18 @@ void set(struct field* f, int x, int y, bool s) {
 struct field* make_field(int x_width, int y_width, bool** pattern) {
   struct field* f = malloc(sizeof(struct field));
   bool** cells = calloc(sizeof(bool*), x_width + 2);
-  for (int x = 0; x < x_width + 2; x++) {
+  for (int x = 0; x < x_width + 2; x = x + 1) {
     cells[x] = calloc(sizeof(bool), y_width + 2);
   }
   if (pattern == 0) {
-    for (int x = 1; x < x_width + 1; x++) {
-      for (int y = 1; y < y_width + 1; y++) {
+    for (int x = 1; x < x_width + 1; x = x + 1) {
+      for (int y = 1; y < y_width + 1; y = y + 1) {
         cells[x][y] = rand() % 2;
       }
     }
   } else {
-    for (int x = 1; x < x_width + 1; x++) {
-      for (int y = 1; y < y_width + 1; y++) {
+    for (int x = 1; x < x_width + 1; x = x + 1) {
+      for (int y = 1; y < y_width + 1; y = y + 1) {
         cells[x][y] = pattern[x][y];
       }
     }
@@ -50,7 +50,7 @@ struct field* make_field(int x_width, int y_width, bool** pattern) {
   return f;
 }
 void free_field(struct field* f) {
-  for (int x = 0; x < f->x_width + 2; x++) {
+  for (int x = 0; x < f->x_width + 2; x = x + 1) {
     free(f->cells[x]);
   }
   free(f->cells);
@@ -64,8 +64,8 @@ char to_char(bool c) {
   }
 }
 void print_field(struct field* f) {
-  for (int x = 0; x < f->x_width; x++) {
-    for (int y = 0; y < f->y_width; y++) {
+  for (int x = 0; x < f->x_width; x = x + 1) {
+    for (int y = 0; y < f->y_width; y = y + 1) {
       printf("%c", to_char(view(f, x, y)));
     }
     printf("\n");
@@ -73,9 +73,9 @@ void print_field(struct field* f) {
 }
 bool next_state(struct field* f, int x, int y) {
   int living = 0;
-  living += view(f, x-1, y-1) + view(f, x-1, y) + view(f, x-1, y+1);
-  living += view(f, x, y-1) + view(f, x, y+1);
-  living += view(f, x+1, y-1) + view(f, x+1, y) + view(f, x+1, y+1);
+  living = living + view(f, x-1, y-1) + view(f, x-1, y) + view(f, x-1, y+1);
+  living = living + view(f, x, y-1) + view(f, x, y+1);
+  living = living + view(f, x+1, y-1) + view(f, x+1, y) + view(f, x+1, y+1);
   if (view(f, x, y)) {
     return living == 2 || living == 3;
   } else {
@@ -84,8 +84,8 @@ bool next_state(struct field* f, int x, int y) {
 }
 void update_field(struct field* f) {
   struct field* copy = make_field(f->x_width, f->y_width, f->cells);
-  for (int x = 0; x < f->x_width; x++) {
-    for (int y = 0; y < f->y_width; y++) {
+  for (int x = 0; x < f->x_width; x = x + 1) {
+    for (int y = 0; y < f->y_width; y = y + 1) {
       int s = next_state(copy, x, y);
       set(f, x, y, s);
     }
@@ -97,14 +97,16 @@ int main(int argc, char** argv) {
     fprintf(stderr, "usage: %s x y times\n", argv[0]);
     exit(1);
   }
-  int x, y, times;
+  int x;
+  int y;
+  int times;
   sscanf(argv[1], "%d", &x);
   sscanf(argv[2], "%d", &y);
   sscanf(argv[3], "%d", &times);
   struct field* f = make_field(x, y, 0);
   print_field(f);
-  for (int i = 0; i < times; i++) {
-    for (int j = 0; j < y; j++) {
+  for (int i = 0; i < times; i = i + 1) {
+    for (int j = 0; j < y; j = j + 1) {
       printf("-");
     }
     printf("\n");
