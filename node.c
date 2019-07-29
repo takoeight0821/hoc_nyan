@@ -8,7 +8,6 @@ Node* new_node(enum NodeTag tag, Token* token) {
 }
 
 size_t size_of(Type* ty) {
-  assert(ty);
   switch (ty->ty) {
   case TY_VOID:
     return 0;
@@ -106,7 +105,6 @@ size_t field_offset(Field* fields, char* name) {
 }
 
 void show_type_(StringBuilder* sb, Type* ty) {
-  assert(ty);
   switch (ty->ty) {
   case TY_VOID:
     sb_puts(sb, "void");
@@ -157,8 +155,6 @@ void indent(int level) {
 }
 
 void dump_node(Node* node, int level) {
-  assert(node);
-
   switch (node->tag) {
   case NINT:
     indent(level);

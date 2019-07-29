@@ -168,7 +168,6 @@ static Token* lt(size_t i) {
 }
 
 static enum TokenTag la(size_t i) {
-  assert(lt(i));
   return lt(i)->tag;
 }
 
@@ -425,9 +424,10 @@ static Node* unary() {
 }
 
 static Node* variable() {
-  assert(la(0) == TIDENT);
   Node* node = find_var(lt(0), lt(0)->ident);
-  consume();
+  if (!match(TIDENT)) {
+    parse_error("indent", lt(0));
+  }
   return node;
 }
 

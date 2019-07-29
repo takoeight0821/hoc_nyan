@@ -100,11 +100,12 @@ void emit_lval(Node* node) {
     emit("lea rax, %zu[rax]", offset);
     push(AX);
     comment("end lval NMEMBER");
-  } else {
-    assert(node->tag == NDEREF);
+  } else if (node->tag == NDEREF){
     comment("start lval NDEREF");
     emit_node(node->expr);
     comment("end lval NDEREF");
+  } else {
+    bad_token(node->token, "emit error: emit_lval");
   }
 }
 
@@ -539,9 +540,7 @@ void emit_node(Node* node) {
     break;
   }
   default:
-    eprintf("emit error: ");
-    dump_node(node, 0);
-    error(" unimplemented\n");
+    bad_token(node->token, "emit error: umimplemented");
   }
 }
 

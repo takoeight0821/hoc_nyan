@@ -41,8 +41,6 @@ int is_equal_type(Type* t1, Type* t2) {
 }
 
 void walk(Node* node) {
-  assert(node);
-
   switch (node->tag) {
   case NINT: {
     node->type = int_type();
@@ -289,34 +287,27 @@ void walk(Node* node) {
   }
   case NDEREF: {
     walk(node->expr);
-
     node->type = node->expr->type->ptr_to;
-
-    assert(node->type);
     break;
   }
   case NMEMBER: {
     walk(node->expr);
     node->type = field_type(node->expr->type->fields, node->name);
-    assert(node->type);
     break;
   }
   case NEXPR_STMT: {
     walk(node->expr);
-
     node->type = NULL;
     break;
   }
   case NRETURN: {
     walk(node->expr);
-
     node->type = NULL;
     break;
   }
   case NIF: {
     walk(node->cond);
     walk(node->then);
-
     node->type = NULL;
     break;
   }
@@ -324,14 +315,12 @@ void walk(Node* node) {
     walk(node->cond);
     walk(node->then);
     walk(node->els);
-
     node->type = NULL;
     break;
   }
   case NWHILE: {
     walk(node->cond);
     walk(node->body);
-
     node->type = NULL;
     break;
   }
@@ -340,7 +329,6 @@ void walk(Node* node) {
     walk(node->cond);
     walk(node->step);
     walk(node->body);
-
     node->type = NULL;
     break;
   }
@@ -348,16 +336,12 @@ void walk(Node* node) {
     for (size_t i = 0; i < node->stmts->length; i++) {
       walk(node->stmts->ptr[i]);
     }
-
     node->type = NULL;
     break;
   }
   case NSIZEOF: {
     walk(node->expr);
-
-    node->type = new_type();
-    node->type->ty = TY_INT;
-
+    node->type = int_type();
     break;
   }
   case NSTRING: {

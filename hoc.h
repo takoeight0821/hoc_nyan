@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdnoreturn.h>
 #include <stdbool.h>
 #include <ctype.h>
