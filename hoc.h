@@ -161,6 +161,7 @@ typedef struct {
   Node* body;
   Vector* params;
   size_t local_size;
+  bool is_static;
 } Function;
 
 typedef struct GVar {

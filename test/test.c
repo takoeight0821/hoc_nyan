@@ -53,6 +53,12 @@ void void_fun() {
 
 }
 
+static int static_global_a;
+
+static int static_func() {
+  return 0;
+}
+
 int main() {
   EXPECT(0, 0);
   EXPECT(42, 40 + 2);
@@ -315,6 +321,7 @@ int main() {
     }
     EXPECT(45, sum);
   }
+  EXPECT(0, static_func());
   return 0;
 }
 

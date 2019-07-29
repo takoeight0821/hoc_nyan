@@ -779,7 +779,7 @@ static Node* statement() {
 
 static void global_var(void);
 
-static Function* funcdef() {
+static Function* funcdef(bool is_static) {
   Token* back = lt(0);
   Type* ret_type = type_specifier();
 
@@ -834,6 +834,7 @@ static Function* funcdef() {
     func->body = NULL;
     func->params = params;
     func->local_size = local_size;
+    func->is_static = is_static;
     return func;
   }
 
@@ -847,6 +848,7 @@ static Function* funcdef() {
   func->body = body;
   func->params = params;
   func->local_size = local_size;
+  func->is_static = is_static;
 
   return func;
 }
@@ -905,8 +907,10 @@ static Function* toplevel() {
     global_var();
     global_env->is_extern = true;
     return NULL;
+  } else if (match_keyword("static")) {
+    return funcdef(true);
   } else {
-    return funcdef();
+    return funcdef(false);
   }
 }
 

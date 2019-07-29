@@ -555,8 +555,10 @@ static void emit_function(Function* func) {
 
   func_end_label = new_label("end");
 
-  /* puts(".text"); */
-  printf(".global %s\n", func->name);
+  if (!func->is_static) {
+    printf(".global %s\n", func->name);
+  }
+
   printf("%s:\n", func->name);
 
   emit("push rbp");
