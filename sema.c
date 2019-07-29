@@ -28,16 +28,16 @@ Type* ret_type(char* name) {
   return int_type();
 }
 
-int integer_type(Type* ty) {
+int is_integer_type(Type* ty) {
   return (ty->ty == TY_CHAR) || (ty->ty == TY_INT) || (ty->ty == TY_LONG) || (ty->ty == TY_PTR);
 }
 
-int assignable(Type* lhs, Type* rhs) {
-  return (lhs->ty == rhs->ty) || (integer_type(lhs) && integer_type(rhs));
+int is_assignable(Type* lhs, Type* rhs) {
+  return (lhs->ty == rhs->ty) || (is_integer_type(lhs) && is_integer_type(rhs));
 }
 
 int is_equal_type(Type* t1, Type* t2) {
-  return (integer_type(t1) && integer_type(t2)) || t1->ty == t2->ty;
+  return (is_integer_type(t1) && is_integer_type(t2)) || t1->ty == t2->ty;
 }
 
 void walk(Node* node) {
@@ -56,10 +56,10 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (!(node->lhs->type->ty == TY_PTR || integer_type(node->lhs->type))) {
+    if (!(node->lhs->type->ty == TY_PTR || is_integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (!(integer_type(node->rhs->type))) {
+    if (!(is_integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
@@ -84,10 +84,10 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (!(node->lhs->type->ty == TY_PTR || integer_type(node->lhs->type))) {
+    if (!(node->lhs->type->ty == TY_PTR || is_integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (!(integer_type(node->rhs->type))) {
+    if (!(is_integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
@@ -112,10 +112,10 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (!(integer_type(node->lhs->type))) {
+    if (!(is_integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (!(integer_type(node->rhs->type))) {
+    if (!(is_integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
@@ -126,10 +126,10 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (!(integer_type(node->lhs->type))) {
+    if (!(is_integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (!(integer_type(node->rhs->type))) {
+    if (!(is_integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
@@ -140,10 +140,10 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (!(integer_type(node->lhs->type))) {
+    if (!(is_integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (!(integer_type(node->rhs->type))) {
+    if (!(is_integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
@@ -154,10 +154,10 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (!(integer_type(node->lhs->type))) {
+    if (!(is_integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (!(integer_type(node->rhs->type))) {
+    if (!(is_integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
@@ -168,10 +168,10 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (!(integer_type(node->lhs->type))) {
+    if (!(is_integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (!(integer_type(node->rhs->type))) {
+    if (!(is_integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
@@ -182,10 +182,10 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (!(integer_type(node->lhs->type))) {
+    if (!(is_integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (!(integer_type(node->rhs->type))) {
+    if (!(is_integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
@@ -196,10 +196,10 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (!(integer_type(node->lhs->type))) {
+    if (!(is_integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
-    if (!(integer_type(node->rhs->type))) {
+    if (!(is_integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
@@ -230,7 +230,7 @@ void walk(Node* node) {
   }
   case NNOT: {
     walk(node->expr);
-    if (!integer_type(node->expr->type)) {
+    if (!is_integer_type(node->expr->type)) {
       type_error(int_type(), node->expr);
     }
     node->type = int_type();
@@ -263,7 +263,7 @@ void walk(Node* node) {
 
     node->type = node->rhs->type;
 
-    if (!assignable(type_of(node->lhs), type_of(node->rhs))) {
+    if (!is_assignable(type_of(node->lhs), type_of(node->rhs))) {
       type_error(type_of(node->lhs), node->rhs);
     }
 
