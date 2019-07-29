@@ -66,6 +66,10 @@ int main() {
   EXPECT(21, 42 / 2);
   EXPECT(15, 5 * (9 - 6));
   EXPECT(4, (3 + 5) / 2);
+  EXPECT(-1, 1 * -1);
+  EXPECT(-1, -1 * 1);
+  EXPECT(1, -1 * -1);
+  EXPECT(1, -1 / -1);
   {
     int a;
     a = 42;
