@@ -1,10 +1,10 @@
 #include "hoc.h"
 
-Vector* funcs; // Vector(Function*)
+static Vector* funcs; // Vector(Function*)
 
-void walk(Node*);
+static void walk(Node*);
 
-void type_error(Type* expected, Node* node) {
+static void type_error(Type* expected, Node* node) {
   bad_token(node->token, format("expected %s, but got %s\n", show_type(expected), show_type(type_of(node))));
 }
 
@@ -18,7 +18,7 @@ void sema(Program* prog) {
   }
 }
 
-Type* ret_type(char* name) {
+static Type* ret_type(char* name) {
   for (size_t i = 0; i < funcs->length; i++) {
     Function* fn = funcs->ptr[i];
     if (streq(name, fn->name)) {
@@ -28,19 +28,19 @@ Type* ret_type(char* name) {
   return int_type();
 }
 
-int is_integer_type(Type* ty) {
+static int is_integer_type(Type* ty) {
   return (ty->ty == TY_CHAR) || (ty->ty == TY_INT) || (ty->ty == TY_LONG) || (ty->ty == TY_PTR);
 }
 
-int is_assignable(Type* lhs, Type* rhs) {
+static int is_assignable(Type* lhs, Type* rhs) {
   return (lhs->ty == rhs->ty) || (is_integer_type(lhs) && is_integer_type(rhs));
 }
 
-int is_equal_type(Type* t1, Type* t2) {
+static int is_equal_type(Type* t1, Type* t2) {
   return (is_integer_type(t1) && is_integer_type(t2)) || t1->ty == t2->ty;
 }
 
-void walk(Node* node) {
+static void walk(Node* node) {
   switch (node->tag) {
   case NINT: {
     node->type = int_type();

@@ -113,7 +113,7 @@ static size_t intern(char* str) {
   return offset;
 }
 
-void add_typedef(char* name, Type* type) {
+static void add_typedef(char* name, Type* type) {
   TypeDef* td = calloc(1, sizeof(TypeDef));
   td->name = name;
   td->type = type;
@@ -121,7 +121,7 @@ void add_typedef(char* name, Type* type) {
   typedefs = td;
 }
 
-void init_typedef(void) {
+static void init_typedef(void) {
   add_typedef("void", void_type());
   add_typedef("char", char_type());
   add_typedef("int", int_type());
@@ -211,7 +211,7 @@ static Node* logical_or();
 static Node* statement();
 static Node* declarator(Type* ty);
 
-void set_field_offset(Type* t) {
+static void set_field_offset(Type* t) {
   size_t offset = 0;
   for (Field* f = t->fields; f != NULL; f = f->next) {
     f->offset = offset;
@@ -777,9 +777,9 @@ static Node* statement() {
   }
 }
 
-void global_var(void);
+static void global_var(void);
 
-Function* funcdef() {
+static Function* funcdef() {
   Token* back = lt(0);
   Type* ret_type = type_specifier();
 
@@ -851,7 +851,7 @@ Function* funcdef() {
   return func;
 }
 
-void type_alias_def(void) {
+static void type_alias_def(void) {
   Type* ty = type_specifier();
   if (la(0) != TIDENT) {
     parse_error("ident", lt(0));
@@ -863,7 +863,7 @@ void type_alias_def(void) {
   }
 }
 
-void global_var(void) {
+static void global_var(void) {
   Type* type = type_specifier();
 
   while (match(TASTERISK)) {
@@ -897,7 +897,7 @@ void global_var(void) {
   }
 }
 
-Function* toplevel() {
+static Function* toplevel() {
   if (match_keyword("typedef")) {
     type_alias_def();
     return NULL;

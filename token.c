@@ -4,10 +4,10 @@
 #define MAX_LENGTH 4096
 
 // ソースコード
-char* src;
-char* cur;
+static char* src;
+static char* cur;
 
-void print_line(char* pos) {
+static void print_line(char* pos) {
   size_t line = 0;
   size_t column = 0;
   char* start = src; // 出力する行の先頭文字
@@ -178,9 +178,6 @@ static Token* next_token() {
         return new_token(TNE, cur - 2);
       default:
         return new_token(TNOT, cur - 1);
-        /* // TODO `not` operator */
-        /* print_line(cur); */
-        /* error("invalid character: %c\n", *cur); */
       }
     case '(':
       consume();

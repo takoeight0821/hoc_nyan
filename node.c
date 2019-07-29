@@ -104,7 +104,7 @@ size_t field_offset(Field* fields, char* name) {
   error("unreachable(field_offset)");
 }
 
-void show_type_(StringBuilder* sb, Type* ty) {
+static void show_type_(StringBuilder* sb, Type* ty) {
   switch (ty->ty) {
   case TY_VOID:
     sb_puts(sb, "void");
@@ -150,7 +150,7 @@ static char* show_indent(int level) {
   return format("%*s", level, "");
 }
 
-void indent(int level) {
+static void indent(int level) {
   eprintf("%s", show_indent(level));
 }
 

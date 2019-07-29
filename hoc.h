@@ -8,8 +8,6 @@
 #include <string.h>
 #include <stddef.h>
 
-extern char* src;
-
 typedef struct {
   void **ptr;
   size_t capacity;

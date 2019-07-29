@@ -41,27 +41,27 @@ static void comment(char *fmt, ...) {
   printf("\n");
 }
 
-void push(Reg src) {
+static void push(Reg src) {
   printf("\tpush %s\n", reg64[src]);
   stack_size += 8;
 }
 
-void pushi(int src) {
+static void pushi(int src) {
   printf("\tpush %d\n", src);
   stack_size += 8;
 }
 
-void pushstring(char* l) {
+static void pushstring(char* l) {
   emit("lea rax, %s", l);
   push(AX);
 }
 
-void pop(Reg dst) {
+static void pop(Reg dst) {
   printf("\tpop %s\n", reg64[dst]);
   stack_size -= 8;
 }
 
-void load(Reg dst, size_t size) {
+static void load(Reg dst, size_t size) {
   if (size == 1) {
     // 8bitの値は自動では0拡張されないので、movzxを使う
     // 32bit整数との演算を行うので32bitレジスタにロードする
@@ -71,20 +71,20 @@ void load(Reg dst, size_t size) {
   }
 }
 
-void store(Reg src, size_t size) {
+static void store(Reg src, size_t size) {
   emit("mov [rax], %s", reg(src, size));
 }
 
-void emit_node(Node*);
+static void emit_node(Node*);
 
-void emit_var(Node* var) {
+static void emit_var(Node* var) {
   comment("start lval NVAR %s", var->name);
   emit("lea rax, -%zu[rbp]", var->offset);
   push(AX);
   comment("end lval NVAR %s", var->name);
 }
 
-void emit_lval(Node* node) {
+static void emit_lval(Node* node) {
   if (node->tag == NVAR) {
     emit_var(node);
   } else if (node->tag == NGVAR) {
@@ -109,7 +109,7 @@ void emit_lval(Node* node) {
   }
 }
 
-void emit_node(Node* node) {
+static void emit_node(Node* node) {
   switch (node->tag) {
   case NINT:
     comment("start NINT");
@@ -544,7 +544,7 @@ void emit_node(Node* node) {
   }
 }
 
-void emit_function(Function* func) {
+static void emit_function(Function* func) {
   comment("start Function");
 
   if (func->body == NULL) {
