@@ -108,13 +108,14 @@ bool next_state(struct field* f, int x, int y) {
 void update_field(struct field* f) {
   struct field* copy = make_field(f->x_width, f->y_width, f->cells);
 
-
   for (int x = 0; x < f->x_width; x = x + 1) {
     for (int y = 0; y < f->y_width; y = y + 1) {
       int s = next_state(copy, x, y);
       set(f, x, y, s);
     }
   }
+
+  free_field(copy);
 }
 
 int main(int argc, char** argv) {

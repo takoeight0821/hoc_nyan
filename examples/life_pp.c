@@ -90,6 +90,7 @@ void update_field(struct field* f) {
       set(f, x, y, s);
     }
   }
+  free_field(copy);
 }
 int main(int argc, char** argv) {
   srand(time(0));
