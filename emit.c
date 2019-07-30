@@ -403,19 +403,18 @@ static void emit_node(Node* node) {
 
     // スタックをがりがりいじりながらコード生成してるので、
     // rspのアライメントをうまいこと扱う必要がある。
-    // push/popの回数をカウントしておく。偶数なら何もしない。奇数ならrsp -= 8。関数が戻ってきたらrsp += 8
-    bool ispadding = stack_size % 16;
-    if (ispadding) {
-      emit("sub rsp, 8");
-      stack_size += 8;
+    int pad = stack_size % 16;
+    if (pad) {
+      emit("sub rsp, %d", pad);
+      stack_size += pad;
     }
     emit("call %s", node->name);
     pop(R11);
     pop(R10);
 
-    if (ispadding) {
-      emit("add rsp, 8");
-      stack_size -= 8;
+    if (pad) {
+      emit("add rsp, %d", pad);
+      stack_size -= pad;
     }
 
     push(AX);
@@ -564,7 +563,7 @@ static void emit_function(Function* func) {
   emit("push rbp");
   emit("mov rbp, rsp");
   emit("sub rsp, %lu", func->local_size);
-  stack_size += func->local_size;
+  stack_size += func->local_size + 8;
 
   for (size_t i = 0; i < func->params->length; i++) {
     Node* param = func->params->ptr[i];
