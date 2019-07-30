@@ -326,6 +326,8 @@ int main() {
     EXPECT(45, sum);
   }
   EXPECT(0, static_func());
+  EXPECT(10, '\n');
+  EXPECT(9, '\t');
   return 0;
 }
 

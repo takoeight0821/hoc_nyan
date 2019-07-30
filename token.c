@@ -223,7 +223,22 @@ static Token* next_token() {
     case '\'': {
       consume();
       Token* t = new_token(TINT, cur - 1);
-      t->integer = *cur;
+      if (*cur == '\\') {
+        consume();
+        switch (*cur) {
+        case 'n':
+          t->integer = '\n';
+          break;
+        case 't':
+          t->integer = '\t';
+          break;
+        default:
+          print_line(cur);
+          error("invalid character: %c\n", *cur);
+        }
+      } else {
+        t->integer = *cur;
+      }
       consume();
       if (*cur != '\'') {
         print_line(cur);
