@@ -7,9 +7,12 @@ hoc: $(OBJS)
 
 $(OBJS): hoc.h
 
-test: hoc test/test.c test.sh
+test: FORCE
 	./hoc -test
 	./test.sh
 
 clean:
 	$(RM) hoc $(OBJS)
+
+FORCE:
+.PHONY: clean FORCE
