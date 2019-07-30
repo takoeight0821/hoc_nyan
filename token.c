@@ -207,13 +207,9 @@ static Token* next_token() {
       char* start = cur;
       consume();
       StringBuilder* sb = new_sb();
-      while(*cur != '\"' || *cur == '\0') {
+      while (*(cur - 1) == '\\' || *cur != '\"') {
         sb_putc(sb, *cur);
         consume();
-      }
-      if (*cur == '\0') {
-        print_line(cur);
-        error("invalid character: %c\n", *cur);
       }
       consume();
       Token* tok = new_token(TSTRING, start);
@@ -226,15 +222,39 @@ static Token* next_token() {
       if (*cur == '\\') {
         consume();
         switch (*cur) {
+        case 'a':
+          t->integer = '\a';
+          break;
+        case 'b':
+          t->integer = '\b';
+          break;
+        case 'f':
+          t->integer = '\f';
+          break;
         case 'n':
           t->integer = '\n';
+          break;
+        case 'r':
+          t->integer = '\r';
           break;
         case 't':
           t->integer = '\t';
           break;
+        case 'v':
+          t->integer = '\v';
+          break;
+        case '\\':
+          t->integer = '\\';
+          break;
+        case '\'':
+          t->integer = '\'';
+          break;
+        case '\"':
+          t->integer = '\"';
+          break;
         default:
           print_line(cur);
-          error("invalid character: %c\n", *cur);
+          error("invalid escape sequence: %c\n", *cur);
         }
       } else {
         t->integer = *cur;

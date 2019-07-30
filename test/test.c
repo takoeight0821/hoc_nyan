@@ -328,6 +328,7 @@ int main() {
   EXPECT(0, static_func());
   EXPECT(10, '\n');
   EXPECT(9, '\t');
+  EXPECT(1, printf("\""));
   return 0;
 }
 
