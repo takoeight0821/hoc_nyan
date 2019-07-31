@@ -448,6 +448,9 @@ static void emit_node(Node* node) {
   case NEXPR_STMT:
     comment("start NEXPR_STMT");
     emit_node(node->expr);
+    if (node->expr->type != NULL || node->expr->type->ty != TY_VOID) {
+      pop(AX);
+    }
     comment("end NEXPR_STMT");
     break;
   case NRETURN:
