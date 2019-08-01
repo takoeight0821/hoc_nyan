@@ -30,6 +30,7 @@ enum TokenTag {
   TRBRACE,
   TLBRACK,
   TRBRACK,
+  TCOLON,
   TSEMICOLON,
   TCOMMA,
   TEQ,
@@ -90,6 +91,8 @@ enum NodeTag {
     NBLOCK,
     NSIZEOF,
     NSTRING,
+    NSWITCH,
+    NBREAK,
 };
 
 enum TypeTag {
@@ -124,6 +127,8 @@ typedef struct Field {
   size_t offset;
 } Field;
 
+typedef struct Case Case;
+
 typedef struct Node {
   enum NodeTag tag;
   Token* token; // for error reporting
@@ -153,7 +158,17 @@ typedef struct Node {
   struct Node* step;
   struct Node* body;
 
+  // "switch" ( expr ) {
+  //   "case" ( value ) : stmts
+  // }
+  Case* clauses;
 } Node;
+
+typedef struct Case {
+  Case* next;
+  Node* value;
+  Vector* stmts;
+} Case;
 
 typedef struct {
   char* name;

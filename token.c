@@ -197,6 +197,9 @@ static Token* next_token() {
     case ']':
       consume();
       return new_token(TRBRACK, cur - 1);
+    case ':':
+      consume();
+      return new_token(TCOLON, cur - 1);
     case ';':
       consume();
       return new_token(TSEMICOLON, cur - 1);
@@ -373,6 +376,9 @@ void dump_token(Token* tok) {
     break;
   case TRBRACK:
     eprintf("[RBRACK]");
+    break;
+  case TCOLON:
+    eprintf("[COLON]");
     break;
   case TSEMICOLON:
     eprintf("[SEMICOLON]");
