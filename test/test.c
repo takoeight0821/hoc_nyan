@@ -329,6 +329,7 @@ int main() {
   EXPECT(10, '\n');
   EXPECT(9, '\t');
   EXPECT(1, printf("\""));
+  switch (0) {}
   return 0;
 }
 

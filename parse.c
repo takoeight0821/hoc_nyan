@@ -685,6 +685,12 @@ static Node* statement() {
       parse_error(";", lt(0));
     }
     return node;
+  } else if ((tok = match_keyword("break"))) {
+    Node* node = new_node(NBREAK, tok);
+    if (!match(TSEMICOLON)) {
+      parse_error(";", lt(0));
+    }
+    return node;
   } else if ((tok = match_keyword("if"))) {
     if (!match(TLPAREN)) {
       parse_error("(", lt(0));
@@ -753,6 +759,20 @@ static Node* statement() {
     node->body = statement();
 
     local_env = tmp;
+
+    return node;
+  } else if ((tok = match_keyword("switch"))) {
+    Node* node = new_node(NSWITCH, tok);
+
+    if (!match(TLPAREN)) {
+      parse_error("(", tok);
+    }
+    node->expr = expr();
+    if (!match(TRPAREN)) {
+      parse_error(")", tok);
+    }
+
+    node->body = statement();
 
     return node;
   } else if ((tok = match(TLBRACE))) {
