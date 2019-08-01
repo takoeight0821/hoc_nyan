@@ -331,10 +331,13 @@ int main() {
   EXPECT(1, printf("\""));
   switch (0) {
   case 0:
-    void_fun();
-    break;
+    printf("case 0\n");
   case 1:
-    void_fun();
+    printf("case 0 or 1\n");
+    break;
+  case 2:
+    printf("case 2\n");
+    break;
   }
   return 0;
 }

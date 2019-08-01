@@ -7,6 +7,7 @@ static Reg argregs[] = {DI, SI, DX, CX, R8, R9};
 static unsigned int label_id = 0;
 static int stack_size = 0;
 static char* func_end_label;
+static char* break_label = NULL;
 
 static char* reg(Reg r, size_t s) {
   if (s == 1) {
@@ -539,6 +540,49 @@ static void emit_node(Node* node) {
     /* pushlabel(format(".string_%zu", node->str_id)); */
     pushstring(format(".string_%zu", node->str_id));
     comment("end NSTRING");
+    break;
+  }
+  case NSWITCH: {
+    comment("start NSWITCH");
+    emit_node(node->expr);
+
+    Node* clause;
+    while (node->cases->length > 0) {
+      clause = vec_pop(node->cases);
+      emit_node(clause->expr); // TODO: emit_const
+      pop(DI);
+      pop(AX);
+      push(AX);
+      size_t size = size_of(type_of(node->expr));
+      emit("cmp %s, %s", reg(AX, size), reg(DI, size));
+      emit("je %s", clause->name);
+    }
+    pop(AX); // pop node->expr
+
+    char* prev_break = break_label;
+    break_label = new_label("break");
+
+    emit_node(node->body);
+
+    printf("%s:\n", break_label);
+    break_label = prev_break;
+    comment("end NSWITCH");
+    break;
+  }
+  case NCASE: {
+    comment("start NCASE");
+    printf("%s:\n", node->name);
+    emit_node(node->body);
+    if (type_of(node->body) != NULL && type_of(node->body)->ty != TY_VOID) {
+      pop(AX); // pop unused value
+    }
+    comment("end NCASE");
+    break;
+  }
+  case NBREAK: {
+    comment("start NBREAK");
+    emit("jmp %s", break_label);
+    comment("end NBREAK");
     break;
   }
   default:

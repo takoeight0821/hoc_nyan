@@ -79,11 +79,7 @@ Type* ptr_to(Type* type) {
 }
 
 Type* type_of(Node* node) {
-  if (node->type) {
-    return node->type;
-  } else {
-    error("node must be type checked");
-  }
+  return node->type;
 }
 
 Type* field_type(Field* fields, char* name) {
