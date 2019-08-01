@@ -348,5 +348,19 @@ static void walk(Node* node) {
     node->type = ptr_to(char_type());
     break;
   }
+  case NSWITCH: {
+    walk(node->expr);
+    node->type = NULL;
+    break;
+  }
+  case NCASE: {
+    walk(node->expr);
+    node->type = NULL;
+    break;
+  }
+  case NBREAK: {
+    node->type = NULL;
+    break;
+  }
   }
 }

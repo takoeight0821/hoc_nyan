@@ -405,6 +405,27 @@ void dump_node(Node* node, int level) {
     eprintf("\"%s\"\n", node->token->str);
     break;
   }
+  case NSWITCH: {
+    indent(level);
+    eprintf("(switch\n");
+    dump_node(node->expr, level + 1);
+    indent(level);
+    eprintf(")\n");
+    break;
+  }
+  case NCASE: {
+    indent(level);
+    eprintf("(case\n");
+    dump_node(node->expr, level + 1);
+    indent(level);
+    eprintf(")\n");
+    break;
+  }
+  case NBREAK: {
+    indent(level);
+    eprintf("(break)");
+    break;
+  }
   }
 }
 
