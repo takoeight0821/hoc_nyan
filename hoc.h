@@ -164,6 +164,8 @@ typedef struct Node {
   struct Node* init;
   struct Node* step;
   struct Node* body;
+
+  Vector* cases; // for switch-case
 } Node;
 
 typedef struct {
