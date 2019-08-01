@@ -74,3 +74,8 @@ static Map* global_env; // Map(char*, GVar)
 
 構造体名と定義のマップが必要。
 パース時に作っとく。
+
+# switch-case
+
+switchノードにcaseノードへのポインタのVectorを持たせる。
+emitかsemaで各caseノードにラベルを割り当て、.nameフィールドに書き込む。
