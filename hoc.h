@@ -92,6 +92,7 @@ enum NodeTag {
     NSIZEOF,
     NSTRING,
     NSWITCH,
+    NCASE,
     NBREAK,
 };
 
@@ -127,8 +128,6 @@ typedef struct Field {
   size_t offset;
 } Field;
 
-typedef struct Case Case;
-
 typedef struct Node {
   enum NodeTag tag;
   Token* token; // for error reporting
@@ -138,7 +137,14 @@ typedef struct Node {
   struct Node* rhs; // right-hand side
   int integer; // integer literal
   Vector* stmts; // block
-  struct Node* expr; // "return" or expression stmt or address-of or dereference or subscription
+
+  // "return" expr
+  // "case" expr ":"
+  // expr ";"
+  // "&" expr
+  // "*" expr
+  // expr "." name
+  struct Node* expr;
   size_t str_id; // string literal
 
   char* name; // function call, variable definition, variable
@@ -151,6 +157,7 @@ typedef struct Node {
   // "if" ( cond ) then "else" els
   // "for" ( init; cond; step ) body
   // "while" ( cond ) body
+  // "switch" ( expr ) body
   struct Node* cond;
   struct Node* then;
   struct Node* els;
@@ -158,17 +165,7 @@ typedef struct Node {
   struct Node* step;
   struct Node* body;
 
-  // "switch" ( expr ) {
-  //   "case" ( value ) : stmts
-  // }
-  Case* clauses;
 } Node;
-
-typedef struct Case {
-  Case* next;
-  Node* value;
-  Vector* stmts;
-} Case;
 
 typedef struct {
   char* name;
