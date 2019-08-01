@@ -418,6 +418,7 @@ void dump_node(Node* node, int level) {
     indent(level);
     eprintf("(case\n");
     dump_node(node->expr, level + 1);
+    dump_node(node->body, level + 1);
     indent(level);
     eprintf(")\n");
     break;

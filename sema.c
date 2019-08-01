@@ -356,6 +356,7 @@ static void walk(Node* node) {
   }
   case NCASE: {
     walk(node->expr);
+    walk(node->body);
     node->type = NULL;
     break;
   }

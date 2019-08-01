@@ -139,7 +139,6 @@ typedef struct Node {
   Vector* stmts; // block
 
   // "return" expr
-  // "case" expr ":"
   // expr ";"
   // "&" expr
   // "*" expr
@@ -158,6 +157,7 @@ typedef struct Node {
   // "for" ( init; cond; step ) body
   // "while" ( cond ) body
   // "switch" ( expr ) body
+  // "case" const_expr ":" body
   struct Node* cond;
   struct Node* then;
   struct Node* els;
