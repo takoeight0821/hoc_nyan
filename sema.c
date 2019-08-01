@@ -350,6 +350,7 @@ static void walk(Node* node) {
   }
   case NSWITCH: {
     walk(node->expr);
+    walk(node->body);
     node->type = NULL;
     break;
   }
