@@ -28,3 +28,7 @@ void* vec_pop(Vector* v) {
 intptr_t vec_popi(Vector* v) {
   return (intptr_t)vec_pop(v);
 }
+
+void* vec_last(Vector* v) {
+  return v->ptr[v->length - 1];
+}

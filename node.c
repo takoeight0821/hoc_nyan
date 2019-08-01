@@ -416,7 +416,7 @@ void dump_node(Node* node, int level) {
   }
   case NCASE: {
     indent(level);
-    eprintf("(case\n");
+    eprintf("(case(%s)\n", node->name);
     dump_node(node->expr, level + 1);
     dump_node(node->body, level + 1);
     indent(level);
@@ -425,7 +425,7 @@ void dump_node(Node* node, int level) {
   }
   case NBREAK: {
     indent(level);
-    eprintf("(break)");
+    eprintf("(break)\n");
     break;
   }
   }

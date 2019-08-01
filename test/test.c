@@ -329,7 +329,13 @@ int main() {
   EXPECT(10, '\n');
   EXPECT(9, '\t');
   EXPECT(1, printf("\""));
-  switch (0) {}
+  switch (0) {
+  case 0:
+    void_fun();
+    break;
+  case 1:
+    void_fun();
+  }
   return 0;
 }
 

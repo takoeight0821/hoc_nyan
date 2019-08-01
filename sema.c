@@ -1,6 +1,14 @@
 #include "hoc.h"
 
 static Vector* funcs; // Vector(Function*)
+static Vector* switches; // Vector(Node*(NSWITCH))
+static int case_label_id = 0;
+
+static char* case_label(void) {
+  char* label = format(".case%d", case_label_id);
+  case_label_id++;
+  return label;
+}
 
 static void walk(Node*);
 
@@ -11,6 +19,7 @@ static void type_error(Type* expected, Node* node) {
 // 各Nodeの.typeを埋める
 void sema(Program* prog) {
   funcs = prog->funcs;
+  switches = new_vec();
   for (size_t i = 0; i < prog->funcs->length; i++) {
     Function* fn = prog->funcs->ptr[i];
     if (fn->body)
@@ -350,6 +359,8 @@ static void walk(Node* node) {
   }
   case NSWITCH: {
     walk(node->expr);
+    node->cases = new_vec();
+    vec_push(switches, node);
     walk(node->body);
     node->type = NULL;
     break;
@@ -358,6 +369,10 @@ static void walk(Node* node) {
     walk(node->expr);
     walk(node->body);
     node->type = NULL;
+
+    node->name = case_label();
+    Node* sw = vec_last(switches);
+    vec_push(sw->cases, node);
     break;
   }
   case NBREAK: {

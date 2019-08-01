@@ -775,6 +775,14 @@ static Node* statement() {
     node->body = statement();
 
     return node;
+  } else if ((tok = match_keyword("case"))) {
+    Node* node = new_node(NCASE, tok);
+    node->expr = logical_or(); // TODO: support conditional expression
+    if (!match(TCOLON)) {
+      parse_error(":", tok);
+    }
+    node->body = statement();
+    return node;
   } else if ((tok = match(TLBRACE))) {
     Node* node = new_node(NBLOCK, tok);
     node->stmts = new_vec();

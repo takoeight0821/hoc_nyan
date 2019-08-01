@@ -157,7 +157,7 @@ typedef struct Node {
   // "for" ( init; cond; step ) body
   // "while" ( cond ) body
   // "switch" ( expr ) body
-  // "case" const_expr ":" body
+  // "case" expr ":" body
   struct Node* cond;
   struct Node* then;
   struct Node* els;
@@ -217,6 +217,7 @@ void vec_push(Vector* v, void* elem);
 void vec_pushi(Vector* v, intptr_t elem);
 void* vec_pop(Vector* v);
 intptr_t vec_popi(Vector* v);
+void* vec_last(Vector* v);
 
 // emit.c
 typedef enum {
