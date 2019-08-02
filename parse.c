@@ -783,6 +783,13 @@ static Node* statement() {
     }
     node->body = statement();
     return node;
+  } else if ((tok = match_keyword("default"))) {
+    Node* node = new_node(NDEFAULT, tok);
+    if (!match(TCOLON)) {
+      parse_error(":", tok);
+    }
+    node->body = statement();
+    return node;
   } else if ((tok = match(TLBRACE))) {
     Node* node = new_node(NBLOCK, tok);
     node->stmts = new_vec();

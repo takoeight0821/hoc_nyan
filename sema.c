@@ -375,6 +375,14 @@ static void walk(Node* node) {
     vec_push(sw->cases, node);
     break;
   }
+  case NDEFAULT: {
+    walk(node->body);
+    node->type = NULL;
+
+    node->name = case_label();
+    Node* sw = vec_last(switches);
+    vec_push(sw->cases, node);
+  }
   case NBREAK: {
     node->type = NULL;
     break;

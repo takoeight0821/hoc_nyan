@@ -93,6 +93,7 @@ enum NodeTag {
     NSTRING,
     NSWITCH,
     NCASE,
+    NDEFAULT,
     NBREAK,
 };
 
@@ -158,6 +159,7 @@ typedef struct Node {
   // "while" ( cond ) body
   // "switch" ( expr ) body
   // "case" expr ":" body
+  // "default" ":" body
   struct Node* cond;
   struct Node* then;
   struct Node* els;

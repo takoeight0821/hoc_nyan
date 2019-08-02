@@ -419,6 +419,13 @@ void dump_node(Node* node, int level) {
     eprintf(")\n");
     break;
   }
+  case NDEFAULT: {
+    indent(level);
+    eprintf("(default(%s)\n", node->name);
+    dump_node(node->body, level + 1);
+    indent(level);
+    eprintf(")\n");
+  }
   case NBREAK: {
     indent(level);
     eprintf("(break)\n");

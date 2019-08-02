@@ -547,15 +547,20 @@ static void emit_node(Node* node) {
     emit_node(node->expr);
 
     Node* clause;
-    while (node->cases->length > 0) {
-      clause = vec_pop(node->cases);
-      emit_node(clause->expr); // TODO: emit_const
-      pop(DI);
-      pop(AX);
-      push(AX);
-      size_t size = size_of(type_of(node->expr));
-      emit("cmp %s, %s", reg(AX, size), reg(DI, size));
-      emit("je %s", clause->name);
+    for (int i = 0; i < node->cases->length; i++) {
+      clause = node->cases->ptr[i];
+
+      if (clause->tag == NDEFAULT) {
+        emit("jmp %s", clause->name);
+      } else {
+       emit_node(clause->expr); // TODO: emit_const
+       pop(DI);
+       pop(AX);
+       push(AX);
+       size_t size = size_of(type_of(node->expr));
+       emit("cmp %s, %s", reg(AX, size), reg(DI, size));
+       emit("je %s", clause->name);
+      }
     }
     pop(AX); // pop node->expr
 
@@ -577,6 +582,16 @@ static void emit_node(Node* node) {
       pop(AX); // pop unused value
     }
     comment("end NCASE");
+    break;
+  }
+  case NDEFAULT: {
+    comment("start NDEFAULT");
+    printf("%s:\n", node->name);
+    emit_node(node->body);
+    if (type_of(node->body) != NULL && type_of(node->body)->ty != TY_VOID) {
+      pop(AX); // pop unused value
+    }
+    comment("end NDEFAULT");
     break;
   }
   case NBREAK: {

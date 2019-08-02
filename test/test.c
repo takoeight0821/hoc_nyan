@@ -53,6 +53,16 @@ void void_fun() {
 
 }
 
+int fib(int n) {
+  switch (n) {
+  case 0:
+  case 1:
+    return 1;
+  default:
+    return fib(n - 1) + fib (n - 2);
+  }
+}
+
 static int static_global_a;
 
 static int static_func() {
@@ -339,6 +349,7 @@ int main() {
     printf("case 2\n");
     break;
   }
+  EXPECT(21, fib(7));
   return 0;
 }
 
