@@ -157,9 +157,6 @@ void dump_token(Token* tok) {
   case TPLUS_PLUS:
     eprintf("[PLUS_PLUS]");
     break;
-  case TEOF:
-    eprintf("[EOF]");
-    break;
   }
 }
 

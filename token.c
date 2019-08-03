@@ -140,7 +140,7 @@ struct Symbol symbols[] = {
 
 static Token* next_token(void) {
   if (*cur == '\0') {
-    return new_token(TEOF, cur);
+    return NULL; // new_token(TEOF, cur);
   }
   if (strchr(" \t\n\r", *cur)) {
     whitespace();
@@ -236,18 +236,11 @@ Token* lex(FILE* file) {
   src = read_file(file);
   cur = src;
 
-  Token* current = NULL;
-  Token* head;
-  Token* t;
+  Token* current = next_token();
+  Token* head = current;
 
-  while ((t = next_token())->tag != TEOF) {
-    if (current) {
-      current->next = t;
-      current = current->next;
-    } else {
-      current = t;
-      head = current;
-    }
+  while ((current->next = next_token()) != NULL) {
+    current = current->next;
   }
 
   return head;

@@ -15,7 +15,6 @@ typedef struct {
 } Vector;
 
 enum TokenTag {
-  TEOF,
   TINT,
   TIDENT,
   TPLUS,
