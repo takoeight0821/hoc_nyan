@@ -1,8 +1,5 @@
 #include "hoc.h"
 
-// ソースコードの最大文字数
-#define MAX_LENGTH 4096
-
 // ソースコード
 static char* src;
 static char* cur;
@@ -45,21 +42,43 @@ void bad_token(Token* tok, char* msg) {
   exit(1);
 }
 
+static Token* new_token(enum TokenTag tag, char* start) {
+  Token* t = calloc(1, sizeof(Token));
+  t->tag = tag;
+  t->start = start;
+  return t;
+}
+
+static char* read_file(FILE* file) {
+  StringBuilder* sb = new_sb();
+
+  char c;
+  while ((c = fgetc(file)) != EOF) {
+    sb_putc(sb, c);
+  }
+  return sb_run(sb);
+}
+
 static void consume() {
   cur++;
+}
+
+static bool start_with(char* s1, char* s2) {
+  while (*s1 != '\0' && *s2 != '\0') {
+    if (*s1 == *s2) {
+      s1++;
+      s2++;
+    } else {
+      return false;
+    }
+  }
+  return true;
 }
 
 static void whitespace() {
   while (*cur == ' ' || *cur == '\t' || *cur == '\n' || *cur == '\r') {
     consume();
   }
-}
-
-static Token* new_token(enum TokenTag tag, char* start) {
-  Token* t = calloc(1, sizeof(Token));
-  t->tag = tag;
-  t->start = start;
-  return t;
 }
 
 static Token* integer(char* start) {
@@ -75,223 +94,142 @@ static Token* integer(char* start) {
 static Token* ident(char* start) {
   Token* t = new_token(TIDENT, start);
   StringBuilder* sb = new_sb();
-  sb_putc(sb, *cur);
-  consume();
-
   while (isalnum(*cur) || *cur == '_') {
     sb_putc(sb, *cur);
     consume();
   }
-
   t->ident = sb_run(sb);
-
   return t;
 }
 
-static Token* next_token() {
-  while (*cur != '\0') {
-    switch (*cur) {
-    case ' ': case '\t': case '\n': case '\r':
-      whitespace(); continue;
-    case '0': case '1': case '2': case '3':
-    case '4': case '5': case '6': case '7':
-    case '8': case '9':
-      return integer(cur);
-    case '+':
-      consume();
-      switch(*cur) {
-      case '+':
-        consume();
-        return new_token(TPLUS_PLUS, cur - 2);
-      default:
-        return new_token(TPLUS, cur - 1);
-      }
-    case '-':
-      consume();
-      switch(*cur) {
-      case '>':
-        consume();
-        return new_token(TARROW, cur - 2);
-      default:
-        return new_token(TMINUS, cur - 1);
-      }
-    case '*':
-      consume();
-      return new_token(TASTERISK, cur - 1);
-    case '/':
-      consume();
-      return new_token(TSLASH, cur - 1);
-    case '&':
-      consume();
-      switch (*cur) {
-      case '&':
-        consume();
-        return new_token(TAND_AND, cur - 2);
-      default:
-        return new_token(TAND, cur - 1);
-      }
-    case '|':
-      consume();
-      switch (*cur) {
-      case '|':
-        consume();
-        return new_token(TOR_OR, cur - 2);
-      default:
-        print_line(cur);
-        error("invalid character: %c\n", *cur);
-      }
-    case '%':
-      consume();
-      return new_token(TPERCENT, cur - 1);
-    case '<':
-      consume();
-      switch (*cur) {
-      case '=':
-        consume();
-        return new_token(TLE, cur - 2);
-      default:
-        return new_token(TLT, cur - 1);
-      }
-    case '>':
-      consume();
-      switch (*cur) {
-      case '=':
-        consume();
-        return new_token(TGE, cur - 2);
-      default:
-        return new_token(TGT, cur - 1);
-      }
-    case '=':
-      consume();
-      switch (*cur) {
-      case '=':
-        consume();
-        return new_token(TEQ, cur - 2);
-      default:
-        return new_token(TEQUAL, cur - 1);
-      }
-    case '!':
-      consume();
-      switch (*cur) {
-      case '=':
-        consume();
-        return new_token(TNE, cur - 2);
-      default:
-        return new_token(TNOT, cur - 1);
-      }
-    case '(':
-      consume();
-      return new_token(TLPAREN, cur - 1);
-    case ')':
-      consume();
-      return new_token(TRPAREN, cur - 1);
-    case '{':
-      consume();
-      return new_token(TLBRACE, cur - 1);
-    case '}':
-      consume();
-      return new_token(TRBRACE, cur - 1);
-    case '[':
-      consume();
-      return new_token(TLBRACK, cur - 1);
-    case ']':
-      consume();
-      return new_token(TRBRACK, cur - 1);
-    case ':':
-      consume();
-      return new_token(TCOLON, cur - 1);
-    case ';':
-      consume();
-      return new_token(TSEMICOLON, cur - 1);
-    case ',':
-      consume();
-      return new_token(TCOMMA, cur - 1);
-    case '\"': {
+struct Symbol {
+  char* name;
+  enum TokenTag tag;
+};
+
+struct Symbol symbols[] = {
+  {"++", TPLUS_PLUS},
+  {"+", TPLUS},
+  {"->", TARROW},
+  {"-", TMINUS},
+  {"*", TASTERISK},
+  {"/", TSLASH},
+  {"&&", TAND_AND},
+  {"&", TAND},
+  {"||", TOR_OR},
+  {"%", TPERCENT},
+  {"<=", TLE},
+  {"<", TLT},
+  {">=", TGE},
+  {">", TGT},
+  {"==", TEQ},
+  {"=", TEQUAL},
+  {"!=", TNE},
+  {"!", TNOT},
+  {"(", TLPAREN},
+  {")", TRPAREN},
+  {"{", TLBRACE},
+  {"}", TRBRACE},
+  {"[", TLBRACK},
+  {"]", TRBRACK},
+  {":", TCOLON},
+  {";", TSEMICOLON},
+  {",", TCOMMA},
+  {".", TDOT},
+};
+
+static Token* next_token(void) {
+  if (*cur == '\0') {
+    return new_token(TEOF, cur);
+  }
+  if (strchr(" \t\n\r", *cur)) {
+    whitespace();
+    return next_token();
+  }
+  if (strchr("0123456789", *cur)) {
+    return integer(cur);
+  }
+
+  for (int i = 0; i < sizeof(symbols) / sizeof(struct Symbol); i++) {
+    if (start_with(symbols[i].name, cur)) {
       char* start = cur;
-      consume();
-      StringBuilder* sb = new_sb();
-      while (*(cur - 1) == '\\' || *cur != '\"') {
-        sb_putc(sb, *cur);
-        consume();
-      }
-      consume();
-      Token* tok = new_token(TSTRING, start);
-      tok->str = sb_run(sb);
-      return tok;
+      cur += strlen(symbols[i].name);
+      return new_token(symbols[i].tag, start);
     }
-    case '\'': {
+  }
+
+  if ('\"' == *cur) {
+    char* start = cur;
+    consume();
+    StringBuilder* sb = new_sb();
+    while (*(cur - 1) == '\\' || *cur != '\"') {
+      sb_putc(sb, *cur);
       consume();
-      Token* t = new_token(TINT, cur - 1);
-      if (*cur == '\\') {
-        consume();
-        switch (*cur) {
-        case 'a':
-          t->integer = '\a';
-          break;
-        case 'b':
-          t->integer = '\b';
-          break;
-        case 'f':
-          t->integer = '\f';
-          break;
-        case 'n':
-          t->integer = '\n';
-          break;
-        case 'r':
-          t->integer = '\r';
-          break;
-        case 't':
-          t->integer = '\t';
-          break;
-        case 'v':
-          t->integer = '\v';
-          break;
-        case '\\':
-          t->integer = '\\';
-          break;
-        case '\'':
-          t->integer = '\'';
-          break;
-        case '\"':
-          t->integer = '\"';
-          break;
-        default:
-          print_line(cur);
-          error("invalid escape sequence: %c\n", *cur);
-        }
-      } else {
-        t->integer = *cur;
-      }
+    }
+    consume();
+    Token* tok = new_token(TSTRING, start);
+    tok->str = sb_run(sb);
+    return tok;
+  }
+
+  if ('\'' == *cur) {
+    consume();
+    Token* t = new_token(TINT, cur - 1);
+    if (*cur == '\\') {
       consume();
-      if (*cur != '\'') {
+      switch (*cur) {
+      case 'a':
+        t->integer = '\a';
+        break;
+      case 'b':
+        t->integer = '\b';
+        break;
+      case 'f':
+        t->integer = '\f';
+        break;
+      case 'n':
+        t->integer = '\n';
+        break;
+      case 'r':
+        t->integer = '\r';
+        break;
+      case 't':
+        t->integer = '\t';
+        break;
+      case 'v':
+        t->integer = '\v';
+        break;
+      case '\\':
+        t->integer = '\\';
+        break;
+      case '\'':
+        t->integer = '\'';
+        break;
+      case '\"':
+        t->integer = '\"';
+        break;
+      default:
         print_line(cur);
-        error("invalid character: %c\n", *cur);
+        error("invalid escape sequence: %c\n", *cur);
       }
-      consume();
-      return t;
+    } else {
+      t->integer = *cur;
     }
-    case '.':
-      consume();
-      return new_token(TDOT, cur - 1);
-    default:
-      if (isalpha(*cur) || *cur == '_') {
-        return ident(cur);
-      }
+    consume();
+    if (*cur != '\'') {
       print_line(cur);
       error("invalid character: %c\n", *cur);
     }
+    consume();
+    return t;
   }
-  return new_token(TEOF, cur);
-}
 
-static char* read_file(FILE* file) {
-  StringBuilder* sb = new_sb();
-
-  char c;
-  while ((c = fgetc(file)) != EOF) {
-    sb_putc(sb, c);
+  if (isalpha(*cur) || *cur == '_') {
+    return ident(cur);
   }
-  return sb_run(sb);
+
+  print_line(cur);
+  error("invalid character: %c\n", *cur);
 }
 
 Token* lex(FILE* file) {
