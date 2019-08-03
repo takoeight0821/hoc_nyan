@@ -232,8 +232,14 @@ static Token* next_token(void) {
   error("invalid character: %c\n", *cur);
 }
 
-Token* lex(FILE* file) {
+Token* lex(char* path) {
+  FILE* file = fopen(path, "r");
+  if (file == NULL) {
+    error("cannot open file\n");
+  }
+
   src = read_file(file);
+  fclose(file);
   cur = src;
 
   Token* current = next_token();

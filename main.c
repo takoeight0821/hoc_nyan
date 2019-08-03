@@ -41,13 +41,7 @@ int main(int argc, char** argv)
     dump = true;
   }
 
-  FILE* fp;
-  if ((fp = fopen(argv[dump ? 2 : 1], "r")) == NULL) {
-    return -1;
-  }
-
-  Token* tokens = lex(fp);
-  fclose(fp);
+  Token* tokens = lex(argv[dump ? 2 : 1]);
 
   if (dump) {
     for (Token* t = tokens; t != NULL; t = t->next) {

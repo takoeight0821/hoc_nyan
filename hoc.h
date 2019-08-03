@@ -233,7 +233,7 @@ void gen_x86(Program* prog);
 // token.c
 void warn_token(Token* tok, char* msg);
 void bad_token(Token* tok, char* msg);
-Token* lex(FILE* file);
+Token* lex(char* path);
 
 // parse.c
 Program* parse(Token* tokens);
