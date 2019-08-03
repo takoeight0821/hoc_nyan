@@ -203,11 +203,6 @@ Type* int_type(void);
 Type* long_type(void);
 Type* ptr_to(Type* type);
 
-void dump_node(Node* node, int level);
-char* show_type(Type* ty);
-void dump_type(Type* ty);
-void dump_function(Function* func);
-
 Type* type_of(Node* node);
 size_t size_of(Type* ty);
 Type* field_type(Field* fields, char* name);
@@ -239,7 +234,6 @@ void gen_x86(Program* prog);
 // token.c
 void warn_token(Token* tok, char* msg);
 void bad_token(Token* tok, char* msg);
-void dump_token(Token* tok);
 Token* lex(FILE* file);
 
 // parse.c
@@ -265,3 +259,9 @@ void sb_putc(StringBuilder*, char);
 void sb_puts(StringBuilder*, char*);
 char* sb_run(StringBuilder*);
 void sb_destory(StringBuilder*);
+
+void dump_token(Token* tok);
+void dump_node(Node* node, int level);
+char* show_type(Type* ty);
+void dump_type(Type* ty);
+void dump_function(Function* func);
