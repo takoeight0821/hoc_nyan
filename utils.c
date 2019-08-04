@@ -82,8 +82,8 @@ void dump_token(Token* tok) {
   case TGT:
     eprintf("[GT]");
     break;
-  case TEQ:
-    eprintf("[EQ]");
+  case TEQ_EQ:
+    eprintf("[EQ_EQ]");
     break;
   case TNE:
     eprintf("[NE]");
@@ -103,8 +103,8 @@ void dump_token(Token* tok) {
   case TAND:
     eprintf("[AND]");
     break;
-  case TEQUAL:
-    eprintf("[EQUAL]");
+  case TEQ:
+    eprintf("[EQ]");
     break;
   case TLPAREN:
     eprintf("[LPAREN]");

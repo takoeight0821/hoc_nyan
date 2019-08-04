@@ -486,7 +486,7 @@ static Node* equality() {
   Node* lhs = relational();
   Token* tok;
   for (;;) {
-    if ((tok = match(TEQ))) {
+    if ((tok = match(TEQ_EQ))) {
       Node* node = new_node(NEQ, tok);
       node->lhs = lhs;
       node->rhs = relational();
@@ -579,7 +579,7 @@ static Node* add() {
 static Node* assign() {
   Node* node = logical_or();
 
-  if (match(TEQUAL)) {
+  if (match(TEQ)) {
     Node* lhs = node;
     Node* rhs = assign();
     node = new_node(NASSIGN, lhs->token);
@@ -653,7 +653,7 @@ static Node* declaration() {
   add_lvar(decl->token, decl->name, decl->type);
 
   Token* tok;
-  if ((tok = match(TEQUAL))) {
+  if ((tok = match(TEQ))) {
     decl->lhs = find_var(tok, decl->name);
     decl->rhs = assign();
   }
