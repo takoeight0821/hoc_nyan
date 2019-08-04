@@ -154,6 +154,21 @@ void dump_token(Token* tok) {
   case TARROW:
     eprintf("[ARROW]");
     break;
+  case TADD_EQ:
+    eprintf("[ADD_EQ]");
+    break;
+  case TSUB_EQ:
+    eprintf("[SUB_EQ]");
+    break;
+  case TMUL_EQ:
+    eprintf("[MUL_EQ]");
+    break;
+  case TDIV_EQ:
+    eprintf("[DIV_EQ]");
+    break;
+  case TMOD_EQ:
+    eprintf("[MOD_EQ]");
+    break;
   }
 }
 

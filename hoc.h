@@ -21,6 +21,7 @@ enum TokenTag {
   TMINUS,
   TASTERISK,
   TSLASH,
+  TPERCENT,
   TAND,
   TEQ,
   TLPAREN,
@@ -43,8 +44,12 @@ enum TokenTag {
   TNOT,
   TAND_AND,
   TOR_OR,
-  TPERCENT,
   TARROW,
+  TADD_EQ,
+  TSUB_EQ,
+  TMUL_EQ,
+  TDIV_EQ,
+  TMOD_EQ,
 };
 
 typedef struct Token {
