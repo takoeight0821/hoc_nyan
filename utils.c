@@ -154,9 +154,6 @@ void dump_token(Token* tok) {
   case TARROW:
     eprintf("[ARROW]");
     break;
-  case TPLUS_PLUS:
-    eprintf("[PLUS_PLUS]");
-    break;
   }
 }
 

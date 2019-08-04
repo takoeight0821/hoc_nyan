@@ -108,7 +108,6 @@ struct Symbol {
 };
 
 struct Symbol symbols[] = {
-  {"++", TPLUS_PLUS},
   {"+", TPLUS},
   {"->", TARROW},
   {"-", TMINUS},
