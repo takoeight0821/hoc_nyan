@@ -362,7 +362,7 @@ static Node* postfix() {
         parse_error("]", lt(0));
       }
       Node* e = new_node(NDEREF, tok);
-      e->expr = new_node(NPLUS, tok);
+      e->expr = new_node(NADD, tok);
       e->expr->lhs = node;
       e->expr->rhs = offset;
       node = e;
@@ -399,7 +399,7 @@ static Node* unary() {
   } else if (match(TPLUS)) {
     return postfix();
   } else if ((tok = match(TMINUS))) {
-    Node* node = new_node(NMINUS, tok);
+    Node* node = new_node(NSUB, tok);
     Node* zero = new_node(NINT, tok);
     zero->integer = 0;
     node->lhs = zero;
@@ -561,12 +561,12 @@ static Node* add() {
   Token* tok;
   for (;;) {
     if ((tok = match(TPLUS))) {
-      Node* node = new_node(NPLUS, tok);
+      Node* node = new_node(NADD, tok);
       node->lhs = lhs;
       node->rhs = mul();
       lhs = node;
     } else if ((tok = match(TMINUS))) {
-      Node* node = new_node(NMINUS, tok);
+      Node* node = new_node(NSUB, tok);
       node->lhs = lhs;
       node->rhs = mul();
       lhs = node;

@@ -149,8 +149,8 @@ static void emit_node(Node* node) {
     comment("end NGVAR");
     break;
   }
-  case NPLUS: {
-    comment("start NPLUS");
+  case NADD: {
+    comment("start NADD");
     emit_node(node->lhs);
     emit_node(node->rhs);
     pop(DI);
@@ -158,11 +158,11 @@ static void emit_node(Node* node) {
     size_t size = size_of(type_of(node->lhs));
     emit("add %s, %s", reg(AX, size), reg(DI, size));
     push(AX);
-    comment("end NPLUS");
+    comment("end NADD");
     break;
   }
-  case NMINUS: {
-    comment("start NMINUS");
+  case NSUB: {
+    comment("start NSUB");
     emit_node(node->lhs);
     emit_node(node->rhs);
     pop(DI);
@@ -170,7 +170,7 @@ static void emit_node(Node* node) {
     size_t size = size_of(type_of(node->lhs));
     emit("sub %s, %s", reg(AX, size), reg(DI, size));
     push(AX);
-    comment("end NMINUS");
+    comment("end NSUB");
     break;
   }
   case NMUL: {

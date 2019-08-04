@@ -225,7 +225,7 @@ void dump_node(Node* node, int level) {
     dump_type(node->type);
     eprintf("\n");
     break;
-  case NPLUS:
+  case NADD:
     indent(level);
     eprintf("(+\n");
     dump_node(node->lhs, level+1);
@@ -233,7 +233,7 @@ void dump_node(Node* node, int level) {
     indent(level);
     eprintf(")\n");
     break;
-  case NMINUS:
+  case NSUB:
     indent(level);
     eprintf("(-\n");
     dump_node(node->lhs, level+1);

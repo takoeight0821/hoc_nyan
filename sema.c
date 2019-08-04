@@ -61,7 +61,7 @@ static void walk(Node* node) {
   case NGVAR: {
     break;
   }
-  case NPLUS: {
+  case NADD: {
     walk(node->lhs);
     walk(node->rhs);
 
@@ -89,7 +89,7 @@ static void walk(Node* node) {
 
     break;
   }
-  case NMINUS: {
+  case NSUB: {
     walk(node->lhs);
     walk(node->rhs);
 
