@@ -7,7 +7,7 @@ hoc: $(OBJS)
 
 $(OBJS): hoc.h
 
-test: FORCE
+test: hoc FORCE
 	./hoc -test
 	./test.sh
 
