@@ -64,111 +64,25 @@ void sb_destory(StringBuilder* sb) {
 
 void dump_token(Token* tok) {
   switch (tok->tag) {
-  case TINT:
-    eprintf("[INT %d]", tok->integer);
+  case TINT: {
+    eprintf("%d", tok->integer);
     break;
-  case TIDENT:
-    eprintf("[IDENT %s]", tok->ident);
+  }
+  case TSTRING: {
+    eprintf("\"%s\"", tok->str);
     break;
-  case TLE:
-    eprintf("[LE]");
+  }
+  case TIDENT: {
+    eprintf("%s", tok->ident);
     break;
-  case TLT:
-    eprintf("[LT]");
+  }
+  case TRESERVED: {
+    eprintf("%s", tok->ident);
     break;
-  case TGE:
-    eprintf("[GE]");
-    break;
-  case TGT:
-    eprintf("[GT]");
-    break;
-  case TEQ_EQ:
-    eprintf("[EQ_EQ]");
-    break;
-  case TNE:
-    eprintf("[NE]");
-    break;
-  case TPLUS:
-    eprintf("[PLUS]");
-    break;
-  case TMINUS:
-    eprintf("[MINUS]");
-    break;
-  case TASTERISK:
-    eprintf("[ASTERISK]");
-    break;
-  case TSLASH:
-    eprintf("[SLASH]");
-    break;
-  case TAND:
-    eprintf("[AND]");
-    break;
-  case TEQ:
-    eprintf("[EQ]");
-    break;
-  case TLPAREN:
-    eprintf("[LPAREN]");
-    break;
-  case TRPAREN:
-    eprintf("[RPAREN]");
-    break;
-  case TLBRACE:
-    eprintf("[LBRACE]");
-    break;
-  case TRBRACE:
-    eprintf("[RBRACE]");
-    break;
-  case TLBRACK:
-    eprintf("[LBRACK]");
-    break;
-  case TRBRACK:
-    eprintf("[RBRACK]");
-    break;
-  case TCOLON:
-    eprintf("[COLON]");
-    break;
-  case TSEMICOLON:
-    eprintf("[SEMICOLON]");
-    break;
-  case TCOMMA:
-    eprintf("[COMMA]");
-    break;
-  case TSTRING:
-    eprintf("[STRING %s]", tok->str);
-    break;
-  case TDOT:
-    eprintf("[DOT]");
-    break;
-  case TNOT:
-    eprintf("[NOT]");
-    break;
-  case TAND_AND:
-    eprintf("[AND_AND]");
-    break;
-  case TOR_OR:
-    eprintf("[OR_OR]");
-    break;
-  case TPERCENT:
-    eprintf("[PERCENT]");
-    break;
-  case TARROW:
-    eprintf("[ARROW]");
-    break;
-  case TADD_EQ:
-    eprintf("[ADD_EQ]");
-    break;
-  case TSUB_EQ:
-    eprintf("[SUB_EQ]");
-    break;
-  case TMUL_EQ:
-    eprintf("[MUL_EQ]");
-    break;
-  case TDIV_EQ:
-    eprintf("[DIV_EQ]");
-    break;
-  case TMOD_EQ:
-    eprintf("[MOD_EQ]");
-    break;
+  }
+  }
+  if (tok->next != NULL) {
+    eprintf(" ");
   }
 }
 

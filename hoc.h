@@ -15,41 +15,10 @@ typedef struct {
 } Vector;
 
 enum TokenTag {
-  TINT,
-  TIDENT,
-  TPLUS,
-  TMINUS,
-  TASTERISK,
-  TSLASH,
-  TPERCENT,
-  TAND,
-  TEQ,
-  TLPAREN,
-  TRPAREN,
-  TLBRACE,
-  TRBRACE,
-  TLBRACK,
-  TRBRACK,
-  TCOLON,
-  TSEMICOLON,
-  TCOMMA,
-  TEQ_EQ,
-  TNE,
-  TLE,
-  TGE,
-  TLT,
-  TGT,
-  TSTRING,
-  TDOT,
-  TNOT,
-  TAND_AND,
-  TOR_OR,
-  TARROW,
-  TADD_EQ,
-  TSUB_EQ,
-  TMUL_EQ,
-  TDIV_EQ,
-  TMOD_EQ,
+  TINT,      // int literal
+  TSTRING,   // string literal
+  TIDENT,    // identifier
+  TRESERVED, // keyword or punctuator
 };
 
 typedef struct Token {

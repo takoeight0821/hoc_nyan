@@ -81,6 +81,18 @@ static void whitespace() {
   }
 }
 
+static char* symbols[] = {
+  "+", "->", "-", "*", "/", "&&", "&", "||", "%", "<=", "<",
+  ">=", ">", "==", "=", "!=", "!", "(", ")", "{", "}", "[", "]",
+  ":", ";", ",", ".",
+  "auto", "break", "case", "char", "const", "continue", "default",
+  "do", "double", "else", "enum", "extern", "float", "for", "goto",
+  "if", "inline", "int", "long", "register", "restrict", "return", "short", "sizeof", "static", "struct", "switch", "typedef",
+  "union", "unsigned", "void", "volatile", "while",
+  "_Alignas", "_Alignof", "_Atomic", "_Bool", "_Complex", "_Generic",
+  "_Imaginary", "_Noreturn", "_Static_assert", "_Thread_local"
+};
+
 static Token* integer(char* start) {
   Token* t = new_token(TINT, start);
   t->integer = 0;
@@ -102,58 +114,33 @@ static Token* ident(char* start) {
   return t;
 }
 
-struct Symbol {
-  char* name;
-  enum TokenTag tag;
-};
-
-struct Symbol symbols[] = {
-  {"+", TPLUS},
-  {"->", TARROW},
-  {"-", TMINUS},
-  {"*", TASTERISK},
-  {"/", TSLASH},
-  {"&&", TAND_AND},
-  {"&", TAND},
-  {"||", TOR_OR},
-  {"%", TPERCENT},
-  {"<=", TLE},
-  {"<", TLT},
-  {">=", TGE},
-  {">", TGT},
-  {"==", TEQ_EQ},
-  {"=", TEQ},
-  {"!=", TNE},
-  {"!", TNOT},
-  {"(", TLPAREN},
-  {")", TRPAREN},
-  {"{", TLBRACE},
-  {"}", TRBRACE},
-  {"[", TLBRACK},
-  {"]", TRBRACK},
-  {":", TCOLON},
-  {";", TSEMICOLON},
-  {",", TCOMMA},
-  {".", TDOT},
-};
+static Token* new_reserved(char* start, char* ident) {
+  Token* t = new_token(TRESERVED, start);
+  t->ident = ident;
+  return t;
+}
 
 static Token* next_token(void) {
   if (*cur == '\0') {
     return NULL; // new_token(TEOF, cur);
   }
+
   if (strchr(" \t\n\r", *cur)) {
     whitespace();
     return next_token();
   }
+
   if (strchr("0123456789", *cur)) {
     return integer(cur);
   }
 
-  for (int i = 0; i < sizeof(symbols) / sizeof(struct Symbol); i++) {
-    if (start_with(symbols[i].name, cur)) {
-      char* start = cur;
-      cur += strlen(symbols[i].name);
-      return new_token(symbols[i].tag, start);
+  for (int i = 0; i < (sizeof(symbols) / sizeof(char*)); i++) {
+    if (start_with(symbols[i], cur)) {
+      Token* t = new_reserved(cur, symbols[i]);
+      if (!(isalnum(*cur) || *cur == '_')) {
+        cur += strlen(symbols[i]);
+        return t;
+      }
     }
   }
 
@@ -217,7 +204,7 @@ static Token* next_token(void) {
     consume();
     if (*cur != '\'') {
       print_line(cur);
-      error("invalid character: %c\n", *cur);
+      error("expected ' but actual %c\n", *cur);
     }
     consume();
     return t;

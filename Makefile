@@ -1,5 +1,5 @@
 CFLAGS=-g -Wall -std=c11
-SRCS=$(wildcard *.c)
+SRCS=containers.c main.c utils.c token.c
 OBJS=$(SRCS:.c=.o)
 
 hoc: $(OBJS)
