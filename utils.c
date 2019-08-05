@@ -270,6 +270,14 @@ void dump_node(Node* node, int level) {
     indent(level);
     eprintf(")\n");
     break;
+  case NCOMMA:
+    indent(level);
+    eprintf("(,\n");
+    dump_node(node->lhs, level+1);
+    dump_node(node->rhs, level+1);
+    indent(level);
+    eprintf(")\n");
+    break;
   case NDEFVAR: {
     indent(level);
     eprintf("(");

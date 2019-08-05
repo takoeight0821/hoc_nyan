@@ -212,6 +212,7 @@ static Node* equality();
 static Node* relational();
 static Node* logical_and();
 static Node* logical_or();
+static Node* assign();
 static Node* statement();
 static Node* declarator(Type* ty);
 
@@ -326,7 +327,7 @@ static Node* term() {
     }
 
     for (;;) {
-      vec_push(node->args, expr());
+      vec_push(node->args, assign());
       if (match(")")) {
         return node;
       } else if (!match(",")) {
@@ -583,8 +584,24 @@ static Node* assign() {
   return node;
 }
 
+static Node* comma() {
+  Node* lhs = assign();
+
+  Token* tok;
+  for (;;) {
+    if ((tok = match(","))) {
+      Node* node = new_node(NCOMMA, tok);
+      node->lhs = lhs;
+      node->rhs = assign();
+      lhs = node;
+    } else {
+      return lhs;
+    }
+  }
+}
+
 static Node* expr() {
-  return assign();
+  return comma();
 }
 
 static int is_typename(Token* t) {

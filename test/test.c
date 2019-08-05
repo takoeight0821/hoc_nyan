@@ -350,6 +350,10 @@ int main() {
     break;
   }
   EXPECT(21, fib(7));
+  {
+    int a = 0;
+    EXPECT(1, (a = a + 1, a));
+  }
   return 0;
 }
 

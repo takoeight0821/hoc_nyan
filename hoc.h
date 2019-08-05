@@ -48,6 +48,7 @@ enum NodeTag {
     NNOT,
     NLOGAND,
     NLOGOR,
+    NCOMMA,
     NDEFVAR,
     NASSIGN,
     NCALL,

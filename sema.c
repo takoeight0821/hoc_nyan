@@ -257,6 +257,12 @@ static void walk(Node* node) {
     node->type = node->rhs->type;
     break;
   }
+  case NCOMMA: {
+    walk(node->lhs);
+    walk(node->rhs);
+    node->type = node->rhs->type;
+    break;
+  }
   case NDEFVAR: {
     if (node->lhs) {
       walk(node->lhs);
