@@ -570,8 +570,21 @@ static Node* add() {
   }
 }
 
+/*
+ * a op= b -> a = a op b
+ */
+static Node* new_assign_node(Token* token, enum NodeTag op, Node* lhs, Node* rhs) {
+  Node* node = new_node(NASSIGN, token);
+  node->lhs = lhs;
+  node->rhs = new_node(op, token);
+  node->rhs->lhs = lhs;
+  node->rhs->rhs = rhs;
+  return node;
+}
+
 static Node* assign() {
   Node* node = logical_or();
+  Token* token;
 
   if (match("=")) {
     Node* lhs = node;
@@ -579,6 +592,8 @@ static Node* assign() {
     node = new_node(NASSIGN, lhs->token);
     node->lhs = lhs;
     node->rhs = rhs;
+  } else if ((token = match("+="))) {
+    node = new_assign_node(token, NADD, node, assign());
   }
 
   return node;
