@@ -77,7 +77,7 @@ void dump_token(Token* tok) {
     break;
   }
   case TRESERVED: {
-    eprintf("%s", tok->ident);
+    eprintf("_%s_", tok->ident);
     break;
   }
   }
@@ -87,6 +87,11 @@ void dump_token(Token* tok) {
 }
 
 static void show_type_(StringBuilder* sb, Type* ty) {
+  if (ty == NULL) {
+    sb_puts(sb, "NULL");
+    return;
+  }
+
   switch (ty->ty) {
   case TY_VOID:
     sb_puts(sb, "void");

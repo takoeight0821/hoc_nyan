@@ -50,16 +50,16 @@ int main(int argc, char** argv)
     eprintf("\n");
   }
 
-  /* Program* prog = parse(tokens); */
-  /* sema(prog); */
+  Program* prog = parse(tokens);
+  sema(prog);
 
-  /* if (dump) { */
-  /*   for (size_t i = 0; i < prog->funcs->length; i++) { */
-  /*     dump_function(prog->funcs->ptr[i]); */
-  /*   } */
-  /* } */
+  if (dump) {
+    for (size_t i = 0; i < prog->funcs->length; i++) {
+      dump_function(prog->funcs->ptr[i]);
+    }
+  }
 
-  /* gen_x86(prog); */
+  gen_x86(prog);
 
   return 0;
 }

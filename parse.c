@@ -175,9 +175,19 @@ static void parse_error(const char* expected, Token* actual) {
   bad_token(actual, format("%s expected", expected));
 }
 
-static Token* match(enum TokenTag tag) {
+static Token* expect(enum TokenTag tag, char* expected) {
   if (la(0) == tag) {
     Token* t = tokens;
+    consume();
+    return t;
+  }
+  parse_error(expected, lt(0));
+  return NULL;
+}
+
+static Token* match(char* name) {
+  if (la(0) == TRESERVED && streq(lt(0)->ident, name)) {
+    Token* t = lt(0);
     consume();
     return t;
   } else {
@@ -185,14 +195,8 @@ static Token* match(enum TokenTag tag) {
   }
 }
 
-static Token* match_keyword(char* name) {
-  if (la(0) == TIDENT && streq(lt(0)->ident, name)) {
-    Token* t = lt(0);
-    consume();
-    return t;
-  } else {
-    return NULL;
-  }
+static bool eq_reserved(Token* token, char* name) {
+  return (token->tag == TRESERVED && streq(token->ident, name));
 }
 
 static int is_typename(Token* t);
@@ -223,7 +227,7 @@ static Type* type_specifier() {
   Type* ty = calloc(1, sizeof(Type));
 
   Token* tok;
-  if ((tok = match_keyword("struct"))) {
+  if ((tok = match("struct"))) {
     char* tag;
 
     if (la(0) == TIDENT) {
@@ -235,20 +239,20 @@ static Type* type_specifier() {
     }
 
     // struct definition
-    if (match(TLBRACE)) {
+    if (match("{")) {
       if (ty->fields != NULL) {
         ty = clone_type(ty); // 同名の異なる型の定義なのでクローンする
       }
 
       ty->fields = NULL;
-      while(!match(TRBRACE)) {
+      while(!match("}")) {
         Node* field = declarator(type_specifier());
         Field* new = calloc(sizeof(Field), 1);
         new->name = field->name;
         new->type = field->type;
         new->next = ty->fields;
         ty->fields = new;
-        if (!match(TSEMICOLON)) {
+        if (!match(";")) {
           parse_error(";", lt(0));
         }
       }
@@ -264,27 +268,32 @@ static Type* type_specifier() {
       bad_token(tok, format("struct %s is not defined\n", tag));
     }
 
-  } else if (match_keyword("enum")) {
+  } else if (match("enum")) {
     ty = int_type();
 
-    match(TIDENT); // タグは読み飛ばす
+    expect(TIDENT, "enum tag"); // タグは読み飛ばす
 
-    if (match(TLBRACE)) {
+    if (match("{")) {
       int val = 0;
-      while (!match(TRBRACE)) {
-        char* name = lt(0)->ident;
-        if (!match(TIDENT)) {
-          parse_error("ident", lt(0));
-        }
+      while (true) {
+        char* name = expect(TIDENT, "enum value")->ident;
         add_enum(name, val);
         val++;
-        if (la(0) != TRBRACE && !match(TCOMMA)) {
+
+        // 要素末尾の","を許す
+        if (match("}")) {
+          break;
+        }
+        if (!match(",")) {
           parse_error(",", lt(0));
+        }
+        if (match("}")) {
+          break;
         }
       }
     }
 
-  } else if (la(0) == TIDENT && find_type(lt(0)->ident)) {
+  } else if ((la(0) == TIDENT || la(0) == TRESERVED) && find_type(lt(0)->ident)) {
     ty = find_type(lt(0)->ident);
     consume();
   } else {
@@ -295,13 +304,13 @@ static Type* type_specifier() {
 }
 
 static Node* term() {
-  if (match(TLPAREN)) {
+  if (match("(")) {
     Node* node = expr();
-    if (!match(TRPAREN)) {
+    if (!match(")")) {
       parse_error(")", lt(0));
     }
     return node;
-  } else if (la(0) == TIDENT && la(1) != TLPAREN) {
+  } else if (la(0) == TIDENT && !eq_reserved(lt(1), "(")) {
     Node* node = variable();
     return node;
   } else if (la(0) == TIDENT) {
@@ -309,18 +318,18 @@ static Node* term() {
     node->name = lt(0)->ident;
     node->args = new_vec();
     consume();
-    if (!match(TLPAREN)) {
+    if (!match("(")) {
       parse_error("(", lt(0));
     }
-    if (match(TRPAREN)) {
+    if (match(")")) {
       return node;
     }
 
     for (;;) {
       vec_push(node->args, expr());
-      if (match(TRPAREN)) {
+      if (match(")")) {
         return node;
-      } else if (!match(TCOMMA)) {
+      } else if (!match(",")) {
         parse_error(",", lt(0));
       }
     }
@@ -336,29 +345,23 @@ static Node* postfix() {
   Token* tok;
 
   for (;;) {
-    if ((tok = match(TDOT))) {
-      char* name = lt(0)->ident;
-      if (!match(TIDENT)) {
-        parse_error("ident", lt(0));
-      }
+    if ((tok = match("."))) {
+      char* name = expect(TIDENT, "field name")->ident;
       Node* e = new_node(NMEMBER, tok);
       e->expr = node;
       e->name = name;
       node = e;
-    } else if ((tok = match(TARROW))) {
-       char* name = lt(0)->ident;
-       if (!match(TIDENT)) {
-         parse_error("ident", lt(0));
-       }
-       Node* deref = new_node(NDEREF, tok);
-       deref->expr = node;
-       Node* e = new_node(NMEMBER, tok);
-       e->expr = deref;
-       e->name = name;
-       node = e;
-    } else if ((tok = match(TLBRACK))) {
+    } else if ((tok = match("->"))) {
+      char* name = expect(TIDENT, "field name")->ident;
+      Node* deref = new_node(NDEREF, tok);
+      deref->expr = node;
+      Node* e = new_node(NMEMBER, tok);
+      e->expr = deref;
+      e->name = name;
+      node = e;
+    } else if ((tok = match("["))) {
       Node* offset = expr();
-      if (!match(TRBRACK)) {
+      if (!match("]")) {
         parse_error("]", lt(0));
       }
       Node* e = new_node(NDEREF, tok);
@@ -374,15 +377,15 @@ static Node* postfix() {
 
 static Node* unary() {
   Token* tok;
-  if ((tok = match_keyword("sizeof"))) {
-    if (!match(TLPAREN)) {
+  if ((tok = match("sizeof"))) {
+    if (!match("(")) {
       parse_error("(", lt(0));
     }
     Node* node;
     if (is_typename(lt(0))) {
       // sizeof(type)は計算してしまってNINTノードにする
       Type* type = type_specifier();
-      while (match(TASTERISK)) {
+      while (match("*")) {
         type = ptr_to(type);
       }
       node = new_node(NINT, tok);
@@ -392,28 +395,28 @@ static Node* unary() {
       node = new_node(NSIZEOF, tok);
       node->expr = unary();
     }
-    if (!match(TRPAREN)) {
+    if (!match(")")) {
       parse_error(")", lt(0));
     }
     return node;
-  } else if (match(TPLUS)) {
+  } else if (match("+")) {
     return postfix();
-  } else if ((tok = match(TMINUS))) {
+  } else if ((tok = match("-"))) {
     Node* node = new_node(NSUB, tok);
     Node* zero = new_node(NINT, tok);
     zero->integer = 0;
     node->lhs = zero;
     node->rhs = postfix();
     return node;
-  } else if ((tok = match(TAND))) {
+  } else if ((tok = match("&"))) {
     Node* node = new_node(NADDR, tok);
     node->expr = postfix();
     return node;
-  } else if ((tok = match(TASTERISK))) {
+  } else if ((tok = match("*"))) {
     Node* node = new_node(NDEREF, tok);
     node->expr = postfix();
     return node;
-  } else if ((tok = match(TNOT))) {
+  } else if ((tok = match("!"))) {
     Node* node = new_node(NNOT, tok);
     node->expr = postfix();
     return node;
@@ -424,29 +427,19 @@ static Node* unary() {
 }
 
 static Node* variable() {
-  Node* node = find_var(lt(0), lt(0)->ident);
-  if (!match(TIDENT)) {
-    parse_error("indent", lt(0));
-  }
+  Node* node = find_var(lt(0), expect(TIDENT, "variable")->ident);
   return node;
 }
 
 static Node* integer() {
   Node* node = new_node(NINT, lt(0));
-  node->integer = lt(0)->integer;
-  if (!match(TINT)) {
-    parse_error("integer", lt(0));
-  }
+  node->integer = expect(TINT, "integer")->integer;
   return node;
 }
 
 static Node* string() {
   Node* node = new_node(NSTRING, lt(0));
-  char* str = lt(0)->str;
-
-  if (!match(TSTRING)) {
-    parse_error("string", lt(0));
-  }
+  char* str = expect(TSTRING, "string")->str;
 
   node->str_id = intern(str);
   return node;
@@ -456,7 +449,7 @@ static Node* logical_or() {
   Node* lhs = logical_and();
   Token* tok;
   for (;;) {
-    if ((tok = match(TOR_OR))) {
+    if ((tok = match("||"))) {
       Node* node = new_node(NLOGOR, tok);
       node->lhs = lhs;
       node->rhs = logical_and();
@@ -471,7 +464,7 @@ static Node* logical_and() {
   Node* lhs = equality();
   Token* tok;
   for (;;) {
-    if ((tok = match(TAND_AND))) {
+    if ((tok = match("&&"))) {
       Node* node = new_node(NLOGAND, tok);
       node->lhs = lhs;
       node->rhs = equality();
@@ -486,12 +479,12 @@ static Node* equality() {
   Node* lhs = relational();
   Token* tok;
   for (;;) {
-    if ((tok = match(TEQ_EQ))) {
+    if ((tok = match("=="))) {
       Node* node = new_node(NEQ, tok);
       node->lhs = lhs;
       node->rhs = relational();
       lhs = node;
-    } else if ((tok = match(TNE))) {
+    } else if ((tok = match("!="))) {
       Node* node = new_node(NNE, tok);
       node->lhs = lhs;
       node->rhs = relational();
@@ -506,22 +499,22 @@ static Node* relational() {
   Node* lhs = add();
   Token* tok;
   for (;;) {
-    if ((tok = match(TLT))) {
+    if ((tok = match("<"))) {
       Node* node = new_node(NLT, tok);
       node->lhs = lhs;
       node->rhs = add();
       lhs = node;
-    } else if ((tok = match(TLE))) {
+    } else if ((tok = match("<="))) {
       Node* node = new_node(NLE, tok);
       node->lhs = lhs;
       node->rhs = add();
       lhs = node;
-    } else if ((tok = match(TGT))) {
+    } else if ((tok = match(">"))) {
       Node* node = new_node(NGT, tok);
       node->lhs = lhs;
       node->rhs = add();
       lhs = node;
-    } else if ((tok = match(TGE))) {
+    } else if ((tok = match(">="))) {
       Node* node = new_node(NGE, tok);
       node->lhs = lhs;
       node->rhs = add();
@@ -535,17 +528,17 @@ static Node* mul() {
   Node* lhs = unary();
   Token* tok;
   for (;;) {
-    if ((tok = match(TASTERISK))) {
+    if ((tok = match("*"))) {
       Node* node = new_node(NMUL, tok);
       node->lhs = lhs;
       node->rhs = unary();
       lhs = node;
-    } else if ((tok = match(TSLASH))) {
+    } else if ((tok = match("/"))) {
       Node* node = new_node(NDIV, tok);
       node->lhs = lhs;
       node->rhs = unary();
       lhs = node;
-    } else if ((tok = match(TPERCENT))) {
+    } else if ((tok = match("%"))) {
       Node* node = new_node(NMOD, tok);
       node->lhs = lhs;
       node->rhs = unary();
@@ -560,12 +553,12 @@ static Node* add() {
   Node* lhs = mul();
   Token* tok;
   for (;;) {
-    if ((tok = match(TPLUS))) {
+    if ((tok = match("+"))) {
       Node* node = new_node(NADD, tok);
       node->lhs = lhs;
       node->rhs = mul();
       lhs = node;
-    } else if ((tok = match(TMINUS))) {
+    } else if ((tok = match("-"))) {
       Node* node = new_node(NSUB, tok);
       node->lhs = lhs;
       node->rhs = mul();
@@ -579,7 +572,7 @@ static Node* add() {
 static Node* assign() {
   Node* node = logical_or();
 
-  if (match(TEQ)) {
+  if (match("=")) {
     Node* lhs = node;
     Node* rhs = assign();
     node = new_node(NASSIGN, lhs->token);
@@ -595,11 +588,11 @@ static Node* expr() {
 }
 
 static int is_typename(Token* t) {
-  if (t->tag == TIDENT && streq(t->ident, "struct")) {
+  if (t->tag == TRESERVED && streq(t->ident, "struct")) {
     return 1;
   }
 
-  if (t->tag == TIDENT) {
+  if (t->tag == TIDENT || t->tag == TRESERVED) {
     for (TypeDef* td = typedefs; td != NULL; td = td->next) {
       if (streq(t->ident, td->name)) {
         return 1;
@@ -623,16 +616,13 @@ static Node* direct_decl(Type* ty) {
 
   node->type = ty;
 
-  if (match(TLBRACK)) {
+  if (match("[")) {
     Type* array_ty = new_type();
     array_ty->ty = TY_PTR;
     array_ty->ptr_to = ty;
-    array_ty->array_size = lt(0)->integer;
+    array_ty->array_size = expect(TINT, "integer")->integer;
     node->type = array_ty;
-    if (!match(TINT)) {
-      parse_error("integer", lt(0));
-    }
-    if (!match(TRBRACK)) {
+    if (!match("]")) {
       parse_error("]", lt(0));
     }
   }
@@ -641,7 +631,7 @@ static Node* direct_decl(Type* ty) {
 }
 
 static Node* declarator(Type* ty) {
-  while (match(TASTERISK)) {
+  while (match("*")) {
     ty = ptr_to(ty);
   }
   return direct_decl(ty);
@@ -653,7 +643,7 @@ static Node* declaration() {
   add_lvar(decl->token, decl->name, decl->type);
 
   Token* tok;
-  if ((tok = match(TEQ))) {
+  if ((tok = match("="))) {
     decl->lhs = find_var(tok, decl->name);
     decl->rhs = assign();
   }
@@ -664,7 +654,7 @@ static Node* declaration() {
 static Node* expr_stmt() {
   Node* node = new_node(NEXPR_STMT, lt(0));
   node->expr = expr();
-  if (!match(TSEMICOLON)) {
+  if (!match(";")) {
     parse_error(";", lt(0));
   }
   return node;
@@ -674,35 +664,35 @@ static Node* statement() {
   Token* tok;
   if (is_typename(lt(0))) {
     Node* node = declaration();
-    if (!match(TSEMICOLON)) {
+    if (!match(";")) {
       parse_error(";", lt(0));
     }
     return node;
-  } else if ((tok = match_keyword("return"))) {
+  } else if ((tok = match("return"))) {
     Node* node = new_node(NRETURN, tok);
     node->expr = expr();
-    if (!match(TSEMICOLON)) {
+    if (!match(";")) {
       parse_error(";", lt(0));
     }
     return node;
-  } else if ((tok = match_keyword("break"))) {
+  } else if ((tok = match("break"))) {
     Node* node = new_node(NBREAK, tok);
-    if (!match(TSEMICOLON)) {
+    if (!match(";")) {
       parse_error(";", lt(0));
     }
     return node;
-  } else if ((tok = match_keyword("if"))) {
-    if (!match(TLPAREN)) {
+  } else if ((tok = match("if"))) {
+    if (!match("(")) {
       parse_error("(", lt(0));
     }
     Node* cond = expr();
-    if (!match(TRPAREN)) {
+    if (!match(")")) {
       parse_error(")", lt(0));
     }
 
     Node* then = statement();
 
-    if (match_keyword("else")) {
+    if (match("else")) {
       Node* els = statement();
       Node* node = new_node(NIFELSE, tok);
       node->cond = cond;
@@ -715,25 +705,25 @@ static Node* statement() {
       node->then = then;
       return node;
     }
-  } else if ((tok = match_keyword("while"))) {
+  } else if ((tok = match("while"))) {
     Node* node = new_node(NWHILE, tok);
 
-    if (!match(TLPAREN)) {
+    if (!match("(")) {
       parse_error("(", lt(0));
     }
     node->cond = expr();
-    if (!match(TRPAREN)) {
+    if (!match(")")) {
       parse_error(")", lt(0));
     }
 
     node->body = statement();
 
     return node;
-  } else if ((tok = match_keyword("for"))) {
+  } else if ((tok = match("for"))) {
     Node* node = new_node(NFOR, tok);
 
     LVar* tmp = local_env;
-    if (!match(TLPAREN)) {
+    if (!match("(")) {
       parse_error("(", lt(0));
     }
 
@@ -743,17 +733,17 @@ static Node* statement() {
       node->init = expr();
     }
 
-    if (!match(TSEMICOLON)) {
+    if (!match(";")) {
       parse_error(";", lt(0));
     }
     node->cond = expr();
 
-    if (!match(TSEMICOLON)) {
+    if (!match(";")) {
       parse_error(";", lt(0));
     }
     node->step = expr();
 
-    if(!match(TRPAREN)) {
+    if(!match(")")) {
       parse_error(")", lt(0));
     }
     node->body = statement();
@@ -761,46 +751,46 @@ static Node* statement() {
     local_env = tmp;
 
     return node;
-  } else if ((tok = match_keyword("switch"))) {
+  } else if ((tok = match("switch"))) {
     Node* node = new_node(NSWITCH, tok);
 
-    if (!match(TLPAREN)) {
+    if (!match("(")) {
       parse_error("(", tok);
     }
     node->expr = expr();
-    if (!match(TRPAREN)) {
+    if (!match(")")) {
       parse_error(")", tok);
     }
 
     node->body = statement();
 
     return node;
-  } else if ((tok = match_keyword("case"))) {
+  } else if ((tok = match("case"))) {
     Node* node = new_node(NCASE, tok);
     node->expr = logical_or(); // TODO: support conditional expression
-    if (!match(TCOLON)) {
+    if (!match(":")) {
       parse_error(":", tok);
     }
     node->body = statement();
     return node;
-  } else if ((tok = match_keyword("default"))) {
+  } else if ((tok = match("default"))) {
     Node* node = new_node(NDEFAULT, tok);
-    if (!match(TCOLON)) {
+    if (!match(":")) {
       parse_error(":", tok);
     }
     node->body = statement();
     return node;
-  } else if ((tok = match(TLBRACE))) {
+  } else if ((tok = match("{"))) {
     Node* node = new_node(NBLOCK, tok);
     node->stmts = new_vec();
 
     LVar* tmp = local_env; // start scope
 
-    while (la(0) != TRBRACE) {
+    while (!eq_reserved(lt(0), "}")) {
       vec_push(node->stmts, statement());
     }
 
-    if (!match(TRBRACE)) {
+    if (!match("}")) {
       parse_error("}", lt(0));
     }
 
@@ -818,21 +808,26 @@ static Function* funcdef(bool is_static) {
   Token* back = lt(0);
   Type* ret_type = type_specifier();
 
-  while (match(TASTERISK)) {
+  while (match("*")) {
     ret_type = ptr_to(ret_type);
   }
 
   char* name = lt(0)->ident;
 
-  if (!match(TIDENT)) {
-    if (match(TSEMICOLON)) {
+  if (la(0) != TIDENT) {
+    if (match(";")) {
       // type definition
       return NULL;
     }
+    eprintf("DEBUG: ");
+    dump_token(lt(0));
+    eprintf("\n");
     parse_error("function name or ;", lt(0));
+  } else {
+    consume(); // TIDENT
   }
 
-  if (!match(TLPAREN)) {
+  if (!match("(")) {
     tokens = back;
     global_var();
     return NULL;
@@ -849,20 +844,20 @@ static Function* funcdef(bool is_static) {
       Node* param = find_var(param_decl->token, param_decl->name);
 
       vec_push(params, param);
-      if (match(TCOMMA))
+      if (match(","))
         continue;
-      if (match(TRPAREN))
+      if (match(")"))
         break;
       parse_error(", or )", lt(0));
 
-    } else if (match(TRPAREN)) {
+    } else if (match(")")) {
       break;
     } else {
       parse_error(")", lt(0));
     }
   }
 
-  if (match(TSEMICOLON)) {
+  if (match(";")) {
     Function* func = calloc(1, sizeof(Function));
     func->name = name;
     func->ret_type = ret_type;
@@ -895,7 +890,7 @@ static void type_alias_def(void) {
   }
   add_typedef(lt(0)->ident, ty);
   consume();
-  if (!match(TSEMICOLON)) {
+  if (!match(";")) {
     parse_error(";", lt(0));
   }
 }
@@ -903,46 +898,39 @@ static void type_alias_def(void) {
 static void global_var(void) {
   Type* type = type_specifier();
 
-  while (match(TASTERISK)) {
+  while (match("*")) {
     type = ptr_to(type);
   }
 
-  char* name = lt(0)->ident;
   Token* tok = lt(0);
+  char* name = expect(TIDENT, "function name or ;")->ident;
 
-  if (!match(TIDENT)) {
-    parse_error("function name or ;", lt(0));
-  }
-
-  if (match(TLBRACK)) {
+  if (match("[")) {
     Type* array_ty = new_type();
     array_ty->ty = TY_PTR;
     array_ty->ptr_to = type;
-    array_ty->array_size = lt(0)->integer;
+    array_ty->array_size = expect(TINT, "integer")->integer;
     type = array_ty;
-    if (!match(TINT)) {
-      parse_error("integer", lt(0));
-    }
-    if (!match(TRBRACK)) {
+    if (!match("]")) {
       parse_error("]", lt(0));
     }
   }
 
   add_gvar(tok, name, type);
-  if (!match(TSEMICOLON)) {
+  if (!match(";")) {
     parse_error("global_var: ;", lt(0));
   }
 }
 
 static Function* toplevel() {
-  if (match_keyword("typedef")) {
+  if (match("typedef")) {
     type_alias_def();
     return NULL;
-  } else if (match_keyword("extern")) {
+  } else if (match("extern")) {
     global_var();
     global_env->is_extern = true;
     return NULL;
-  } else if (match_keyword("static")) {
+  } else if (match("static")) {
     return funcdef(true);
   } else {
     return funcdef(false);

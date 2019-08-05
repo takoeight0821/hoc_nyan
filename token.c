@@ -138,8 +138,16 @@ static Token* next_token(void) {
   for (int i = 0; i < (sizeof(symbols) / sizeof(char*)); i++) {
     if (start_with(symbols[i], cur)) {
       Token* t = new_reserved(cur, symbols[i]);
-      if (!(isalnum(*cur) || *cur == '_')) {
-        cur += strlen(symbols[i]);
+      cur += strlen(symbols[i]);
+
+      if (isalnum(*(cur - 1)) || *(cur - 1) == '_') {
+        // t is a keyword
+        if (isalnum(*cur) || *cur == '_') {
+          cur -= strlen(symbols[i]);
+        } else {
+          return t;
+        }
+      } else {
         return t;
       }
     }

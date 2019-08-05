@@ -1,5 +1,5 @@
 CFLAGS=-g -Wall -std=c11
-SRCS=containers.c main.c utils.c token.c
+SRCS=containers.c main.c utils.c token.c parse.c node.c sema.c emit.c
 OBJS=$(SRCS:.c=.o)
 
 hoc: $(OBJS)
