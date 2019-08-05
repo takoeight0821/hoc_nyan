@@ -355,6 +355,8 @@ int main() {
     int a = 0;
     EXPECT(1, a = a + 1);
     EXPECT(2, a += 1);
+    EXPECT(2, a++);
+    EXPECT(3, a);
   }
   return 0;
 }

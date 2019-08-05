@@ -212,6 +212,7 @@ static Node* equality();
 static Node* relational();
 static Node* logical_and();
 static Node* logical_or();
+static Node* new_assign_node(Token* token, enum NodeTag op, Node* lhs, Node* rhs);
 static Node* assign();
 static Node* statement();
 static Node* declarator(Type* ty);
@@ -370,6 +371,19 @@ static Node* postfix() {
       e->expr->lhs = node;
       e->expr->rhs = offset;
       node = e;
+    } else if ((tok = match("++"))) {
+      /*
+       * a++ -> (a = a + 1, a - 1)
+       */
+      Node* one = new_node(NINT, tok);
+      one->integer = 1;
+      Node* assign = new_assign_node(tok, NADD, node, one);
+      Node* value = new_node(NSUB, tok);
+      value->lhs = node;
+      value->rhs = one;
+      node = new_node(NCOMMA, tok);
+      node->lhs = assign;
+      node->rhs = value;
     } else {
       return node;
     }
