@@ -81,10 +81,17 @@ static void whitespace() {
   }
 }
 
-static char* symbols[] = {
-  "+", "->", "-", "*", "/", "&&", "&", "||", "%", "<=", "<",
-  ">=", ">", "==", "=", "!=", "!", "(", ")", "{", "}", "[", "]",
-  ":", ";", ",", ".",
+static char* punctuators[] = {
+  "...", "<<=", ">>=",
+  "->", "++", "--", "<<", ">>", "<=", ">=", "==", "!=",
+  "&&", "||", "*=", "/=", "%=", "+=", "-=", "&=", "^=",
+  "|=",
+  "[", "]", "(", ")", "{", "}", ".", "&", "*", "+",
+  "-", "~", "!", "/", "%", "<", ">", "^", "|", "?",
+  ":", ";", "=", ",",
+};
+
+static char* keywords[] = {
   "auto", "break", "case", "char", "const", "continue", "default",
   "do", "double", "else", "enum", "extern", "float", "for", "goto",
   "if", "inline", "int", "long", "register", "restrict", "return",
@@ -135,18 +142,20 @@ static Token* next_token(void) {
     return integer(cur);
   }
 
-  for (int i = 0; i < (sizeof(symbols) / sizeof(char*)); i++) {
-    if (start_with(symbols[i], cur)) {
-      Token* t = new_reserved(cur, symbols[i]);
-      cur += strlen(symbols[i]);
+  for (int i = 0; i < (sizeof(punctuators) / sizeof(char*)); i++) {
+    if (start_with(punctuators[i], cur)) {
+      Token* t = new_reserved(cur, punctuators[i]);
+      cur += strlen(punctuators[i]);
+      return t;
+    }
+  }
 
-      if (isalnum(*(cur - 1)) || *(cur - 1) == '_') {
-        // t is a keyword
-        if (isalnum(*cur) || *cur == '_') {
-          cur -= strlen(symbols[i]);
-        } else {
-          return t;
-        }
+  for (int i = 0; i < (sizeof(keywords) / sizeof(char*)); i++) {
+    if (start_with(keywords[i], cur)) {
+      Token* t = new_reserved(cur, keywords[i]);
+      cur += strlen(keywords[i]);
+      if (isalnum(*cur) || *cur == '_') {
+        cur -= strlen(keywords[i]);
       } else {
         return t;
       }
