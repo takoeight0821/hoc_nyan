@@ -47,6 +47,12 @@ Type* clone_type(Type* t) {
   return new;
 }
 
+Node* clone_node(Node* node) {
+  Node* new = calloc(1, sizeof(Node));
+  *new = *node;
+  return new;
+}
+
 Type* void_type(void) {
   Type* t = new_type();
   t->ty = TY_VOID;

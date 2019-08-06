@@ -167,6 +167,7 @@ typedef struct {
 
 // node.c
 Node* new_node(enum NodeTag tag, Token* token);
+Node* clone_node(Node*);
 Type* new_type(void);
 Type* clone_type(Type*);
 

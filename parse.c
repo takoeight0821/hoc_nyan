@@ -49,34 +49,28 @@ static Node* new_gvar(Token* tok, char* name, Type* type) {
 }
 
 static Node* find_var(Token* tok, char* name) {
-  Node* var = NULL;
-  for (LVar* env = local_env; var == NULL && env != NULL; env = env->next) {
+  for (LVar* env = local_env; env != NULL; env = env->next) {
     if (streq(name, env->name)) {
-      var = new_var(tok, env->name, env->type, env->offset);
+      return new_var(tok, env->name, env->type, env->offset);
     }
   }
 
-  if (var == NULL) {
-    for (GVar* env = global_env; var == NULL && env != NULL; env = env->next) {
-      if (streq(name, env->name)) {
-        var = new_gvar(tok, env->name, env->type);
-      }
+  for (GVar* env = global_env; env != NULL; env = env->next) {
+    if (streq(name, env->name)) {
+      return new_gvar(tok, env->name, env->type);
     }
   }
 
-  if (var == NULL) {
-    for (Enum* env = enum_env; var == NULL && env != NULL; env = env->next) {
-      if (streq(name, env->name)) {
-        var = env->val;
-        var->token = tok;
-      }
+  for (Enum* env = enum_env; env != NULL; env = env->next) {
+    if (streq(name, env->name)) {
+      Node* val = clone_node(env->val);
+      val->token = tok;
+      return val;
     }
   }
 
-  if (var == NULL) {
-    bad_token(tok, format("%s is not defined\n", name));
-  }
-  return var;
+  bad_token(tok, format("%s is not defined\n", name));
+  return NULL;
 }
 
 static void add_lvar(Token* tok, char* name, Type* ty) {
@@ -108,9 +102,9 @@ static void add_enum(char* name, int val) {
 
 // 文字列リテラルのインターン
 static size_t intern(char* str) {
-  size_t offset = strs->length;
+  size_t id = strs->length;
   vec_push(strs, str);
-  return offset;
+  return id;
 }
 
 static void add_typedef(char* name, Type* type) {
@@ -138,19 +132,15 @@ static Type* find_type(char* name) {
 }
 
 static Type* find_tag(char* tag_name) {
-  Type* ty = NULL;
-  for (Tag* tag = tag_env; ty == NULL && tag != NULL; tag = tag->next) {
+  for (Tag* tag = tag_env; tag != NULL; tag = tag->next) {
     if (streq(tag_name, tag->type->tag)) {
-      ty = tag->type;
+      return tag->type;
     }
   }
 
-  if (ty == NULL) {
-    ty = new_type();
-    ty->ty = TY_STRUCT;
-    ty->tag = tag_name;
-  }
-
+  Type* ty = new_type();
+  ty->ty = TY_STRUCT;
+  ty->tag = tag_name;
   return ty;
 }
 
@@ -995,7 +985,7 @@ Program* parse(Token* t) {
   while (tokens) {
     Function* func = toplevel();
     if (func) {
-       vec_push(prog->funcs, func);
+      vec_push(prog->funcs, func);
     }
   }
 
