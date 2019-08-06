@@ -185,9 +185,7 @@ size_t field_offset(Field* fields, char* name);
 // containers.c
 Vector* new_vec();
 void vec_push(Vector* v, void* elem);
-void vec_pushi(Vector* v, intptr_t elem);
 void* vec_pop(Vector* v);
-intptr_t vec_popi(Vector* v);
 void* vec_last(Vector* v);
 
 // emit.c
