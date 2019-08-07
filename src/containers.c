@@ -1,5 +1,4 @@
 #include "hoc.h"
-/* #include "containers.h" */
 
 Vector* new_vec() {
   Vector* v = calloc(1, sizeof(Vector));

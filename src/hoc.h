@@ -1,8 +1,9 @@
 #ifdef __hoc__
 typedef long size_t;
 typedef int bool;
+void* calloc(size_t count, size_t size);
+void* realloc(void* old, size_t size);
 #else
-
 #include <stdnoreturn.h>
 #include <stdbool.h>
 #include <ctype.h>
@@ -12,7 +13,6 @@ typedef int bool;
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
-
 #endif
 
 typedef struct Vector {
@@ -174,9 +174,9 @@ typedef struct Program {
 
 // node.c
 Node* new_node(enum NodeTag tag, Token* token);
-Node* clone_node(Node*);
+Node* clone_node(Node* node);
 Type* new_type(void);
-Type* clone_type(Type*);
+Type* clone_type(Type* t);
 
 Type* void_type(void);
 Type* char_type(void);
@@ -197,7 +197,7 @@ void* vec_last(Vector* v);
 
 // emit.c
 typedef enum Reg {
-  AX = 0,
+  AX,
   DI,
   SI,
   DX,
@@ -222,9 +222,15 @@ Program* parse(Token* tokens);
 void sema(Program* prog);
 
 // utils.c
-noreturn void error(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
-char *format(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+#ifdef __hoc__
+void error(char* fmt);
+char *format(char* fmt);
+void eprintf(char* fmt);
+#else
+noreturn void error(const char* fmt, ...) __attribute__((format(printf, 1, 2)));
+char *format(const char* fmt, ...) __attribute__((format(printf, 1, 2)));
 void eprintf(const char* fmt, ...);
+#endif
 int streq(char* s0, char* s1);
 
 typedef struct StringBuilder {
@@ -234,10 +240,10 @@ typedef struct StringBuilder {
 } StringBuilder;
 
 StringBuilder* new_sb(void);
-void sb_putc(StringBuilder*, char);
-void sb_puts(StringBuilder*, char*);
-char* sb_run(StringBuilder*);
-void sb_destory(StringBuilder*);
+void sb_putc(StringBuilder* sb, char c);
+void sb_puts(StringBuilder* sb, char* str);
+char* sb_run(StringBuilder* sb);
+void sb_destory(StringBuilder* sb);
 
 void dump_token(Token* tok);
 void dump_node(Node* node, int level);

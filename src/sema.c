@@ -34,6 +34,7 @@ static Type* ret_type(char* name) {
       return fn->ret_type;
     }
   }
+  eprintf("undefined function %s\n", name);
   return int_type();
 }
 
