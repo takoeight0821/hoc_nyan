@@ -1,3 +1,8 @@
+#ifdef __hoc__
+typedef long size_t;
+
+#else
+
 #include <stdnoreturn.h>
 #include <stdbool.h>
 #include <ctype.h>
@@ -8,7 +13,9 @@
 #include <string.h>
 #include <stddef.h>
 
-typedef struct {
+#endif
+
+typedef struct Vector {
   void **ptr;
   size_t capacity;
   size_t length;
