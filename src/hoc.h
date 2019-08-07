@@ -102,12 +102,12 @@ typedef struct Type {
   Field* fields;
 } Type;
 
-typedef struct Field {
+struct Field {
   Field* next;
   char* name;
   Type* type;
   size_t offset;
-} Field;
+};
 
 typedef struct Node {
   enum NodeTag tag;
@@ -150,7 +150,7 @@ typedef struct Node {
   Vector* cases; // for switch-case
 } Node;
 
-typedef struct {
+typedef struct Function {
   char* name;
   Type* ret_type;
   Node* body;
@@ -166,7 +166,7 @@ typedef struct GVar {
   bool is_extern;
 } GVar;
 
-typedef struct {
+typedef struct Program {
   Vector* funcs;
   GVar* globals;
   Vector* strs;
@@ -196,7 +196,7 @@ void* vec_pop(Vector* v);
 void* vec_last(Vector* v);
 
 // emit.c
-typedef enum {
+typedef enum Reg {
   AX = 0,
   DI,
   SI,
@@ -227,7 +227,7 @@ char *format(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 void eprintf(const char* fmt, ...);
 int streq(char* s0, char* s1);
 
-typedef struct {
+typedef struct StringBuilder {
   char* buf;
   size_t capacity;
   size_t length;
