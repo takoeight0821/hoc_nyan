@@ -4,6 +4,11 @@ typedef int bool;
 void* calloc(size_t count, size_t size);
 void* realloc(void* old, size_t size);
 #define NULL (0)
+#define false 0
+#define true 1
+typedef struct __io_file FILE;
+#define EOF (-1)
+
 #else
 #include <stdnoreturn.h>
 #include <stdbool.h>

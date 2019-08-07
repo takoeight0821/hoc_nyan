@@ -26,8 +26,13 @@ static void print_line(char* pos) {
   eprintf("%.*s\n", len, start);
 
   // posまでインデントする
-  for (size_t i = 0; i < column; i++)
-    eprintf("%c", (start[i] == '\t') ? '\t' : ' ');
+  for (size_t i = 0; i < column; i++) {
+    if (start[i] == '\t') {
+      eprintf("\t");
+    } else {
+      eprintf(" ");
+    }
+  }
 
   eprintf("^\n\n");
 }
@@ -211,6 +216,9 @@ static Token* next_token(void) {
         break;
       case '\"':
         t->integer = '\"';
+        break;
+      case '0':
+        t->integer = '\0';
         break;
       default:
         print_line(cur);

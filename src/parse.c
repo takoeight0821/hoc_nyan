@@ -26,7 +26,7 @@ typedef struct Enum {
 
 static Token* tokens;
 static LVar* local_env;
-static size_t local_size = 0;
+static size_t local_size;
 static Tag* tag_env;
 static Enum* enum_env;
 static GVar* global_env;
@@ -147,7 +147,7 @@ static void consume() {
 static Token* lt(size_t i) {
   Token* t = tokens;
   // i回nextをたどるとi+1個目の要素になる
-  for (; i > 0; i--) {
+  for (size_t j = i; j > 0; j--) {
     t = t->next;
   }
   return t;
@@ -157,7 +157,7 @@ static enum TokenTag la(size_t i) {
   return lt(i)->tag;
 }
 
-static void parse_error(const char* expected, Token* actual) {
+static void parse_error(char* expected, Token* actual) {
   bad_token(actual, format("%s expected", expected));
 }
 

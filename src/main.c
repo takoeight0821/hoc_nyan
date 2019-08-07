@@ -11,7 +11,13 @@ int main(int argc, char** argv)
     dump = true;
   }
 
-  Token* tokens = lex(argv[dump ? 2 : 1]);
+
+  Token* tokens;
+  if (dump) {
+    tokens = lex(argv[2]);
+  } else {
+    tokens = lex(argv[1]);
+  }
 
   if (dump) {
     for (Token* t = tokens; t != NULL; t = t->next) {
