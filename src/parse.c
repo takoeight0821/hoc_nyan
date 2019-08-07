@@ -872,9 +872,6 @@ static Function* funcdef(bool is_static) {
       // type definition
       return NULL;
     }
-    eprintf("DEBUG: ");
-    dump_token(lt(0));
-    eprintf("\n");
     parse_error("function name or ;", lt(0));
   } else {
     consume(); // TIDENT
