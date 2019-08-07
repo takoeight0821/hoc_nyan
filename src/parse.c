@@ -208,10 +208,10 @@ static Node* statement();
 static Node* declarator(Type* ty);
 
 static void set_field_offset(Type* t) {
-  size_t offset = 0;
+  size_t offset = size_of(t);
   for (Field* f = t->fields; f != NULL; f = f->next) {
+    offset -= size_of(f->type);
     f->offset = offset;
-    offset += size_of(f->type);
   }
 }
 
