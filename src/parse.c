@@ -781,25 +781,32 @@ static Node* statement() {
       parse_error("(", lt(0));
     }
 
-    if (is_typename(lt(0))) {
-      node->init = declaration();
-    } else {
-      node->init = expr();
+    if (!(eq_reserved(lt(0), ";"))) {
+      if (is_typename(lt(0))) {
+        node->init = declaration();
+      } else {
+        node->init = expr();
+      }
     }
-
     if (!match(";")) {
       parse_error(";", lt(0));
     }
-    node->cond = expr();
 
+    if (!(eq_reserved(lt(0), ";"))) {
+      node->cond = expr();
+    }
     if (!match(";")) {
       parse_error(";", lt(0));
     }
-    node->step = expr();
 
+    if (!(eq_reserved(lt(0), ")"))){
+      node->step = expr();
+
+    }
     if(!match(")")) {
       parse_error(")", lt(0));
     }
+
     node->body = statement();
 
     local_env = tmp;

@@ -51,6 +51,10 @@ static int is_equal_type(Type* t1, Type* t2) {
 }
 
 static void walk(Node* node) {
+  if (!node) {
+    return;
+  }
+
   switch (node->tag) {
   case NINT: {
     node->type = int_type();

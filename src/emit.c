@@ -111,6 +111,9 @@ static void emit_lval(Node* node) {
 }
 
 static void emit_node(Node* node) {
+  if (!node) {
+    return;
+  }
   switch (node->tag) {
   case NINT:
     comment("start NINT");
@@ -611,8 +614,6 @@ static void emit_node(Node* node) {
     comment("end NBREAK");
     break;
   }
-  /* default: */
-  /*   bad_token(node->token, "emit error: umimplemented"); */
   }
 }
 

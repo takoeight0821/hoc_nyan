@@ -381,6 +381,14 @@ int main() {
     EXPECT(sizeof(a[0]), 12);
     EXPECT(sizeof(a[0][0]), 4);
   }
+  {
+    int i = 1;
+    int sum = 0;
+    for (; i < 10;) {
+      sum += i++;
+    }
+    EXPECT(sum, 45);
+  }
   return 0;
 }
 
