@@ -7,6 +7,7 @@ int putchar(char c);
 int puts(char* msg);
 void* malloc(long size);
 void* calloc(long count, long size);
+#define NULL (0)
 
 #define EXPECT(expected, expr)                                          \
   {                                                                     \
@@ -29,6 +30,11 @@ int global_c[2];
 struct pair {
   int x;
   int y;
+};
+
+struct list {
+  int car;
+  struct list* cdr;
 };
 
 enum Enum {
@@ -361,6 +367,13 @@ int main() {
     EXPECT(2, a += 1);
     EXPECT(2, a++);
     EXPECT(3, a);
+  }
+  {
+    struct list* nil = NULL;
+    struct list a;
+    a.car = 1;
+    a.cdr = nil;
+    EXPECT(1, a.car);
   }
   return 0;
 }

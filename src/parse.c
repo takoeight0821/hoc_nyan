@@ -137,11 +137,7 @@ static Type* find_tag(char* tag_name) {
       return tag->type;
     }
   }
-
-  Type* ty = new_type();
-  ty->ty = TY_STRUCT;
-  ty->tag = tag_name;
-  return ty;
+  return NULL;
 }
 
 static void consume() {
@@ -225,6 +221,15 @@ static Type* type_specifier() {
     if (la(0) == TIDENT) {
       tag = lt(0)->ident;
       ty = find_tag(tag);
+      if (!ty) {
+        ty = new_type();
+        ty->ty = TY_STRUCT;
+        ty->tag = tag;
+        Tag* new_tag = calloc(sizeof(Tag), 1);
+        new_tag->type = ty;
+        new_tag->next = tag_env;
+        tag_env = new_tag;
+      }
       consume();
     } else {
       parse_error("ident", lt(0));
@@ -233,10 +238,9 @@ static Type* type_specifier() {
     // struct definition
     if (match("{")) {
       if (ty->fields != NULL) {
-        ty = clone_type(ty); // 同名の異なる型の定義なのでクローンする
+        bad_token(tok, format("struct %s is already defined\n", tag));
       }
 
-      ty->fields = NULL;
       while(!match("}")) {
         Node* field = declarator(type_specifier());
         Field* new = calloc(sizeof(Field), 1);
@@ -250,14 +254,6 @@ static Type* type_specifier() {
       }
 
       set_field_offset(ty);
-      Tag* tag = calloc(sizeof(Tag), 1);
-      tag->type = ty;
-      tag->next = tag_env;
-      tag_env = tag;
-    }
-
-    if (ty->fields == NULL) {
-      bad_token(tok, format("struct %s is not defined\n", tag));
     }
 
   } else if (match("enum")) {
