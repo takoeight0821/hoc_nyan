@@ -374,6 +374,19 @@ static Node* postfix() {
       node = new_node(NCOMMA, tok);
       node->lhs = assign;
       node->rhs = value;
+    } else if ((tok = match("--"))) {
+      /*
+       * a-- -> (a = a - 1, a + 1)
+       */
+      Node* one = new_node(NINT, tok);
+      one->integer = 1;
+      Node* assign = new_assign_node(tok, NSUB, node, one);
+      Node* value = new_node(NADD, tok);
+      value->lhs = node;
+      value->rhs = one;
+      node = new_node(NCOMMA, tok);
+      node->lhs = assign;
+      node->rhs = value;
     } else {
       return node;
     }
@@ -598,6 +611,10 @@ static Node* assign() {
     node->rhs = rhs;
   } else if ((token = match("+="))) {
     node = new_assign_node(token, NADD, node, assign());
+  } else if ((token = match("-="))) {
+    node = new_assign_node(token, NSUB, node, assign());
+  } else if ((token = match("*="))) {
+    node = new_assign_node(token, NMUL, node, assign());
   }
 
   return node;

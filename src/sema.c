@@ -72,7 +72,7 @@ static void walk(Node* node) {
       type_error(int_type(), node->rhs);
     }
 
-    if (node->lhs->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) {
+    if (node->lhs->type->ty == TY_PTR && is_integer_type(node->rhs->type)) {
       // ポインタの加算に対応
       // ptr + n -> ptr + sizeof(typeof(*ptr)) * n
       Node* new_rhs = new_node(NMUL, node->rhs->token);
@@ -100,7 +100,7 @@ static void walk(Node* node) {
       type_error(int_type(), node->rhs);
     }
 
-    if (node->lhs->type->ty == TY_PTR && node->rhs->type->ty == TY_INT) {
+    if (node->lhs->type->ty == TY_PTR && is_integer_type(node->rhs->type)) {
       // ポインタの減算に対応
       // ptr - n -> ptr - sizeof(typeof(*ptr)) * n
       Node* new_rhs = new_node(NMUL, node->rhs->token);
@@ -302,6 +302,11 @@ static void walk(Node* node) {
   }
   case NDEREF: {
     walk(node->expr);
+
+    if (node->expr->type->ty != TY_PTR) {
+      type_error(ptr_to(void_type()), node->expr);
+    }
+
     node->type = node->expr->type->ptr_to;
     break;
   }
