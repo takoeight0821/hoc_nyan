@@ -6,6 +6,9 @@ main
 hoc
 .clang_complete
 
+*_pp.c
+*.s
+
 # Prerequisites
 *.d
 
