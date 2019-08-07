@@ -3,6 +3,7 @@ typedef long size_t;
 typedef int bool;
 void* calloc(size_t count, size_t size);
 void* realloc(void* old, size_t size);
+#define NULL (0)
 #else
 #include <stdnoreturn.h>
 #include <stdbool.h>
