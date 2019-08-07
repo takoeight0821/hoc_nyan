@@ -6,6 +6,7 @@
 <!-- 1. for文の修正(for(;;)みたいなのを許す) -->
 1. 空のreturn
 1. グローバル変数の初期化
+   * emit_const
 1. リスト初期化
 1. va_list, va_startなどの実装
 1. continue
