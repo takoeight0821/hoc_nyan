@@ -69,6 +69,10 @@ static int static_func() {
   return 0;
 }
 
+int no_args(void) {
+  return 0;
+}
+
 int main() {
   EXPECT(0, 0);
   EXPECT(42, 40 + 2);

@@ -887,23 +887,27 @@ static Function* funcdef(bool is_static) {
   LVar* tmp = local_env; // start scope
   local_size = 0;
 
-  for (;;) {
-    if (is_typename(lt(0))) {
-      Node* param_decl = declarator(type_specifier()); // NDEFVAR
-      add_lvar(param_decl->token, param_decl->name, param_decl->type);
-      Node* param = find_var(param_decl->token, param_decl->name);
+  if (eq_reserved(lt(0), "void") && eq_reserved(lt(1), ")")) {
+    consume();
+    consume();
+  } else {
+    for (;;) {
+      if (is_typename(lt(0))) {
+        Node* param_decl = declarator(type_specifier()); // NDEFVAR
+        add_lvar(param_decl->token, param_decl->name, param_decl->type);
+        Node* param = find_var(param_decl->token, param_decl->name);
 
-      vec_push(params, param);
-      if (match(","))
-        continue;
-      if (match(")"))
+        vec_push(params, param);
+        if (match(","))
+          continue;
+        if (match(")"))
+          break;
+        parse_error(", or )", lt(0));
+      } else if (match(")")) {
         break;
-      parse_error(", or )", lt(0));
-
-    } else if (match(")")) {
-      break;
-    } else {
-      parse_error(")", lt(0));
+      } else {
+        parse_error(")", lt(0));
+      }
     }
   }
 
