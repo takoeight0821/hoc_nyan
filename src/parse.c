@@ -724,7 +724,9 @@ static Node* statement() {
     return node;
   } else if ((tok = match("return"))) {
     Node* node = new_node(NRETURN, tok);
-    node->expr = expr();
+    if (!eq_reserved(lt(0), ";")) {
+      node->expr = expr();
+    }
     if (!match(";")) {
       parse_error(";", lt(0));
     }
@@ -906,11 +908,11 @@ static Function* funcdef(bool is_static) {
         Node* param = find_var(param_decl->token, param_decl->name);
 
         vec_push(params, param);
-        if (match(","))
-          continue;
         if (match(")"))
           break;
-        parse_error(", or )", lt(0));
+        if (!match(",")) {
+          parse_error(", or )", lt(0));
+        }
       } else if (match(")")) {
         break;
       } else {

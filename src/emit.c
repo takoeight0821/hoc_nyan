@@ -472,8 +472,10 @@ static void emit_node(Node* node) {
     break;
   case NRETURN:
     comment("start NRETURN");
-    emit_node(node->expr);
-    pop(AX);
+    if (node->expr) {
+      emit_node(node->expr);
+      pop(AX);
+    }
     emit("jmp %s", func_end_label);
     comment("end NRETURN");
     break;

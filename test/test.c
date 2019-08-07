@@ -56,7 +56,7 @@ int* id_ptr(int* x) {
 int func();
 
 void void_fun() {
-
+  return;
 }
 
 int fib(int n) {
