@@ -84,6 +84,12 @@ Type* ptr_to(Type* type) {
   return new_ty;
 }
 
+Type* array_of(Type* type, size_t size) {
+  Type* array = ptr_to(type);
+  array->array_size = size;
+  return array;
+}
+
 Type* type_of(Node* node) {
   return node->type;
 }

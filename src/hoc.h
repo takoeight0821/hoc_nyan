@@ -184,6 +184,7 @@ Type* char_type(void);
 Type* int_type(void);
 Type* long_type(void);
 Type* ptr_to(Type* type);
+Type* array_of(Type* type, size_t size);
 
 Type* type_of(Node* node);
 size_t size_of(Type* ty);

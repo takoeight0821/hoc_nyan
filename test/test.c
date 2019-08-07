@@ -375,6 +375,12 @@ int main() {
     a.cdr = nil;
     EXPECT(1, a.car);
   }
+  {
+    int a[2][3];
+    EXPECT(sizeof(a), 24);
+    EXPECT(sizeof(a[0]), 12);
+    EXPECT(sizeof(a[0][0]), 4);
+  }
   return 0;
 }
 

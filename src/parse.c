@@ -655,6 +655,18 @@ static int is_typename(Token* t) {
   return 0;
 }
 
+static Type* read_type_suffix(Type* base) {
+  if (!match("[")) {
+    return base;
+  }
+  size_t size = expect(TINT, "integer")->integer;
+  if (!match("]")) {
+    parse_error("]", lt(0));
+  }
+  base = read_type_suffix(base);
+  return array_of(base, size);
+}
+
 static Node* direct_decl(Type* ty) {
   if (la(0) != TIDENT) {
     parse_error("ident", lt(0));
@@ -667,18 +679,7 @@ static Node* direct_decl(Type* ty) {
 
   consume();
 
-  node->type = ty;
-
-  if (match("[")) {
-    Type* array_ty = new_type();
-    array_ty->ty = TY_PTR;
-    array_ty->ptr_to = ty;
-    array_ty->array_size = expect(TINT, "integer")->integer;
-    node->type = array_ty;
-    if (!match("]")) {
-      parse_error("]", lt(0));
-    }
-  }
+  node->type = read_type_suffix(ty);
 
   return node;
 }

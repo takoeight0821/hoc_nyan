@@ -2,7 +2,7 @@
 
 static Vector* funcs; // Vector(Function*)
 static Vector* switches; // Vector(Node*(NSWITCH))
-static int case_label_id = 0;
+static int case_label_id;
 
 static char* case_label(void) {
   char* label = format(".case%d", case_label_id);
@@ -10,7 +10,7 @@ static char* case_label(void) {
   return label;
 }
 
-static void walk(Node*);
+static void walk(Node* node);
 
 static void type_error(Type* expected, Node* node) {
   bad_token(node->token, format("expected %s, but got %s\n", show_type(expected), show_type(type_of(node))));
