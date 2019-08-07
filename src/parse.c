@@ -641,6 +641,10 @@ static int is_typename(Token* t) {
     return 1;
   }
 
+  if (t->tag == TRESERVED && streq(t->ident, "enum")) {
+    return 1;
+  }
+
   if (t->tag == TIDENT || t->tag == TRESERVED) {
     for (TypeDef* td = typedefs; td != NULL; td = td->next) {
       if (streq(t->ident, td->name)) {

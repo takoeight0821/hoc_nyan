@@ -1,6 +1,6 @@
 #ifdef __hoc__
 typedef long size_t;
-
+typedef int bool;
 #else
 
 #include <stdnoreturn.h>
