@@ -658,6 +658,21 @@ static void emit_function(Function* func) {
   comment("end Function");
 }
 
+static void emit_const(Node* node) {
+  if (!node) {
+    return;
+  }
+
+  switch (node->tag) {
+  case NINT: {
+    emit(".int %d", node->integer);
+    break;
+  }
+  default:
+    bad_token(node->token, "emit error: value is not constant");
+  }
+}
+
 void gen_x86(Program* prog) {
   puts(".intel_syntax noprefix");
 
@@ -666,11 +681,16 @@ void gen_x86(Program* prog) {
     printf(".string_%zu:\n", i);
     emit(".string \"%s\"", (char*)prog->strs->ptr[i]);
   }
+  for (GVar* gvar = prog->globals; gvar != NULL; gvar = gvar->next) {
+    if (gvar->data != NULL && !gvar->is_extern) {
+      printf("%s:\n", gvar->name);
+      emit_const(gvar->data);
+    }
+  }
 
   puts(".bss");
-
   for (GVar* gvar = prog->globals; gvar != NULL; gvar = gvar->next) {
-    if (!gvar->is_extern) {
+    if (gvar->data == NULL && !gvar->is_extern) {
       printf("%s:\n", gvar->name);
       emit(".zero %zu", size_of(gvar->type));
     }

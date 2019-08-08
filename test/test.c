@@ -26,6 +26,7 @@ void* calloc(long count, long size);
 int global_a;
 int* global_b;
 int global_c[2];
+int global_d = 42;
 
 struct pair {
   int x;
@@ -387,8 +388,9 @@ int main() {
     for (; i < 10;) {
       sum += i++;
     }
-    EXPECT(sum, 45);
+    EXPECT(45, sum);
   }
+  EXPECT(42, global_d);
   return 0;
 }
 

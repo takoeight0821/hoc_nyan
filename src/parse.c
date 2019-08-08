@@ -972,7 +972,12 @@ static void global_var(void) {
 
   type = read_type_suffix(type);
 
-  add_gvar(tok, name, type, NULL);
+  if (match("=")) {
+    add_gvar(tok, name, type, expr());
+  } else {
+    add_gvar(tok, name, type, NULL);
+  }
+
   if (!match(";")) {
     parse_error("global_var: ;", lt(0));
   }
