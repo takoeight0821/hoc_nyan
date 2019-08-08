@@ -169,6 +169,7 @@ typedef struct GVar {
   struct GVar *next;
   char* name;
   Type* type;
+  Node* data;
   bool is_extern;
 } GVar;
 

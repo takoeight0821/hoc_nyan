@@ -83,10 +83,11 @@ static void add_lvar(Token* tok, char* name, Type* ty) {
   local_env = lvar;
 }
 
-static void add_gvar(Token* tok, char* name, Type* type) {
+static void add_gvar(Token* tok, char* name, Type* type, Node* data) {
   GVar* gvar = calloc(sizeof(GVar), 1);
   gvar->name = name;
   gvar->type = type;
+  gvar->data = data;
   gvar->next = global_env;
   global_env = gvar;
 }
@@ -969,18 +970,9 @@ static void global_var(void) {
   Token* tok = lt(0);
   char* name = expect(TIDENT, "function name or ;")->ident;
 
-  if (match("[")) {
-    Type* array_ty = new_type();
-    array_ty->ty = TY_PTR;
-    array_ty->ptr_to = type;
-    array_ty->array_size = expect(TINT, "integer")->integer;
-    type = array_ty;
-    if (!match("]")) {
-      parse_error("]", lt(0));
-    }
-  }
+  type = read_type_suffix(type);
 
-  add_gvar(tok, name, type);
+  add_gvar(tok, name, type, NULL);
   if (!match(";")) {
     parse_error("global_var: ;", lt(0));
   }
