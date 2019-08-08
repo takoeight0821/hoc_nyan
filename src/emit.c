@@ -658,14 +658,26 @@ static void emit_function(Function* func) {
   comment("end Function");
 }
 
-static void emit_const(Node* node) {
+static void emit_const(Type* type, Node* node) {
   if (!node) {
     return;
   }
 
   switch (node->tag) {
   case NINT: {
-    emit(".int %d", node->integer);
+    if (size_of(type) == 1) {
+      emit(".byte %d", node->integer);
+    } else if (size_of(type) == 4) {
+      emit(".int %d", node->integer);
+    } else if (size_of(type) == 8) {
+      emit(".quad %d", node->integer);
+    } else {
+      bad_token(node->token, "emit error: emit_const(invalid size)");
+    }
+    break;
+  }
+  case NSTRING: {
+    emit(".quad .string_%zu", node->str_id);
     break;
   }
   default:
@@ -684,7 +696,7 @@ void gen_x86(Program* prog) {
   for (GVar* gvar = prog->globals; gvar != NULL; gvar = gvar->next) {
     if (gvar->data != NULL && !gvar->is_extern) {
       printf("%s:\n", gvar->name);
-      emit_const(gvar->data);
+      emit_const(gvar->type, gvar->data);
     }
   }
 
