@@ -32,6 +32,7 @@ static Enum* enum_env;
 static GVar* global_env;
 static TypeDef* typedefs;
 static Vector* strs;
+static Vector* current_block; /* 初期化付きのローカル変数宣言に利用 */
 
 static Node* new_var(Token* tok, char* name, Type* type, size_t offset) {
   Node* var = new_node(NVAR, tok);
@@ -729,9 +730,10 @@ static Node* declaration() {
 
   Token* tok;
   if ((tok = match("="))) {
-    decl->expr = new_node(NASSIGN, tok);
-    decl->expr->lhs = find_var(tok, decl->name);
-    decl->expr->rhs = read_initializer();
+    Node* init = new_node(NASSIGN, tok);
+    init->lhs = find_var(tok, decl->name);
+    init->rhs = read_initializer();
+    vec_push(current_block, init);
   }
 
   return decl;
@@ -880,6 +882,7 @@ static Node* statement() {
     node->stmts = new_vec();
 
     LVar* tmp = local_env; // start scope
+    current_block = node->stmts;
 
     while (!eq_reserved(lt(0), "}")) {
       vec_push(node->stmts, statement());

@@ -407,11 +407,6 @@ static void emit_node(Node* node) {
     break;
   }
   case NDEFVAR: {
-    comment("start NDEFVAR");
-    if (node->expr) {
-      emit_node(node->expr);
-    }
-    comment("end NDEFVAR");
     break;
   }
   case NASSIGN: {

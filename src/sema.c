@@ -277,7 +277,6 @@ void walk(Node* node) {
     break;
   }
   case NDEFVAR: {
-    walk(node->expr);
     node->type = NULL;
     break;
   }
