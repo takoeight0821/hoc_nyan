@@ -106,9 +106,14 @@ static void show_type_(StringBuilder* sb, Type* ty) {
     sb_puts(sb, "long");
     break;
   case TY_PTR:
-    sb_puts(sb, "ptr(");
-    show_type_(sb, ty->ptr_to);
-    sb_puts(sb, ")");
+    if (ty->array_size) {
+      show_type_(sb, ty->ptr_to);
+      sb_puts(sb, format("[%zu]", ty->array_size));
+    } else {
+      sb_puts(sb, "ptr(");
+      show_type_(sb, ty->ptr_to);
+      sb_puts(sb, ")");
+    }
     break;
   case TY_STRUCT: {
     sb_puts(sb, format("struct %s", ty->tag));

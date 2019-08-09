@@ -52,6 +52,40 @@ static int is_equal_type(Type* t1, Type* t2) {
   return (is_integer_type(t1) && is_integer_type(t2)) || t1->ty == t2->ty;
 }
 
+static void rewrite_arith_node(Node* node) {
+  /* ポインタ演算を通常の整数演算に置き換える */
+  if (type_of(node->lhs)->ty == TY_PTR && type_of(node->rhs)->ty != TY_PTR) {
+    Node* new = new_node(NMUL, node->rhs->token);
+    new->lhs = node->rhs;
+    new->rhs = new_node(NINT, node->rhs->token);
+    new->rhs->integer = size_of(type_of(node->lhs)->ptr_to);
+    walk(new);
+    new->type = ptr_to(type_of(node->lhs)->ptr_to);
+    node->rhs = new;
+  } else if (type_of(node->rhs)->ty == TY_PTR && type_of(node->lhs)->ty != TY_PTR) {
+    Node* new = new_node(NMUL, node->lhs->token);
+    new->lhs = node->lhs;
+    new->rhs = new_node(NINT, node->lhs->token);
+    new->rhs->integer = size_of(type_of(node->rhs)->ptr_to);
+    walk(new);
+    new->type = ptr_to(type_of(node->rhs)->ptr_to);
+    node->lhs = new;
+  }
+
+  /* 左辺と右辺のサイズが大きい方の型をnodeに割り当てる */
+  if (size_of(type_of(node->lhs)) >= size_of(type_of(node->rhs))) {
+    node->type = type_of(node->lhs);
+  } else {
+    node->type = type_of(node->rhs);
+  }
+
+  if (node->type->array_size != 0) {
+    /* 配列型になった場合はポインタ型に変換する */
+    node->type = clone_type(node->type);
+    node->type->array_size = 0;
+  }
+}
+
 void walk(Node* node) {
   if (!node) {
     return;
@@ -72,56 +106,28 @@ void walk(Node* node) {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (!(node->lhs->type->ty == TY_PTR || is_integer_type(node->lhs->type))) {
+    if (!(is_integer_type(type_of(node->lhs)))) {
       type_error(int_type(), node->lhs);
     }
-    if (!(is_integer_type(node->rhs->type))) {
+    if (!(is_integer_type(type_of(node->rhs)))) {
       type_error(int_type(), node->rhs);
     }
 
-    if (node->lhs->type->ty == TY_PTR && is_integer_type(node->rhs->type)) {
-      // ポインタの加算に対応
-      // ptr + n -> ptr + sizeof(typeof(*ptr)) * n
-      Node* new_rhs = new_node(NMUL, node->rhs->token);
-      new_rhs->lhs = node->rhs;
-      new_rhs->rhs = new_node(NINT, node->rhs->token);
-      new_rhs->rhs->integer = size_of(node->lhs->type->ptr_to);
-      walk(new_rhs);
-      node->rhs = new_rhs;
-
-      node->type = ptr_to(node->lhs->type->ptr_to);
-    } else {
-      node->type = int_type();
-    }
-
+    rewrite_arith_node(node);
     break;
   }
   case NSUB: {
     walk(node->lhs);
     walk(node->rhs);
 
-    if (!(node->lhs->type->ty == TY_PTR || is_integer_type(node->lhs->type))) {
+    if (!(is_integer_type(node->lhs->type))) {
       type_error(int_type(), node->lhs);
     }
     if (!(is_integer_type(node->rhs->type))) {
       type_error(int_type(), node->rhs);
     }
 
-    if (node->lhs->type->ty == TY_PTR && is_integer_type(node->rhs->type)) {
-      // ポインタの減算に対応
-      // ptr - n -> ptr - sizeof(typeof(*ptr)) * n
-      Node* new_rhs = new_node(NMUL, node->rhs->token);
-      new_rhs->lhs = node->rhs;
-      new_rhs->rhs = new_node(NINT, node->rhs->token);
-      new_rhs->rhs->integer = size_of(node->lhs->type->ptr_to);
-      walk(new_rhs);
-      node->rhs = new_rhs;
-
-      node->type = ptr_to(node->lhs->type->ptr_to);
-    } else {
-      node->type = int_type();
-    }
-
+    rewrite_arith_node(node);
     break;
   }
   case NMUL: {
