@@ -107,8 +107,9 @@ static void show_type_(StringBuilder* sb, Type* ty) {
     break;
   case TY_PTR:
     if (ty->array_size) {
+      sb_puts(sb, "array(");
       show_type_(sb, ty->ptr_to);
-      sb_puts(sb, format("[%zu]", ty->array_size));
+      sb_puts(sb, format(", %zu)", ty->array_size));
     } else {
       sb_puts(sb, "ptr(");
       show_type_(sb, ty->ptr_to);

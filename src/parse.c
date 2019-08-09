@@ -141,6 +141,30 @@ static Type* find_tag(char* tag_name) {
   return NULL;
 }
 
+static Node* new_subscript(Token* token, Node* value, Node* index) {
+  Node* node = new_node(NDEREF, token);
+  node->expr = new_node(NADD, token);
+  node->expr->lhs = value;
+  node->expr->rhs = index;
+  return node;
+}
+
+/*
+ * a op= b -> a = a op b
+ */
+static Node* new_assign_node(Token* token, enum NodeTag op, Node* lhs, Node* rhs) {
+  Node* node = new_node(NASSIGN, token);
+  node->lhs = lhs;
+  if (op) {
+    node->rhs = new_node(op, token);
+    node->rhs->lhs = lhs;
+    node->rhs->rhs = rhs;
+    return node;
+  }
+  node->rhs = rhs;
+  return node;
+}
+
 static void consume() {
   tokens = tokens->next;
 }
@@ -199,7 +223,6 @@ static Node* equality();
 static Node* relational();
 static Node* logical_and();
 static Node* logical_or();
-static Node* new_assign_node(Token* token, enum NodeTag op, Node* lhs, Node* rhs);
 static Node* assign();
 static Node* statement();
 static Node* declarator(Type* ty);
@@ -353,11 +376,7 @@ static Node* postfix() {
       if (!match("]")) {
         parse_error("]", lt(0));
       }
-      Node* e = new_node(NDEREF, tok);
-      e->expr = new_node(NADD, tok);
-      e->expr->lhs = node;
-      e->expr->rhs = offset;
-      node = e;
+      node = new_subscript(tok, node, offset);
     } else if ((tok = match("++"))) {
       /*
        * a++ -> (a = a + 1, a - 1)
@@ -614,28 +633,12 @@ static Node* read_initializer() {
   }
 }
 
-/*
- * a op= b -> a = a op b
- */
-static Node* new_assign_node(Token* token, enum NodeTag op, Node* lhs, Node* rhs) {
-  Node* node = new_node(NASSIGN, token);
-  node->lhs = lhs;
-  node->rhs = new_node(op, token);
-  node->rhs->lhs = lhs;
-  node->rhs->rhs = rhs;
-  return node;
-}
-
 static Node* assign() {
   Node* node = logical_or();
   Token* token;
 
-  if (match("=")) {
-    Node* lhs = node;
-    Node* rhs = read_initializer();
-    node = new_node(NASSIGN, lhs->token);
-    node->lhs = lhs;
-    node->rhs = rhs;
+  if ((token = match("="))) {
+    node = new_assign_node(token, 0, node, read_initializer());
   } else if ((token = match("+="))) {
     node = new_assign_node(token, NADD, node, assign());
   } else if ((token = match("-="))) {
@@ -729,12 +732,9 @@ static Node* declaration() {
 
   Token* tok;
   if ((tok = match("="))) {
-    Node* init = new_node(NASSIGN, tok);
-    init->lhs = find_var(tok, decl->name);
-    init->rhs = read_initializer();
     Node* comma = new_node(NCOMMA, tok);
     comma->lhs = decl;
-    comma->rhs = init;
+    comma->rhs = new_assign_node(tok, 0, find_var(tok, decl->name), read_initializer());
     return comma;
   }
 
