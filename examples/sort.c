@@ -2,13 +2,9 @@ int print_int(int i);
 int puts(char* s);
 
 int sort(int* arr, int n) {
-  int i;
-  int j;
-  int tmp;
-
-  tmp = 0;
-  for (i = 0; i < n; i = i + 1) {
-    for (j = 0; j < n - 1; j = j + 1) {
+  int tmp = 0;
+  for (int i = 0; i < n; i = i + 1) {
+    for (int j = 0; j < n - 1; j = j + 1) {
       if (arr[j + 1] < arr[j]) {
         tmp = arr[j];
         arr[j] = arr[j + 1];
@@ -33,15 +29,14 @@ int main() {
   array[8] = 2;
   array[9] = -12;
 
-  int i;
-  for (i = 0; i < 10; i = i + 1) {
+  for (int i = 0; i < 10; i = i + 1) {
     print_int(array[i]);
     puts(";");
   }
 
   sort(array, 10);
 
-  for (i = 0; i < 10; i = i + 1) {
+  for (int i = 0; i < 10; i = i + 1) {
     print_int(array[i]);
     puts(";");
   }

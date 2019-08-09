@@ -399,7 +399,7 @@ static void emit_node(Node* node) {
     comment("start NCOMMA");
     emit_node(node->lhs);
     // pop unused value
-    if (node->lhs->type != NULL || node->lhs->type->ty != TY_VOID) {
+    if (node->lhs->type != NULL && node->lhs->type->ty != TY_VOID) {
       pop(AX);
     }
     emit_node(node->rhs);

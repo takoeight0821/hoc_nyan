@@ -295,9 +295,7 @@ void dump_node(Node* node, int level) {
     break;
   case NDEFVAR: {
     indent(level);
-    eprintf("(");
-    dump_type(node->type);
-    eprintf(" %s)\n", node->name);
+    eprintf("(define %s)\n", node->name);
     break;
   }
   case NASSIGN:
