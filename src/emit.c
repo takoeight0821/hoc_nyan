@@ -408,8 +408,8 @@ static void emit_node(Node* node) {
   }
   case NDEFVAR: {
     comment("start NDEFVAR");
-    if (node->lhs && node->rhs) {
-      emit_assign(node->lhs, node->rhs);
+    if (node->expr) {
+      emit_node(node->expr);
     }
     comment("end NDEFVAR");
     break;

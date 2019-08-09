@@ -729,8 +729,9 @@ static Node* declaration() {
 
   Token* tok;
   if ((tok = match("="))) {
-    decl->lhs = find_var(tok, decl->name);
-    decl->rhs = read_initializer();
+    decl->expr = new_node(NASSIGN, tok);
+    decl->expr->lhs = find_var(tok, decl->name);
+    decl->expr->rhs = read_initializer();
   }
 
   return decl;
