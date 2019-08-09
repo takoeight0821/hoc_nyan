@@ -141,6 +141,13 @@ static void indent(int level) {
   eprintf("%s", show_indent(level));
 }
 
+static void dump_init_list(Node* list, int level) {
+  if (list) {
+    dump_node(list->lhs, level);
+    dump_init_list(list->rhs, level);
+  }
+}
+
 void dump_node(Node* node, int level) {
   switch (node->tag) {
   case NINT:
@@ -429,6 +436,13 @@ void dump_node(Node* node, int level) {
     indent(level);
     eprintf("(break)\n");
     break;
+  }
+  case NLIST: {
+    indent(level);
+    eprintf("{\n");
+    dump_init_list(node, level + 1);
+    indent(level);
+    eprintf("}\n");
   }
   }
 }

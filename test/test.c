@@ -395,6 +395,11 @@ int main() {
   EXPECT(42, global_d);
   EXPECT('e', global_e);
   EXPECT('h', global_f[0]);
+  {
+    int a[2] = { 0, 1 };
+    EXPECT(0, a[0]);
+    EXPECT(1, a[1]);
+  }
   return 0;
 }
 

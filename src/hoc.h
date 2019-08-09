@@ -81,6 +81,7 @@ enum NodeTag {
     NCASE,
     NDEFAULT,
     NBREAK,
+    NLIST,
 };
 
 enum TypeTag {
@@ -227,6 +228,7 @@ Token* lex(char* path);
 Program* parse(Token* tokens);
 
 // sema.c
+void walk(Node* node);
 void sema(Program* prog);
 
 // utils.c

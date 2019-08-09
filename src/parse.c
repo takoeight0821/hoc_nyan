@@ -584,6 +584,35 @@ static Node* add() {
   }
 }
 
+static Node* read_init_list() {
+  if (eq_reserved(lt(0), "}")) {
+    return NULL;
+  }
+  Node* node = new_node(NLIST, lt(0));
+  node->lhs = assign();
+  if (eq_reserved(lt(0), "}")) {
+    node->rhs = NULL;
+    return node;
+  }
+  if (!match(",")) {
+    parse_error(",", lt(0));
+  }
+  node->rhs = read_init_list();
+  return node;
+}
+
+static Node* read_initializer() {
+  if (match("{")) {
+    Node* node = read_init_list();
+    if (!match("}")) {
+      parse_error("}", lt(0));
+    }
+    return node;
+  } else {
+    return assign();
+  }
+}
+
 /*
  * a op= b -> a = a op b
  */
@@ -602,16 +631,16 @@ static Node* assign() {
 
   if (match("=")) {
     Node* lhs = node;
-    Node* rhs = assign();
+    Node* rhs = read_initializer();
     node = new_node(NASSIGN, lhs->token);
     node->lhs = lhs;
     node->rhs = rhs;
   } else if ((token = match("+="))) {
-    node = new_assign_node(token, NADD, node, assign());
+    node = new_assign_node(token, NADD, node, read_initializer());
   } else if ((token = match("-="))) {
-    node = new_assign_node(token, NSUB, node, assign());
+    node = new_assign_node(token, NSUB, node, read_initializer());
   } else if ((token = match("*="))) {
-    node = new_assign_node(token, NMUL, node, assign());
+    node = new_assign_node(token, NMUL, node, read_initializer());
   }
 
   return node;
@@ -700,7 +729,7 @@ static Node* declaration() {
   Token* tok;
   if ((tok = match("="))) {
     decl->lhs = find_var(tok, decl->name);
-    decl->rhs = assign();
+    decl->rhs = read_initializer();
   }
 
   return decl;

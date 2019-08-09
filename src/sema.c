@@ -10,8 +10,6 @@ static char* case_label(void) {
   return label;
 }
 
-static void walk(Node* node);
-
 static void type_error(Type* expected, Node* node) {
   bad_token(node->token, format("expected %s, but got %s\n", show_type(expected), show_type(type_of(node))));
 }
@@ -54,7 +52,7 @@ static int is_equal_type(Type* t1, Type* t2) {
   return (is_integer_type(t1) && is_integer_type(t2)) || t1->ty == t2->ty;
 }
 
-static void walk(Node* node) {
+void walk(Node* node) {
   if (!node) {
     return;
   }
@@ -405,6 +403,12 @@ static void walk(Node* node) {
   }
   case NBREAK: {
     node->type = NULL;
+    break;
+  }
+  case NLIST: {
+    walk(node->lhs);
+    walk(node->rhs);
+    node->type = ptr_to(type_of(node->lhs));
     break;
   }
   }
