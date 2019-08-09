@@ -400,6 +400,11 @@ int main() {
     EXPECT(0, a[0]);
     EXPECT(1, a[1]);
   }
+  {
+    char* a[2] = {"hello", "world"};
+    EXPECT('h', a[0][0]);
+    EXPECT('w', a[1][0]);
+  }
   return 0;
 }
 
