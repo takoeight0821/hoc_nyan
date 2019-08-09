@@ -111,13 +111,16 @@ static void show_type_(StringBuilder* sb, Type* ty) {
     sb_puts(sb, ")");
     break;
   case TY_STRUCT: {
-    sb_puts(sb, format("struct %s {", ty->tag));
-    for (Field* f = ty->fields; f != NULL; f = f->next) {
-      sb_puts(sb, format("%s(+%zu) : ", f->name, f->offset));
-      show_type_(sb, f->type);
-      sb_puts(sb, ",");
-    }
-    sb_puts(sb, "}");
+    sb_puts(sb, format("struct %s", ty->tag));
+
+    // 以下のコードは無限ループを引き起こす
+    /* sb_puts(sb, format("struct %s {", ty->tag)); */
+    /* for (Field* f = ty->fields; f != NULL; f = f->next) { */
+    /*   sb_puts(sb, format("%s(+%zu) : ", f->name, f->offset)); */
+    /*   show_type_(sb, f->type, ty->tag); */
+    /*   sb_puts(sb, ","); */
+    /* } */
+    /* sb_puts(sb, "}"); */
     break;
   }
   }
