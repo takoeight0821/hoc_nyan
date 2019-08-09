@@ -589,6 +589,7 @@ static Node* read_init_list() {
     return NULL;
   }
   Node* node = new_node(NLIST, lt(0));
+  // 入れ子になったリストはサポートしない
   node->lhs = assign();
   if (eq_reserved(lt(0), "}")) {
     node->rhs = NULL;
@@ -636,11 +637,11 @@ static Node* assign() {
     node->lhs = lhs;
     node->rhs = rhs;
   } else if ((token = match("+="))) {
-    node = new_assign_node(token, NADD, node, read_initializer());
+    node = new_assign_node(token, NADD, node, assign());
   } else if ((token = match("-="))) {
-    node = new_assign_node(token, NSUB, node, read_initializer());
+    node = new_assign_node(token, NSUB, node, assign());
   } else if ((token = match("*="))) {
-    node = new_assign_node(token, NMUL, node, read_initializer());
+    node = new_assign_node(token, NMUL, node, assign());
   }
 
   return node;
