@@ -33,6 +33,13 @@ static GVar* global_env;
 static TypeDef* typedefs;
 static Vector* strs;
 
+static Node* new_int_node(Token* token, int i) {
+  Node* node = new_node(NINT, token);
+  node->integer = i;
+  node->type = int_type();
+  return node;
+}
+
 static Node* new_var(Token* tok, char* name, Type* type, size_t offset) {
   Node* var = new_node(NVAR, tok);
   var->name = name;
@@ -95,8 +102,7 @@ static void add_gvar(Token* tok, char* name, Type* type, Node* data) {
 static void add_enum(char* name, int val) {
   Enum* e = calloc(1, sizeof(Enum));
   e->name = name;
-  e->val = new_node(NINT, NULL);
-  e->val->integer = val;
+  e->val = new_int_node(NULL, val);
   e->next = enum_env;
   enum_env = e;
 }
@@ -381,8 +387,7 @@ static Node* postfix() {
       /*
        * a++ -> (a = a + 1, a - 1)
        */
-      Node* one = new_node(NINT, tok);
-      one->integer = 1;
+      Node* one = new_int_node(tok, 1);
       Node* assign = new_assign_node(tok, NADD, node, one);
       Node* value = new_node(NSUB, tok);
       value->lhs = node;
@@ -394,8 +399,7 @@ static Node* postfix() {
       /*
        * a-- -> (a = a - 1, a + 1)
        */
-      Node* one = new_node(NINT, tok);
-      one->integer = 1;
+      Node* one = new_int_node(tok, 1);
       Node* assign = new_assign_node(tok, NSUB, node, one);
       Node* value = new_node(NADD, tok);
       value->lhs = node;
@@ -422,8 +426,7 @@ static Node* unary() {
       while (match("*")) {
         type = ptr_to(type);
       }
-      node = new_node(NINT, tok);
-      node->integer = size_of(type);
+      node = new_int_node(tok, size_of(type));
     } else {
       // sizeof(expr)はsemaで型付けしてemitで計算する
       node = new_node(NSIZEOF, tok);
@@ -437,9 +440,7 @@ static Node* unary() {
     return postfix();
   } else if ((tok = match("-"))) {
     Node* node = new_node(NSUB, tok);
-    Node* zero = new_node(NINT, tok);
-    zero->integer = 0;
-    node->lhs = zero;
+    node->lhs = new_int_node(tok, 0);
     node->rhs = postfix();
     return node;
   } else if ((tok = match("&"))) {
@@ -468,6 +469,7 @@ static Node* variable() {
 static Node* integer() {
   Node* node = new_node(NINT, lt(0));
   node->integer = expect(TINT, "integer")->integer;
+  node->type = int_type();
   return node;
 }
 
@@ -603,42 +605,12 @@ static Node* add() {
   }
 }
 
-static Node* read_init_list() {
-  if (eq_reserved(lt(0), "}")) {
-    return NULL;
-  }
-  Node* node = new_node(NLIST, lt(0));
-  // 入れ子になったリストはサポートしない
-  node->lhs = assign();
-  if (eq_reserved(lt(0), "}")) {
-    node->rhs = NULL;
-    return node;
-  }
-  if (!match(",")) {
-    parse_error(",", lt(0));
-  }
-  node->rhs = read_init_list();
-  return node;
-}
-
-static Node* read_initializer() {
-  if (match("{")) {
-    Node* node = read_init_list();
-    if (!match("}")) {
-      parse_error("}", lt(0));
-    }
-    return node;
-  } else {
-    return assign();
-  }
-}
-
 static Node* assign() {
   Node* node = logical_or();
   Token* token;
 
   if ((token = match("="))) {
-    node = new_assign_node(token, 0, node, read_initializer());
+    node = new_assign_node(token, 0, node, assign());
   } else if ((token = match("+="))) {
     node = new_assign_node(token, NADD, node, assign());
   } else if ((token = match("-="))) {
@@ -725,6 +697,38 @@ static Node* declarator(Type* ty) {
   return direct_decl(ty);
 }
 
+static Node* read_initializer(Token* token, Node* var);
+static Node* read_init_list(Token* token, Node* var, int i) {
+  Node* node = new_assign_node(token, 0,
+                               new_subscript(token, var, new_int_node(token,i)),
+                               assign());
+  if (eq_reserved(lt(0), "}")) {
+    Node* comma = new_node(NCOMMA, token);
+    comma->lhs = node;
+    comma->rhs = var;
+    return comma;
+  }
+  if (!match(",")) {
+    parse_error(",", lt(0));
+  }
+  Node* comma = new_node(NCOMMA, token);
+  comma->lhs = node;
+  comma->rhs = read_init_list(token, var, i + 1);
+  return comma;
+}
+
+static Node* read_initializer(Token* token, Node* var) {
+  if (match("{")) {
+    Node* init = read_init_list(token, var, 0);
+    if (!match("}")) {
+      parse_error("}", lt(0));
+    }
+    return init;
+  } else {
+    return new_assign_node(token, 0, var, assign());
+  }
+}
+
 static Node* declaration() {
   // variable definition
   Node* decl = declarator(type_specifier());
@@ -734,7 +738,7 @@ static Node* declaration() {
   if ((tok = match("="))) {
     Node* comma = new_node(NCOMMA, tok);
     comma->lhs = decl;
-    comma->rhs = new_assign_node(tok, 0, find_var(tok, decl->name), read_initializer());
+    comma->rhs = read_initializer(tok, find_var(tok, decl->name));
     return comma;
   }
 

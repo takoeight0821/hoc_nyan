@@ -158,6 +158,9 @@ static void dump_init_list(Node* list, int level) {
 }
 
 void dump_node(Node* node, int level) {
+
+  eprintf("ADDRESS: %p ", node);
+  int pad = 23;
   switch (node->tag) {
   case NINT:
     indent(level);
@@ -180,7 +183,7 @@ void dump_node(Node* node, int level) {
     eprintf("(+\n");
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NSUB:
@@ -188,15 +191,15 @@ void dump_node(Node* node, int level) {
     eprintf("(-\n");
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NMUL:
     indent(level);
-    eprintf("(*\n");
+    eprintf("(* %s %s\n", show_type(type_of(node->lhs)), show_type(type_of(node->rhs)));
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NDIV:
@@ -204,7 +207,7 @@ void dump_node(Node* node, int level) {
     eprintf("(/\n");
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NMOD:
@@ -212,7 +215,7 @@ void dump_node(Node* node, int level) {
     eprintf("(%%\n");
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NLT:
@@ -220,7 +223,7 @@ void dump_node(Node* node, int level) {
     eprintf("(<\n");
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NLE:
@@ -228,7 +231,7 @@ void dump_node(Node* node, int level) {
     eprintf("(<=\n");
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NGT:
@@ -236,7 +239,7 @@ void dump_node(Node* node, int level) {
     eprintf("(>\n");
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NGE:
@@ -244,7 +247,7 @@ void dump_node(Node* node, int level) {
     eprintf("(>=\n");
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NEQ:
@@ -252,7 +255,7 @@ void dump_node(Node* node, int level) {
     eprintf("(==\n");
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NNE:
@@ -260,14 +263,14 @@ void dump_node(Node* node, int level) {
     eprintf("(!=\n");
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NNOT:
     indent(level);
     eprintf("(!\n");
     dump_node(node->expr, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NLOGAND:
@@ -275,7 +278,7 @@ void dump_node(Node* node, int level) {
     eprintf("(&&\n");
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NLOGOR:
@@ -283,7 +286,7 @@ void dump_node(Node* node, int level) {
     eprintf("(||\n");
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NCOMMA:
@@ -291,7 +294,7 @@ void dump_node(Node* node, int level) {
     eprintf("(,\n");
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NDEFVAR: {
@@ -304,7 +307,7 @@ void dump_node(Node* node, int level) {
     eprintf("(=\n");
     dump_node(node->lhs, level+1);
     dump_node(node->rhs, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NCALL: {
@@ -315,7 +318,7 @@ void dump_node(Node* node, int level) {
     for (size_t i = 0; i < node->args->length; i++) {
       dump_node(node->args->ptr[i], level+1);
     }
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   }
@@ -323,37 +326,37 @@ void dump_node(Node* node, int level) {
     indent(level);
     eprintf("(&\n");
     dump_node(node->expr, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NDEREF:
     indent(level);
     eprintf("(*\n");
     dump_node(node->expr, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NMEMBER:
     indent(level);
     eprintf("(.\n");
     dump_node(node->expr, level+1);
-    indent(level+1);
+    indent(level+1+pad);
     eprintf("%s\n", node->name);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NEXPR_STMT:
     indent(level);
     eprintf("(expr_stmt\n");
     dump_node(node->expr, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NRETURN:
     indent(level);
     eprintf("(return\n");
     dump_node(node->expr, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NIF:
@@ -361,7 +364,7 @@ void dump_node(Node* node, int level) {
     eprintf("(if\n");
     dump_node(node->cond, level+1);
     dump_node(node->then, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NIFELSE:
@@ -370,7 +373,7 @@ void dump_node(Node* node, int level) {
     dump_node(node->cond, level+1);
     dump_node(node->then, level+1);
     dump_node(node->els, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NWHILE:
@@ -378,7 +381,7 @@ void dump_node(Node* node, int level) {
     eprintf("(while\n");
     dump_node(node->cond, level+1);
     dump_node(node->body, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NFOR:
@@ -388,7 +391,7 @@ void dump_node(Node* node, int level) {
     dump_node(node->cond, level+1);
     dump_node(node->step, level+1);
     dump_node(node->body, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   case NBLOCK: {
@@ -397,7 +400,7 @@ void dump_node(Node* node, int level) {
     for (size_t i = 0; i < node->stmts->length; i++) {
       dump_node(node->stmts->ptr[i], level+1);
     }
-    indent(level);
+    indent(level+pad);
     eprintf("}\n");
     break;
   }
@@ -405,7 +408,7 @@ void dump_node(Node* node, int level) {
     indent(level);
     eprintf("(sizeof\n");
     dump_node(node->expr, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   }
@@ -419,7 +422,7 @@ void dump_node(Node* node, int level) {
     eprintf("(switch\n");
     dump_node(node->expr, level + 1);
     dump_node(node->body, level+1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   }
@@ -428,7 +431,7 @@ void dump_node(Node* node, int level) {
     eprintf("(case(%s)\n", node->name);
     dump_node(node->expr, level + 1);
     dump_node(node->body, level + 1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
     break;
   }
@@ -436,7 +439,7 @@ void dump_node(Node* node, int level) {
     indent(level);
     eprintf("(default(%s)\n", node->name);
     dump_node(node->body, level + 1);
-    indent(level);
+    indent(level+pad);
     eprintf(")\n");
   }
   case NBREAK: {
@@ -448,7 +451,7 @@ void dump_node(Node* node, int level) {
     indent(level);
     eprintf("{\n");
     dump_init_list(node, level + 1);
-    indent(level);
+    indent(level+pad);
     eprintf("}\n");
   }
   }
