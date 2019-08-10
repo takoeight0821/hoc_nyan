@@ -9,7 +9,7 @@
 <!--    * emit_const -->
 <!-- 1. NDEFVARのexprにNASSIGNをもたせるように変更 -->
 <!-- 1. NDEREFの書き換えが多重にならないように修正 -->
-1. NLISTを削除（NDEFVARのexprにNCOMMAをもたせる）
+<!-- 1. NLISTを削除（NDEFVARのexprにNCOMMAをもたせる） -->
 1. グローバル変数の入れ子になっていないリスト初期化
 1. va_list, va_startなどの実装
 1. continue
