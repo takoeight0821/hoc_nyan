@@ -110,34 +110,15 @@ static void emit_lval(Node* node) {
   }
 }
 
-static void emit_assign(Node* lhs, Node* rhs);
-
-static void emit_init_list(Node* pointer, int n, Node* list) {
-  if (list) {
-    Node* lval = new_node(NDEREF, pointer->token);
-    lval->expr = new_node(NADD, pointer->token);
-    lval->expr->lhs = pointer;
-    lval->expr->rhs = new_node(NINT, pointer->token);
-    lval->expr->rhs->integer = n;
-    walk(lval);
-    emit_assign(lval, list->lhs);
-    emit_init_list(pointer, n + 1, list->rhs);
-  }
-}
-
 static void emit_assign(Node* lhs, Node* rhs) {
-  if (rhs->tag != NLIST) {
-    comment("  start lval");
-    emit_lval(lhs);
-    comment("  end lval");
-    emit_node(rhs);
-    pop(DI);
-    pop(AX);
-    store(DI, size_of(type_of(lhs)));
-    push(DI);
-  } else {
-    emit_init_list(lhs, 0, rhs);
-  }
+  comment("  start lval");
+  emit_lval(lhs);
+  comment("  end lval");
+  emit_node(rhs);
+  pop(DI);
+  pop(AX);
+  store(DI, size_of(type_of(lhs)));
+  push(DI);
 }
 
 static void emit_node(Node* node) {
@@ -627,10 +608,6 @@ static void emit_node(Node* node) {
     comment("start NBREAK");
     emit("jmp %s", break_label);
     comment("end NBREAK");
-    break;
-  }
-  case NLIST: {
-    error("emit error: NLIST\n");
     break;
   }
   }

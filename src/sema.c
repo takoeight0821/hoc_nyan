@@ -419,11 +419,5 @@ void walk(Node* node) {
     node->type = NULL;
     break;
   }
-  case NLIST: {
-    walk(node->lhs);
-    walk(node->rhs);
-    node->type = ptr_to(type_of(node->lhs));
-    break;
-  }
   }
 }

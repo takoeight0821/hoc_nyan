@@ -81,7 +81,6 @@ enum NodeTag {
     NCASE,
     NDEFAULT,
     NBREAK,
-    NLIST,
 };
 
 enum TypeTag {
