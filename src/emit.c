@@ -686,15 +686,20 @@ void gen_x86(Program* prog) {
     emit(".string \"%s\"", (char*)prog->strs->ptr[i]);
   }
   for (GVar* gvar = prog->globals; gvar != NULL; gvar = gvar->next) {
-    if (gvar->data != NULL && !gvar->is_extern) {
+    if (gvar->init != NULL && !gvar->is_extern) {
       printf("%s:\n", gvar->name);
-      emit_const(gvar->type, gvar->data);
+      emit_const(gvar->type, gvar->init);
+    } else if (gvar->inits != NULL && !gvar->is_extern) {
+      printf("%s:\n", gvar->name);
+      for (size_t i = 0; i < gvar->inits->length; i++) {
+        emit_const(gvar->type->ptr_to, gvar->inits->ptr[i]);
+      }
     }
   }
 
   puts(".bss");
   for (GVar* gvar = prog->globals; gvar != NULL; gvar = gvar->next) {
-    if (gvar->data == NULL && !gvar->is_extern) {
+    if (gvar->init == NULL && gvar->inits == NULL && !gvar->is_extern) {
       printf("%s:\n", gvar->name);
       emit(".zero %zu", size_of(gvar->type));
     }

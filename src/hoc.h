@@ -169,7 +169,8 @@ typedef struct GVar {
   struct GVar *next;
   char* name;
   Type* type;
-  Node* data;
+  Node* init;
+  Vector* inits;
   bool is_extern;
 } GVar;
 

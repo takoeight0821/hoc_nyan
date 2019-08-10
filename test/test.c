@@ -29,6 +29,8 @@ int global_c[2];
 int global_d = 42;
 char global_e = 'e';
 char* global_f = "hello";
+int global_g[3] = {1,2,3};
+char* global_h[2] = { "hello", "world" };
 
 struct pair {
   int x;
@@ -405,6 +407,8 @@ int main() {
     EXPECT('h', a[0][0]);
     EXPECT('w', a[1][0]);
   }
+  EXPECT(1, global_g[0]);
+  EXPECT('h', global_h[0][0]);
   return 0;
 }
 

@@ -17,7 +17,12 @@ static void type_error(Type* expected, Node* node) {
 // 各Nodeの.typeを埋める
 void sema(Program* prog) {
   for (GVar* gvar = prog->globals; gvar != NULL; gvar = gvar->next) {
-    walk(gvar->data);
+    walk(gvar->init);
+    if (gvar->inits != NULL) {
+      for (size_t i = 0; i < gvar->inits->length; i++) {
+        walk(gvar->inits->ptr[i]);
+      }
+    }
   }
 
   funcs = prog->funcs;

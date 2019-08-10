@@ -90,11 +90,12 @@ static void add_lvar(Token* tok, char* name, Type* ty) {
   local_env = lvar;
 }
 
-static void add_gvar(Token* tok, char* name, Type* type, Node* data) {
+static void add_gvar(Token* tok, char* name, Type* type, Node* init, Vector* inits) {
   GVar* gvar = calloc(sizeof(GVar), 1);
   gvar->name = name;
   gvar->type = type;
-  gvar->data = data;
+  gvar->init = init;
+  gvar->inits = inits;
   gvar->next = global_env;
   global_env = gvar;
 }
@@ -1012,9 +1013,22 @@ static void global_var(void) {
   type = read_type_suffix(type);
 
   if (match("=")) {
-    add_gvar(tok, name, type, expr());
+    if (match("{")) {
+      /* リスト初期化 */
+      Vector* inits = new_vec();
+      vec_push(inits, assign());
+      while (match(",")) {
+        vec_push(inits, assign());
+      }
+      if (!match("}")) {
+        parse_error("}", lt(0));
+      }
+      add_gvar(tok, name, type, NULL, inits);
+    } else {
+      add_gvar(tok, name, type, expr(), NULL);
+    }
   } else {
-    add_gvar(tok, name, type, NULL);
+    add_gvar(tok, name, type, NULL, NULL);
   }
 
   if (!match(";")) {
