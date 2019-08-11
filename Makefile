@@ -17,14 +17,13 @@ prepare_self_host: hoc FORCE
 # undefined function
 #	./hoc.sh src/token.c
 #	$(CC) -c src/token.s -o src/token.o
-
-# segmentation fault
+# segmentation fault 多分structのpaddingをしてないから死ぬ
 #	./hoc.sh src/sema.c
 #	$(CC) -c src/sema.s -o src/sema.o
 #	./hoc.sh src/parse.c
 #	$(CC) -c src/parse.s -o src/parse.o
-# ./hoc.sh src/node.c
-# $(CC) -c src/node.s -o src/node.o
+#	./hoc.sh src/node.c
+#	$(CC) -c src/node.s -o src/node.o
 
 test: hoc FORCE
 	./test.sh
