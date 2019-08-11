@@ -644,11 +644,11 @@ static Node* expr() {
 }
 
 static int is_typename(Token* t) {
-  if (t->tag == TRESERVED && streq(t->ident, "struct")) {
+  if (eq_reserved(t, "struct")) {
     return 1;
   }
 
-  if (t->tag == TRESERVED && streq(t->ident, "enum")) {
+  if (eq_reserved(t, "enum")) {
     return 1;
   }
 
