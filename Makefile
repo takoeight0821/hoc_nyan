@@ -14,8 +14,11 @@ prepare_self_host: hoc FORCE
 	$(CC) -c src/containers.s -o src/containers.o
 	./hoc.sh src/main.c
 	$(CC) -c src/main.s -o src/main.o
+# undefined function
 #	./hoc.sh src/token.c
 #	$(CC) -c src/token.s -o src/token.o
+
+# segmentation fault
 #	./hoc.sh src/sema.c
 #	$(CC) -c src/sema.s -o src/sema.o
 #	./hoc.sh src/parse.c
