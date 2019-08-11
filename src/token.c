@@ -86,17 +86,17 @@ static void whitespace() {
   }
 }
 
-static char* punctuators[] = {
+static char* punctuators[46] = {
   "...", "<<=", ">>=",
   "->", "++", "--", "<<", ">>", "<=", ">=", "==", "!=",
   "&&", "||", "*=", "/=", "%=", "+=", "-=", "&=", "^=",
   "|=",
   "[", "]", "(", ")", "{", "}", ".", "&", "*", "+",
   "-", "~", "!", "/", "%", "<", ">", "^", "|", "?",
-  ":", ";", "=", ",",
+  ":", ";", "=", ","
 };
 
-static char* keywords[] = {
+static char* keywords[43] = {
   "auto", "break", "case", "char", "const", "continue", "default",
   "do", "double", "else", "enum", "extern", "float", "for", "goto",
   "if", "inline", "int", "long", "register", "restrict", "return",

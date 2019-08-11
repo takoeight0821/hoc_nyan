@@ -1,13 +1,13 @@
 #include "hoc.h"
 
-static char* reg64[] = { "rax", "rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11" };
-static char* reg32[] = { "eax", "edi", "esi", "edx", "ecx", "r8d", "r9d", "r10d", "r11d" };
-static char* reg8[] = { "al", "dil", "sil", "dl", "cl", "r8b", "r9b", "r10b", "r11b" };
-static Reg argregs[] = {DI, SI, DX, CX, R8, R9};
-static unsigned int label_id = 0;
-static int stack_size = 0;
+static char* reg64[9] = { "rax", "rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11" };
+static char* reg32[9] = { "eax", "edi", "esi", "edx", "ecx", "r8d", "r9d", "r10d", "r11d" };
+static char* reg8[9] = { "al", "dil", "sil", "dl", "cl", "r8b", "r9b", "r10b", "r11b" };
+static Reg argregs[6] = {DI, SI, DX, CX, R8, R9};
+static int label_id;
+static int stack_size;
 static char* func_end_label;
-static char* break_label = NULL;
+static char* break_label;
 
 static char* reg(Reg r, size_t s) {
   if (s == 1) {
@@ -23,7 +23,9 @@ static char* new_label(char* name) {
   return format(".L%s%u", name, label_id++);
 }
 
+#ifndef __hoc__
 __attribute__((format(printf, 1, 2))) static void emit(char *fmt, ...);
+#endif
 
 static void emit(char *fmt, ...) {
   va_list ap;
@@ -33,7 +35,10 @@ static void emit(char *fmt, ...) {
   printf("\n");
 }
 
+#ifndef __hoc__
 __attribute__((format(printf, 1, 2))) static void comment(char *fmt, ...);
+#endif
+
 static void comment(char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
