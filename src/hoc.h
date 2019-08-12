@@ -7,6 +7,7 @@ void* realloc(void* old, size_t size);
 #define false 0
 #define true 1
 typedef struct __io_file FILE;
+void* memcpy(void* dst, void* src, size_t size);
 #define EOF (-1)
 
 #else

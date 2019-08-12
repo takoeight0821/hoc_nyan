@@ -22,7 +22,7 @@ prepare_self_host: hoc FORCE
 # Error: invalid use of operator "lt"
 #	./hoc.sh src/parse.c
 #	$(CC) -c src/parse.s -o src/parse.o
-# segmentation fault on is_is_assignable
+# segmentation fault on is_assignable (rhs)
 #	./hoc.sh src/node.c
 #	$(CC) -c src/node.s -o src/node.o
 

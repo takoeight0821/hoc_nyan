@@ -244,7 +244,7 @@ static void set_field_offset(Type* t) {
       t->align = f->type->align;
     }
   }
-  t->size = offset;
+  t->size = roundup(offset, t->align);
 }
 
 static Type* type_specifier();
