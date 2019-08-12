@@ -32,7 +32,7 @@ prepare_selfhost: hoc FORCE
 selfhost: prepare_selfhost
 	$(CC) -static -o gen_first/hoc $(OBJS:src/%=gen_first/%) $(LDFLAGS)
 
-test: hoc FORCE
+test: hoc selfhost FORCE
 	./test.sh
 
 clean:
