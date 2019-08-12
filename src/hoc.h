@@ -241,6 +241,7 @@ noreturn void error(const char* fmt, ...) __attribute__((format(printf, 1, 2)));
 char *format(const char* fmt, ...) __attribute__((format(printf, 1, 2)));
 void eprintf(const char* fmt, ...);
 #endif
+int roundup(int x, int round_to);
 int streq(char* s0, char* s1);
 
 typedef struct StringBuilder {

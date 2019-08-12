@@ -235,11 +235,28 @@ static Node* statement();
 static Node* declarator(Type* ty);
 
 static void set_field_offset(Type* t) {
-  size_t offset = size_of(t);
+  size_t offset = 0;
   for (Field* f = t->fields; f != NULL; f = f->next) {
-    offset -= size_of(f->type);
     f->offset = offset;
+    offset += size_of(f->type);
   }
+}
+
+static Type* type_specifier();
+
+static Field* read_field() {
+  match(";");
+  if (match("}")) {
+    return NULL;
+  }
+
+  Node* def = declarator(type_specifier());
+  Field* field = calloc(1, sizeof(Field));
+  field->name = def->name;
+  field->type = def->type;
+  field->next = read_field();
+
+  return field;
 }
 
 static Type* type_specifier() {
@@ -272,17 +289,7 @@ static Type* type_specifier() {
         bad_token(tok, format("struct %s is already defined\n", tag));
       }
 
-      while(!match("}")) {
-        Node* field = declarator(type_specifier());
-        Field* new = calloc(sizeof(Field), 1);
-        new->name = field->name;
-        new->type = field->type;
-        new->next = ty->fields;
-        ty->fields = new;
-        if (!match(";")) {
-          parse_error(";", lt(0));
-        }
-      }
+      ty->fields = read_field();
 
       set_field_offset(ty);
     }
