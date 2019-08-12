@@ -11,23 +11,23 @@ $(OBJS): src/hoc.h
 
 prepare_selfhost: hoc FORCE
 	./hoc.sh src/containers.c
-	$(CC) -c src/containers.s -o gen_first/containers.o
+	$(CC) -g -c src/containers.s -o gen_first/containers.o
 	./hoc.sh src/main.c
-	$(CC) -c src/main.s -o gen_first/main.o
+	$(CC) -g -c src/main.s -o gen_first/main.o
 # undefined function
 #	./hoc.sh src/token.c
-#	$(CC) -c src/token.s -o src/token.o
+#	$(CC) -c src/token.s -o gen_first/token.o
 	cp src/token.o gen_first/token.o
 	./hoc.sh src/sema.c
-	$(CC) -c src/sema.s -o gen_first/sema.o
+	$(CC) -g -c src/sema.s -o gen_first/sema.o
 # Error: invalid use of operator "lt"
 #	./hoc.sh src/parse.c
-#	$(CC) -c src/parse.s -o src/parse.o
+#	$(CC) -c src/parse.s -o gen_first/parse.o
 	cp src/parse.o gen_first/parse.o
-# segmentation fault on is_assignable (rhs)
-#	./hoc.sh src/node.c
-#	$(CC) -c src/node.s -o src/node.o
-	cp src/node.o gen_first/node.o
+# segmentation fault on is_assignable (rhs=0)
+	./hoc.sh src/node.c
+	$(CC) -g -c src/node.s -o gen_first/node.o
+#	cp src/node.o gen_first/node.o
 	cp src/emit.o gen_first/emit.o
 	cp src/utils.o gen_first/utils.o
 
