@@ -1,10 +1,12 @@
-struct pair {
-    long a;
-    int b;
+struct a {
+  int x;
+  long y;
+  int z;
 };
 
 void f() {
-    struct pair p;
-    p.a = 10;
-    p.b = 20;
+    struct a p;
+    p.x = 10;
+    p.y = 20;
+    p.z = 30;
 }
