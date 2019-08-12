@@ -634,9 +634,12 @@ static void emit_function(Function* func) {
   }
 
   printf("%s:\n", func->name);
-
+  emit(".cfi_startproc");
   emit("push rbp");
+  emit(".cfi_def_cfa_offset 16");
+  emit(".cfi_offset rbp, -16");
   emit("mov rbp, rsp");
+  emit(".cfi_def_cfa_register rbp");
   emit("sub rsp, %lu", func->local_size);
   stack_size += func->local_size + 8;
 
@@ -649,8 +652,10 @@ static void emit_function(Function* func) {
   emit_node(func->body);
 
   printf("%s:\n", func_end_label);
+  emit(".cfi_def_cfa rsp, 8");
   emit("leave");
   emit("ret");
+  emit(".cfi_endproc");
 
   comment("end Function");
 }
