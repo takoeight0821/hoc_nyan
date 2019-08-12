@@ -50,7 +50,11 @@ static int is_integer_type(Type* ty) {
 }
 
 static int is_assignable(Type* lhs, Type* rhs) {
-  return (lhs->ty == rhs->ty) || (is_integer_type(lhs) && is_integer_type(rhs));
+  if (lhs->ty == TY_STRUCT || rhs->ty == TY_STRUCT) {
+    return false;
+  } else {
+    return (lhs->ty == rhs->ty) || (is_integer_type(lhs) && is_integer_type(rhs));
+  }
 }
 
 static int is_equal_type(Type* t1, Type* t2) {
