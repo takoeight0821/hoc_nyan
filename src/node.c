@@ -27,7 +27,7 @@ Type* clone_type(Type* t) {
 
 Node* clone_node(Node* node) {
   Node* new = calloc(1, sizeof(Node));
-  *new = *node;
+  memcpy(new, node, sizeof(Node));
   return new;
 }
 

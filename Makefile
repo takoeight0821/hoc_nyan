@@ -24,10 +24,8 @@ prepare_selfhost: hoc FORCE
 #	./hoc.sh src/parse.c
 #	$(CC) -c src/parse.s -o gen_first/parse.o
 	cp src/parse.o gen_first/parse.o
-# segmentation fault on is_assignable (rhs=0)
-#	./hoc.sh src/node.c
-#	$(CC) -g -c src/node.s -o gen_first/node.o
-	cp src/node.o gen_first/node.o
+	./hoc.sh src/node.c
+	$(CC) -g -c src/node.s -o gen_first/node.o
 	cp src/emit.o gen_first/emit.o
 	cp src/utils.o gen_first/utils.o
 
