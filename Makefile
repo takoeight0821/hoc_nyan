@@ -37,6 +37,7 @@ test: hoc selfhost FORCE
 
 clean:
 	$(RM) hoc $(OBJS) $(OBJS:src/%=gen_first/%) $(SRCS:%.c=%.s)
+	$(RM) src/*_pp.c src/*_pp.o
 
 FORCE:
 .PHONY: clean FORCE
