@@ -241,7 +241,7 @@ static void emit_node(Node* node) {
     size_t size = size_of(type_of(node->lhs));
     emit("cmp %s, %s", reg(AX, size), reg(DI, size));
     emit("setl al");
-    emit("movzb rax, al");
+    emit("movzx rax, al");
     push(AX);
     comment("end NLT");
     break;
@@ -255,7 +255,7 @@ static void emit_node(Node* node) {
     size_t size = size_of(type_of(node->lhs));
     emit("cmp %s, %s", reg(AX, size), reg(DI, size));
     emit("setle al");
-    emit("movzb rax, al");
+    emit("movzx rax, al");
     push(AX);
     comment("end NLE");
     break;
@@ -269,7 +269,7 @@ static void emit_node(Node* node) {
     size_t size = size_of(type_of(node->lhs));
     emit("cmp %s, %s", reg(AX, size), reg(DI, size));
     emit("setg al");
-    emit("movzb rax, al");
+    emit("movzx rax, al");
     push(AX);
     comment("end NGT");
     break;
@@ -283,7 +283,7 @@ static void emit_node(Node* node) {
     size_t size = size_of(type_of(node->lhs));
     emit("cmp %s, %s", reg(AX, size), reg(DI, size));
     emit("setge al");
-    emit("movzb rax, al");
+    emit("movzx rax, al");
     push(AX);
     comment("end NGE");
     break;
@@ -297,7 +297,7 @@ static void emit_node(Node* node) {
     size_t size = size_of(type_of(node->lhs));
     emit("cmp %s, %s", reg(AX, size), reg(DI, size));
     emit("sete al");
-    emit("movzb rax, al");
+    emit("movzx rax, al");
     push(AX);
     comment("end NEQ");
     break;
@@ -311,7 +311,7 @@ static void emit_node(Node* node) {
     size_t size = size_of(type_of(node->lhs));
     emit("cmp %s, %s", reg(AX, size), reg(DI, size));
     emit("setne al");
-    emit("movzb rax, al");
+    emit("movzx rax, al");
     push(AX);
     comment("end NNE");
     break;
@@ -322,7 +322,7 @@ static void emit_node(Node* node) {
     pop(AX);
     emit("cmp %s, 0", reg(AX, 4));
     emit("sete al");
-    emit("movzb rax, al");
+    emit("movzx rax, al");
     push(AX);
     comment("end NNOT");
     break;
