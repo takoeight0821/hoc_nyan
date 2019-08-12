@@ -237,9 +237,14 @@ static Node* declarator(Type* ty);
 static void set_field_offset(Type* t) {
   size_t offset = 0;
   for (Field* f = t->fields; f != NULL; f = f->next) {
+    offset = roundup(offset, f->type->align);
     f->offset = offset;
     offset += size_of(f->type);
+    if (t->align < f->type->align) {
+      t->align = f->type->align;
+    }
   }
+  t->size = offset;
 }
 
 static Type* type_specifier();
@@ -270,8 +275,7 @@ static Type* type_specifier() {
       tag = lt(0)->ident;
       ty = find_tag(tag);
       if (!ty) {
-        ty = new_type();
-        ty->ty = TY_STRUCT;
+        ty = new_type(TY_STRUCT, 0);
         ty->tag = tag;
         Tag* new_tag = calloc(sizeof(Tag), 1);
         new_tag->type = ty;

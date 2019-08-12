@@ -319,11 +319,7 @@ void walk(Node* node) {
   }
   case NADDR: {
     walk(node->expr);
-
-    node->type = new_type();
-    node->type->ty = TY_PTR;
-    node->type->ptr_to = node->expr->type;
-
+    node->type = ptr_to(type_of(node->expr));
     break;
   }
   case NDEREF: {

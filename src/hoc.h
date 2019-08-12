@@ -96,6 +96,8 @@ typedef struct Field Field;
 
 typedef struct Type {
   enum TypeTag ty;
+  size_t align;
+  size_t size;
 
   // Pointer
   struct Type* ptr_to;
@@ -183,7 +185,7 @@ typedef struct Program {
 // node.c
 Node* new_node(enum NodeTag tag, Token* token);
 Node* clone_node(Node* node);
-Type* new_type(void);
+Type* new_type(enum TypeTag tag, size_t size);
 Type* clone_type(Type* t);
 
 Type* void_type(void);

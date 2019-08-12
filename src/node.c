@@ -8,42 +8,20 @@ Node* new_node(enum NodeTag tag, Token* token) {
 }
 
 size_t size_of(Type* ty) {
-  switch (ty->ty) {
-  case TY_VOID:
-    return 0;
-  case TY_CHAR:
-    return 1;
-  case TY_INT:
-    return 4;
-  case TY_LONG:
-    return 8;
-  case TY_PTR:
-    if (ty->array_size == 0) {
-      return 8;
-    } else {
-      // ty->array_size >= 1のときは配列型
-      return ty->array_size * size_of(ty->ptr_to);
-    }
-  case TY_STRUCT: {
-    size_t s = 0;
-    for (Field* f = ty->fields; f != NULL; f = f->next) {
-      s += size_of(f->type);
-    }
-    return s;
-  }
-  }
-
-  error("unreachable(size_of)");
+  return ty->size;
 }
 
-Type* new_type(void) {
+Type* new_type(enum TypeTag tag, size_t size) {
   Type* ty = calloc(1, sizeof(Type));
+  ty->ty = tag;
+  ty->size = size;
+  ty->align = size;
   return ty;
 }
 
 Type* clone_type(Type* t) {
-  Type* new = new_type();
-  *new = *t;
+  Type* new = calloc(1, sizeof(Type));
+  memcpy(new, t, sizeof(Type));
   return new;
 }
 
@@ -54,32 +32,23 @@ Node* clone_node(Node* node) {
 }
 
 Type* void_type(void) {
-  Type* t = new_type();
-  t->ty = TY_VOID;
-  return t;
+  return new_type(TY_VOID, 0);
 }
 
 Type* char_type(void) {
-  Type* t = new_type();
-  t->ty = TY_CHAR;
-  return t;
+  return new_type(TY_CHAR, 1);
 }
 
 Type* int_type(void) {
-  Type* t = new_type();
-  t->ty = TY_INT;
-  return t;
+  return new_type(TY_INT, 4);
 }
 
 Type* long_type(void) {
-  Type* t = new_type();
-  t->ty = TY_LONG;
-  return t;
+  return new_type(TY_LONG, 8);
 }
 
 Type* ptr_to(Type* type) {
-  Type* new_ty = calloc(1, sizeof(Type));
-  new_ty->ty = TY_PTR;
+  Type* new_ty = new_type(TY_PTR, 8);
   new_ty->ptr_to = type;
   return new_ty;
 }
@@ -87,6 +56,7 @@ Type* ptr_to(Type* type) {
 Type* array_of(Type* type, size_t size) {
   Type* array = ptr_to(type);
   array->array_size = size;
+  array->size = size * size_of(type);
   return array;
 }
 
