@@ -18,7 +18,6 @@ prepare_selfhost: hoc FORCE
 	$(CC) -c src/token.s -o gen_first/token.o
 	./hoc.sh src/sema.c
 	$(CC) -g -c src/sema.s -o gen_first/sema.o
-#	cp src/parse.o gen_first/parse.o
 	./hoc.sh src/parse.c
 	$(CC) -c src/parse.s -o gen_first/parse.o
 	./hoc.sh src/node.c
