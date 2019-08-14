@@ -61,6 +61,33 @@ static int is_equal_type(Type* t1, Type* t2) {
   return (is_integer_type(t1) && is_integer_type(t2)) || t1->ty == t2->ty;
 }
 
+static Type* arith_conv(Type* t1, Type* t2) {
+  Type* type = NULL;
+
+  if (t1->ty == TY_STRUCT || t2->ty == TY_STRUCT) {
+    error("error(arith_conv):");
+    dump_type(t1);
+    eprintf("\n");
+    dump_type(t2);
+    eprintf("\n");
+  }
+
+  /* 左辺と右辺のサイズが大きい方の型をnodeに割り当てる */
+  if (size_of(t1) >= size_of(t2)) {
+    type = t1;
+  } else {
+    type = t2;
+  }
+
+  if (type->array_size != 0) {
+    /* 配列型になった場合はポインタ型に変換する */
+    type = clone_type(type);
+    type->array_size = 0;
+  }
+
+  return type;
+}
+
 static void rewrite_arith_node(Node* node) {
   /* ポインタ演算を通常の整数演算に置き換える */
   if (type_of(node->lhs)->ty == TY_PTR && type_of(node->rhs)->ty != TY_PTR) {
@@ -83,18 +110,9 @@ static void rewrite_arith_node(Node* node) {
     node->lhs = new;
   }
 
-  /* 左辺と右辺のサイズが大きい方の型をnodeに割り当てる */
-  if (size_of(type_of(node->lhs)) >= size_of(type_of(node->rhs))) {
-    node->type = type_of(node->lhs);
-  } else {
-    node->type = type_of(node->rhs);
-  }
+  Type* type = arith_conv(type_of(node->lhs), type_of(node->rhs));
 
-  if (node->type->array_size != 0) {
-    /* 配列型になった場合はポインタ型に変換する */
-    node->type = clone_type(node->type);
-    node->type->array_size = 0;
-  }
+  node->type = type;
 }
 
 void walk(Node* node) {
@@ -151,19 +169,7 @@ void walk(Node* node) {
       type_error(int_type(), node->rhs);
     }
 
-    /* 左辺と右辺のサイズが大きい方の型をnodeに割り当てる */
-    if (size_of(type_of(node->lhs)) >= size_of(type_of(node->rhs))) {
-      node->type = type_of(node->lhs);
-    } else {
-      node->type = type_of(node->rhs);
-    }
-
-    if (node->type->array_size != 0) {
-      /* 配列型になった場合はポインタ型に変換する */
-      node->type = clone_type(node->type);
-      node->type->array_size = 0;
-    }
-
+    node->type = arith_conv(type_of(node->lhs), type_of(node->rhs));
     break;
   }
   case NDIV: {
@@ -177,7 +183,7 @@ void walk(Node* node) {
       type_error(int_type(), node->rhs);
     }
 
-    node->type = node->lhs->type;
+    node->type = arith_conv(type_of(node->lhs), type_of(node->rhs));
     break;
   }
   case NMOD: {
@@ -191,7 +197,7 @@ void walk(Node* node) {
       type_error(int_type(), node->rhs);
     }
 
-    node->type = node->lhs->type;
+    node->type = arith_conv(type_of(node->lhs), type_of(node->rhs));
     break;
   }
   case NLT: {
@@ -283,19 +289,19 @@ void walk(Node* node) {
   case NAND: {
     walk(node->lhs);
     walk(node->rhs);
-    node->type = type_of(node->lhs);
+    node->type = arith_conv(type_of(node->lhs), type_of(node->rhs));
     break;
   }
   case NOR: {
     walk(node->lhs);
     walk(node->rhs);
-    node->type = type_of(node->lhs);
+    node->type = arith_conv(type_of(node->lhs), type_of(node->rhs));
     break;
   }
   case NXOR: {
     walk(node->lhs);
     walk(node->rhs);
-    node->type = type_of(node->lhs);
+    node->type = arith_conv(type_of(node->lhs), type_of(node->rhs));
     break;
   }
   case NLOGAND: {
