@@ -1,6 +1,7 @@
 #ifdef __hoc__
 typedef long size_t;
-typedef int bool;
+typedef long ptrdiff_t;
+typedef char bool;
 void* calloc(size_t count, size_t size);
 void* realloc(void* old, size_t size);
 #define NULL (0)

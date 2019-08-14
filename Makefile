@@ -26,7 +26,10 @@ prepare_selfhost: hoc FORCE
 	cp src/parse.o gen_first/parse.o
 	./hoc.sh src/node.c
 	$(CC) -g -c src/node.s -o gen_first/node.o
-	cp src/emit.o gen_first/emit.o
+
+	./hoc.sh src/emit.c
+	$(CC) -g -c src/emit.s -o gen_first/emit.o
+#cp src/emit.o gen_first/emit.o
 	cp src/utils.o gen_first/utils.o
 
 selfhost: prepare_selfhost

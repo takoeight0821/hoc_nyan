@@ -83,7 +83,7 @@ static void store(Reg src, size_t size) {
   emit("mov [rax], %s", reg(src, size));
 }
 
-static void emit_node(Node*);
+static void emit_node(Node* node);
 
 static void emit_var(Node* var) {
   comment("start lval NVAR %s", var->name);
