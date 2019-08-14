@@ -280,6 +280,24 @@ void walk(Node* node) {
     node->type = int_type();
     break;
   }
+  case NAND: {
+    walk(node->lhs);
+    walk(node->rhs);
+    node->type = type_of(node->lhs);
+    break;
+  }
+  case NOR: {
+    walk(node->lhs);
+    walk(node->rhs);
+    node->type = type_of(node->lhs);
+    break;
+  }
+  case NXOR: {
+    walk(node->lhs);
+    walk(node->rhs);
+    node->type = type_of(node->lhs);
+    break;
+  }
   case NLOGAND: {
     walk(node->lhs);
     walk(node->rhs);

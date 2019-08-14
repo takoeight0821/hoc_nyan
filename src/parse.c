@@ -229,6 +229,9 @@ static Node* cast();
 static Node* unary();
 static Node* equality();
 static Node* relational();
+static Node* and();
+static Node* xor();
+static Node* or();
 static Node* logical_and();
 static Node* logical_or();
 static Node* assign();
@@ -511,11 +514,56 @@ static Node* logical_or() {
 }
 
 static Node* logical_and() {
-  Node* lhs = equality();
+  Node* lhs = or();
   Token* tok;
   for (;;) {
     if ((tok = match("&&"))) {
       Node* node = new_node(NLOGAND, tok);
+      node->lhs = lhs;
+      node->rhs = or();
+      lhs = node;
+    } else {
+      return lhs;
+    }
+  }
+}
+
+static Node* or() {
+  Node* lhs = xor();
+  Token* token;
+  for (;;) {
+    if ((token = match("|"))) {
+      Node* node = new_node(NOR, token);
+      node->lhs = lhs;
+      node->rhs = xor();
+      lhs = node;
+    } else {
+      return lhs;
+    }
+  }
+}
+
+static Node* xor() {
+  Node* lhs = and();
+  Token* token;
+  for (;;) {
+    if ((token = match("^"))) {
+      Node* node = new_node(NXOR, token);
+      node->lhs = lhs;
+      node->rhs = and();
+      lhs = node;
+    } else {
+      return lhs;
+    }
+  }
+}
+
+static Node* and() {
+  Node* lhs = equality();
+  Token* token;
+  for (;;) {
+    if ((token = match("&"))) {
+      Node* node = new_node(NAND, token);
       node->lhs = lhs;
       node->rhs = equality();
       lhs = node;

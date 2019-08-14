@@ -269,6 +269,27 @@ void dump_node(Node* node, int level) {
     indent(level+pad);
     eprintf(")\n");
     break;
+  case NAND:
+    indent(level);
+    eprintf("(&\n");
+    dump_node(node->lhs, level + 1);
+    dump_node(node->rhs, level + 1);
+    eprintf(")\n");
+    break;
+  case NOR:
+    indent(level);
+    eprintf("(|\n");
+    dump_node(node->lhs, level + 1);
+    dump_node(node->rhs, level + 1);
+    eprintf(")\n");
+    break;
+  case NXOR:
+    indent(level);
+    eprintf("(^\n");
+    dump_node(node->lhs, level + 1);
+    dump_node(node->rhs, level + 1);
+    eprintf(")\n");
+    break;
   case NLOGAND:
     indent(level);
     eprintf("(&&\n");

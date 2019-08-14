@@ -29,8 +29,8 @@ prepare_selfhost: hoc FORCE
 
 	./hoc.sh src/emit.c
 	$(CC) -g -c src/emit.s -o gen_first/emit.o
-#cp src/emit.o gen_first/emit.o
-	cp src/utils.o gen_first/utils.o
+	./hoc.sh src/utils.c
+	$(CC) -g -c src/utils.s -o gen_first/utils.o
 
 selfhost: prepare_selfhost
 	$(CC) -static -o gen_first/hoc $(OBJS:src/%=gen_first/%) $(LDFLAGS)

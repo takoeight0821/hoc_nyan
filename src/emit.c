@@ -340,6 +340,39 @@ static void emit_node(Node* node) {
     comment("end NNOT");
     break;
   }
+  case NAND: {
+    comment("start NAND");
+    emit_node(node->lhs);
+    emit_node(node->rhs);
+    pop(DI);
+    pop(AX);
+    emit("and %s, %s", reg(AX, size_of(type_of(node))), reg(DI, size_of(type_of(node))));
+    push(AX);
+    comment("end NAND");
+    break;
+  }
+  case NOR: {
+    comment("start NOR");
+    emit_node(node->lhs);
+    emit_node(node->rhs);
+    pop(DI);
+    pop(AX);
+    emit("or %s, %s", reg(AX, size_of(type_of(node))), reg(DI, size_of(type_of(node))));
+    push(AX);
+    comment("end NOR");
+    break;
+  }
+  case NXOR: {
+    comment("start NXOR");
+    emit_node(node->lhs);
+    emit_node(node->rhs);
+    pop(DI);
+    pop(AX);
+    emit("xor %s, %s", reg(AX, size_of(type_of(node))), reg(DI, size_of(type_of(node))));
+    push(AX);
+    comment("end NXOR");
+    break;
+  }
   case NLOGAND: {
     comment("start NLOGAND");
     char* when_false = new_label("when_false");
