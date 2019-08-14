@@ -84,6 +84,10 @@ int no_args(void) {
   return 0;
 }
 
+int sum(int count, ...) {
+  return 0;
+}
+
 int main() {
   EXPECT(0, 0);
   EXPECT(42, 40 + 2);
@@ -409,6 +413,7 @@ int main() {
   }
   EXPECT(1, global_g[0]);
   EXPECT('h', global_h[0][0]);
+  EXPECT(55, sum(10));
   return 0;
 }
 

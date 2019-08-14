@@ -947,6 +947,7 @@ static Function* funcdef(bool is_static) {
 
   Vector* params = new_vec();
   LVar* tmp = local_env; // start scope
+  bool has_va_arg = false;
   local_size = 0;
 
   if (eq_reserved(lt(0), "void") && eq_reserved(lt(1), ")")) {
@@ -965,6 +966,9 @@ static Function* funcdef(bool is_static) {
         if (!match(",")) {
           parse_error(", or )", lt(0));
         }
+      } else if (match("...") && match(")")) {
+        has_va_arg = true;
+        break;
       } else if (match(")")) {
         break;
       } else {
@@ -981,6 +985,7 @@ static Function* funcdef(bool is_static) {
     func->params = params;
     func->local_size = local_size;
     func->is_static = is_static;
+    func->has_va_arg = has_va_arg;
     return func;
   }
 
