@@ -317,3 +317,6 @@ void dump_node(Node* node, int level);
 char* show_type(Type* ty);
 void dump_type(Type* ty);
 void dump_function(Function* func);
+
+// preprocess.c
+Vector* preprocess(Vector* tokens);

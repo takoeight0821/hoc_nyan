@@ -26,6 +26,8 @@ selfhost:
 	$(CC) -g -c src/emit.s -o gen_first/emit.o
 	./hoc.sh src/utils.c
 	$(CC) -g -c src/utils.s -o gen_first/utils.o
+	./hoc.sh src/preprocess.c
+	$(CC) -g -c src/preprocess.s -o gen_first/preprocess.o
 	$(CC) -g -static -o gen_first/hoc $(OBJS:src/%=gen_first/%) $(LDFLAGS)
 
 gen_second: selfhost FORCE
@@ -45,6 +47,8 @@ gen_second: selfhost FORCE
 	$(CC) -g -c src/emit_1.s -o gen_second/emit.o
 	./hoc_1.sh src/utils.c
 	$(CC) -g -c src/utils_1.s -o gen_second/utils.o
+	./hoc_1.sh src/preprocess.c
+	$(CC) -g -c src/preprocess_1.s -o gen_second/preprocess.o
 	$(CC) -g -static -o gen_second/hoc $(OBJS:src/%=gen_second/%) $(LDFLAGS)
 
 test: hoc selfhost gen_second FORCE
