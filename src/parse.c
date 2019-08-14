@@ -469,7 +469,7 @@ static Node* unary() {
     node->expr = cast();
     return node;
   } else if ((tok = match("!"))) {
-    Node* node = new_node(NNOT, tok);
+    Node* node = new_node(NLOGNOT, tok);
     node->expr = cast();
     return node;
   } else {

@@ -87,7 +87,7 @@ enum NodeTag {
     NGE,
     NEQ,
     NNE,
-    NNOT,
+    NLOGNOT,
     NAND,
     NOR,
     NXOR,

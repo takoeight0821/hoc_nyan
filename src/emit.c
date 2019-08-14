@@ -329,15 +329,15 @@ static void emit_node(Node* node) {
     comment("end NNE");
     break;
   }
-  case NNOT: {
-    comment("start NNOT");
+  case NLOGNOT: {
+    comment("start NLOGNOT");
     emit_node(node->expr);
     pop(AX);
     emit("cmp %s, 0", reg(AX, 4));
     emit("sete al");
     emit("movzx rax, al");
     push(AX);
-    comment("end NNOT");
+    comment("end NLOGNOT");
     break;
   }
   case NAND: {

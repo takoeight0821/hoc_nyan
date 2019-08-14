@@ -272,7 +272,7 @@ void walk(Node* node) {
     node->type = int_type();
     break;
   }
-  case NNOT: {
+  case NLOGNOT: {
     walk(node->expr);
     if (!is_integer_type(node->expr->type)) {
       type_error(int_type(), node->expr);

@@ -262,7 +262,7 @@ void dump_node(Node* node, int level) {
     indent(level+pad);
     eprintf(")\n");
     break;
-  case NNOT:
+  case NLOGNOT:
     indent(level);
     eprintf("(!\n");
     dump_node(node->expr, level+1);
