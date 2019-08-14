@@ -573,6 +573,8 @@ static void emit_node(Node* node) {
     comment("start NWHILE");
     char* begin = new_label("begin");
     char* end = new_label("end");
+    char* prev_break = break_label;
+    break_label = end;
     printf("%s:\n", begin);
     emit_node(node->cond);
     pop(AX);
@@ -581,6 +583,7 @@ static void emit_node(Node* node) {
     emit_node(node->body);
     emit("jmp %s", begin);
     printf("%s:\n", end);
+    break_label = prev_break;
     comment("end NWHILE");
     break;
   }
@@ -588,6 +591,8 @@ static void emit_node(Node* node) {
     comment("start NFOR");
     char* begin = new_label("begin");
     char* end = new_label("end");
+    char* prev_break = break_label;
+    break_label = end;
     emit_node(node->init);
     printf("%s:\n", begin);
     emit_node(node->cond);
@@ -598,6 +603,7 @@ static void emit_node(Node* node) {
     emit_node(node->step);
     emit("jmp %s", begin);
     printf("%s:\n", end);
+    break_label = prev_break;
     comment("end NFOR");
     break;
   }

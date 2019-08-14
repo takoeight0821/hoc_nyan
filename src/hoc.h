@@ -2,8 +2,10 @@
 typedef long size_t;
 typedef long ptrdiff_t;
 typedef char bool;
+void* malloc(size_t size);
 void* calloc(size_t count, size_t size);
 void* realloc(void* old, size_t size);
+void free(void* ptr);
 #define NULL (0)
 #define false 0
 #define true 1
@@ -16,9 +18,19 @@ int exit();
 int putchar(char c);
 int puts(char* msg);
 
-typedef struct __io_file FILE;
+typedef void FILE;
 void* memcpy(void* dst, void* src, size_t size);
 #define EOF (-1)
+
+char* strchr(char* s, int c);
+int fgetc(FILE* stream);
+int isdigit(int c);
+int isalnum(int c);
+int isalpha(int c);
+int strcmp(char* s1, char* s2);
+size_t strlen(char* s);
+FILE* fopen(char* path, char* mode);
+int fclose(FILE* stream);
 
 struct __va_list_elem {
   int gp_offset;
@@ -38,6 +50,11 @@ static void* __va_arg(struct __va_list_elem* ap) {
 #define va_start(ap, start) __hoc_builtin_va_start(ap, start)
 #define va_arg(ap, type) *(type *)__va_arg(ap)
 #define va_end(ap) (0)
+
+int vprintf(char* format, va_list ap);
+int vfprintf(FILE* stream, char* format, va_list ap);
+int vsprintf(char* str, char* format, va_list ap);
+int vsnprintf(char* str, size_t size, char* format, va_list ap);
 
 #else
 #include <stdnoreturn.h>
