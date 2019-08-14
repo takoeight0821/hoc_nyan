@@ -203,6 +203,11 @@ static Token* expect(enum TokenTag tag, char* expected) {
   return NULL;
 }
 
+static char* read_ident(void) {
+  Token* token = expect(TIDENT, "ident");
+  return token->ident;
+}
+
 static Token* match(char* name) {
   if (peek_tag(0) == TRESERVED && streq(peek(0)->ident, name)) {
     Token* t = peek(0);
@@ -310,7 +315,7 @@ static Type* type_specifier() {
     if (match("{")) {
       int val = 0;
       while (true) {
-        char* name = expect(TIDENT, "enum value")->ident;
+        char* name = read_ident();
         add_enum(name, val);
         val++;
 
@@ -381,13 +386,13 @@ static Node* postfix() {
 
   for (;;) {
     if ((tok = match("."))) {
-      char* name = expect(TIDENT, "field name")->ident;
+      char* name = read_ident();
       Node* e = new_node(NMEMBER, tok);
       e->expr = node;
       e->name = name;
       node = e;
     } else if ((tok = match("->"))) {
-      char* name = expect(TIDENT, "field name")->ident;
+      char* name = read_ident();
       Node* deref = new_node(NDEREF, tok);
       deref->expr = node;
       Node* e = new_node(NMEMBER, tok);
@@ -483,7 +488,7 @@ static Node* unary() {
 }
 
 static Node* variable() {
-  Node* node = find_var(peek(0), expect(TIDENT, "variable")->ident);
+  Node* node = find_var(peek(0), read_ident());
   return node;
 }
 
@@ -1105,7 +1110,7 @@ static void global_var(void) {
   }
 
   Token* tok = peek(0);
-  char* name = expect(TIDENT, "function name or ;")->ident;
+  char* name = read_ident();
 
   type = read_type_suffix(type);
 
