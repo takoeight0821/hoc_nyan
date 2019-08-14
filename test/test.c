@@ -9,6 +9,15 @@ void* malloc(long size);
 void* calloc(long count, long size);
 #define NULL (0)
 
+struct __va_list_elem {
+  int gp_offset;
+  int fp_offset;
+  void* overflow_arg_area;
+  void* reg_save_area;
+};
+typedef struct __va_list_elem va_list[1];
+#define va_start(ap, type) __hoc_builtin_va_start(ap)
+
 #define EXPECT(expected, expr)                                          \
   {                                                                     \
     int e1;                                                             \
@@ -89,6 +98,8 @@ int no_args(void) {
 }
 
 int sum(int count, ...) {
+  va_list args;
+  va_start(args, count);
   return 0;
 }
 
@@ -417,7 +428,7 @@ int main() {
   }
   EXPECT(1, global_g[0]);
   EXPECT('h', global_h[0][0]);
-  /* EXPECT(55, sum(10)); */
+  EXPECT(55, sum(10));
   {
     single_array a;
     a[0].x = 42;

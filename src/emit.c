@@ -9,6 +9,7 @@ static int stack_size;
 static char* func_end_label;
 static char* break_label;
 static int numgp;
+#define REGAREA_SIZE 176
 
 static char* reg(Reg r, size_t s) {
   if (s == 1) {
@@ -125,6 +126,17 @@ static void emit_assign(Node* lhs, Node* rhs) {
   pop(AX);
   store(DI, size_of(type_of(lhs)));
   push(DI);
+}
+
+static void emit_builtin_va_start(Node* node) {
+  emit_node(node);
+  pop(AX); // address of va_list
+  push(CX); // save register
+  emit("mov DWORD PTR [rax], %d", numgp * 8);
+  emit("mov DWORD PTR [rax + 4], 48");
+  emit("lea rcx, [rbp - %d]", REGAREA_SIZE);
+  emit("mov [rax + 16], rcx");
+  pop(CX); // load register
 }
 
 static void emit_node(Node* node) {
@@ -403,6 +415,12 @@ static void emit_node(Node* node) {
     break;
   }
   case NCALL: {
+    if (streq("__hoc_builtin_va_start", node->name)) {
+      comment("start __hoc_builtin_va_start");
+      emit_builtin_va_start(node->args->ptr[0]);
+      comment("end __hoc_builtin_va_start");
+      break;
+    }
     comment("start NCALL");
     // function call
     for (size_t i = 0; i < node->args->length; i++) {
@@ -623,7 +641,6 @@ static void set_reg_nums(Vector* params) {
   numgp = params->length;
 }
 
-#define REGAREA_SIZE 176
 static int emit_regsave_area(void) {
   emit("sub rsp, %d", REGAREA_SIZE);
   emit("mov [rsp], rdi");

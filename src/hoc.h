@@ -17,6 +17,10 @@ struct __va_list_elem {
   void* reg_save_area;
 };
 
+typedef struct __va_list_elem va_list[1];
+
+#define va_start(ap, type) __hoc_builtin_va_start(ap)
+
 #else
 #include <stdnoreturn.h>
 #include <stdbool.h>
