@@ -424,5 +424,9 @@ void walk(Node* node) {
     node->type = NULL;
     break;
   }
+  case NCAST:{
+    walk(node->expr);
+    break;
+  }
   }
 }

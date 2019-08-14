@@ -6,6 +6,15 @@ void* realloc(void* old, size_t size);
 #define NULL (0)
 #define false 0
 #define true 1
+
+extern void* stderr;
+
+int printf();
+int fprintf();
+int exit();
+int putchar(char c);
+int puts(char* msg);
+
 typedef struct __io_file FILE;
 void* memcpy(void* dst, void* src, size_t size);
 #define EOF (-1)
@@ -18,8 +27,15 @@ struct __va_list_elem {
 };
 
 typedef struct __va_list_elem va_list[1];
+static void* __va_arg(struct __va_list_elem* ap) {
+  char* reg_save_area = ap->reg_save_area;
+  void* r = reg_save_area + ap->gp_offset;
+  ap->gp_offset += 8;
+  return r;
+}
 
-#define va_start(ap, type) __hoc_builtin_va_start(ap)
+#define va_start(ap, start) __hoc_builtin_va_start(ap, start)
+#define va_arg(ap, type) *(type *)__va_arg(ap)
 
 #else
 #include <stdnoreturn.h>
@@ -93,6 +109,7 @@ enum NodeTag {
     NCASE,
     NDEFAULT,
     NBREAK,
+    NCAST,
 };
 
 enum TypeTag {
@@ -144,6 +161,7 @@ typedef struct Node {
   // "&" expr
   // "*" expr
   // expr "." name
+  // (type *) expr
   struct Node* expr;
   size_t str_id; // string literal
 

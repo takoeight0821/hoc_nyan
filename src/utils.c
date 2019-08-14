@@ -437,10 +437,18 @@ void dump_node(Node* node, int level) {
     dump_node(node->body, level + 1);
     indent(level+pad);
     eprintf(")\n");
+    break;
   }
   case NBREAK: {
     indent(level);
     eprintf("(break)\n");
+    break;
+  }
+  case NCAST: {
+    indent(level);
+    eprintf("(cast (%s)\n", show_type(type_of(node)));
+    dump_node(node->expr, level + 1);
+    eprintf(")\n");
     break;
   }
   }

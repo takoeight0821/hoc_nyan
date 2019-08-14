@@ -1,22 +1,4 @@
-extern void* stderr;
-
-int printf();
-int fprintf();
-int exit();
-int putchar(char c);
-int puts(char* msg);
-void* malloc(long size);
-void* calloc(long count, long size);
-#define NULL (0)
-
-struct __va_list_elem {
-  int gp_offset;
-  int fp_offset;
-  void* overflow_arg_area;
-  void* reg_save_area;
-};
-typedef struct __va_list_elem va_list[1];
-#define va_start(ap, type) __hoc_builtin_va_start(ap)
+#include "../src/hoc.h"
 
 #define EXPECT(expected, expr)                                          \
   {                                                                     \
@@ -98,9 +80,13 @@ int no_args(void) {
 }
 
 int sum(int count, ...) {
+  int sum = 0;
   va_list args;
   va_start(args, count);
-  return 0;
+  for (int i = 0; i < count; i++) {
+    sum += va_arg(args, int);
+  }
+  return sum;
 }
 
 int main() {
@@ -428,12 +414,17 @@ int main() {
   }
   EXPECT(1, global_g[0]);
   EXPECT('h', global_h[0][0]);
-  EXPECT(55, sum(10));
+  {
+    int a = 'a';
+    char* a_ptr = (char*)(&a);
+    EXPECT('a', *a_ptr);
+  }
   {
     single_array a;
     a[0].x = 42;
     EXPECT(42, a[0].x);
   }
+  EXPECT(6, sum(3, 1, 2, 3));
   return 0;
 }
 

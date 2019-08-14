@@ -225,6 +225,7 @@ static Node* integer();
 static Node* string();
 static Node* add();
 static Node* mul();
+static Node* cast();
 static Node* unary();
 static Node* equality();
 static Node* relational();
@@ -334,7 +335,8 @@ static Type* type_specifier() {
 }
 
 static Node* term() {
-  if (match("(")) {
+  if (eq_reserved(lt(0), "(") && !is_typename(lt(1))) {
+    consume();
     Node* node = expr();
     if (!match(")")) {
       parse_error(")", lt(0));
@@ -449,23 +451,23 @@ static Node* unary() {
     }
     return node;
   } else if (match("+")) {
-    return postfix();
+    return cast();
   } else if ((tok = match("-"))) {
     Node* node = new_node(NSUB, tok);
     node->lhs = new_int_node(tok, 0);
-    node->rhs = postfix();
+    node->rhs = cast();
     return node;
   } else if ((tok = match("&"))) {
     Node* node = new_node(NADDR, tok);
-    node->expr = postfix();
+    node->expr = cast();
     return node;
   } else if ((tok = match("*"))) {
     Node* node = new_node(NDEREF, tok);
-    node->expr = postfix();
+    node->expr = cast();
     return node;
   } else if ((tok = match("!"))) {
     Node* node = new_node(NNOT, tok);
-    node->expr = postfix();
+    node->expr = cast();
     return node;
   } else {
     Node* node = postfix();
@@ -572,24 +574,45 @@ static Node* relational() {
     }
   }
 }
+
+static Node* cast() {
+  if (eq_reserved(lt(0), "(") && is_typename(lt(1))) {
+    Token* token = lt(0);
+    consume();
+    Type* type = type_specifier();
+    while (match("*")) {
+      type = ptr_to(type);
+    }
+    if (!match(")")) {
+      parse_error(")", lt(0));
+    }
+    Node* node = new_node(NCAST, token);
+    node->type = type;
+    node->expr = cast();
+    return node;
+  } else {
+    return unary();
+  }
+}
+
 static Node* mul() {
-  Node* lhs = unary();
+  Node* lhs = cast();
   Token* tok;
   for (;;) {
     if ((tok = match("*"))) {
       Node* node = new_node(NMUL, tok);
       node->lhs = lhs;
-      node->rhs = unary();
+      node->rhs = cast();
       lhs = node;
     } else if ((tok = match("/"))) {
       Node* node = new_node(NDIV, tok);
       node->lhs = lhs;
-      node->rhs = unary();
+      node->rhs = cast();
       lhs = node;
     } else if ((tok = match("%"))) {
       Node* node = new_node(NMOD, tok);
       node->lhs = lhs;
-      node->rhs = unary();
+      node->rhs = cast();
       lhs = node;
     } else {
       return lhs;
@@ -1000,6 +1023,7 @@ static Function* funcdef(bool is_static) {
   func->params = params;
   func->local_size = local_size;
   func->is_static = is_static;
+  func->has_va_arg = has_va_arg;
 
   return func;
 }

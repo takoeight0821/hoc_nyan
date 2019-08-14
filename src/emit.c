@@ -415,13 +415,24 @@ static void emit_node(Node* node) {
     break;
   }
   case NCALL: {
+    comment("start NCALL");
+
+    // スタックをがりがりいじりながらコード生成してるので、
+    // rspのアライメントをうまいこと扱う必要がある。
+    int pad = stack_size % 16;
+    if (pad) {
+      emit("sub rsp, %d", pad);
+      stack_size += pad;
+    }
+
+    // builtinを特別あつかい
     if (streq("__hoc_builtin_va_start", node->name)) {
       comment("start __hoc_builtin_va_start");
       emit_builtin_va_start(node->args->ptr[0]);
       comment("end __hoc_builtin_va_start");
       break;
     }
-    comment("start NCALL");
+
     // function call
     for (size_t i = 0; i < node->args->length; i++) {
       emit_node(node->args->ptr[i]);
@@ -434,13 +445,6 @@ static void emit_node(Node* node) {
     push(R11);
     emit("mov %s, %d", reg64[AX], 0);
 
-    // スタックをがりがりいじりながらコード生成してるので、
-    // rspのアライメントをうまいこと扱う必要がある。
-    int pad = stack_size % 16;
-    if (pad) {
-      emit("sub rsp, %d", pad);
-      stack_size += pad;
-    }
     emit("call %s", node->name);
     pop(R11);
     pop(R10);
@@ -634,6 +638,12 @@ static void emit_node(Node* node) {
     comment("end NBREAK");
     break;
   }
+  case NCAST: {
+    comment("start NCAST");
+    emit_node(node->expr);
+    comment("end NCAST");
+    break;
+  }
   }
 }
 
@@ -649,14 +659,14 @@ static int emit_regsave_area(void) {
   emit("mov [rsp + 24], rcx");
   emit("mov [rsp + 32], r8");
   emit("mov [rsp + 40], r9");
-  emit("movaps [rsp - 48], xmm0");
-  emit("movaps [rsp - 64], xmm1");
-  emit("movaps [rsp - 80], xmm2");
-  emit("movaps [rsp - 96], xmm3");
-  emit("movaps [rsp - 112], xmm4");
-  emit("movaps [rsp - 128], xmm5");
-  emit("movaps [rsp - 144], xmm6");
-  emit("movaps [rsp - 160], xmm7");
+  /* emit("movaps [rsp + 48], xmm0"); */
+  /* emit("movaps [rsp + 64], xmm1"); */
+  /* emit("movaps [rsp + 80], xmm2"); */
+  /* emit("movaps [rsp + 96], xmm3"); */
+  /* emit("movaps [rsp + 112], xmm4"); */
+  /* emit("movaps [rsp + 128], xmm5"); */
+  /* emit("movaps [rsp + 144], xmm6"); */
+  /* emit("movaps [rsp + 160], xmm7"); */
   return REGAREA_SIZE;
 }
 
@@ -676,10 +686,7 @@ static void emit_function(Function* func) {
   }
 
   printf("%s:\n", func->name);
-  emit(".cfi_startproc");
   emit("push rbp");
-  emit(".cfi_def_cfa_offset 16");
-  emit(".cfi_offset rbp, -16");
   emit("mov rbp, rsp");
 
   // variable arguments list
@@ -688,7 +695,6 @@ static void emit_function(Function* func) {
     stack_size += emit_regsave_area();
   }
 
-  emit(".cfi_def_cfa_register rbp");
   emit("sub rsp, %lu", func->local_size);
   stack_size += func->local_size + 8;
 
@@ -701,10 +707,8 @@ static void emit_function(Function* func) {
   emit_node(func->body);
 
   printf("%s:\n", func_end_label);
-  emit(".cfi_def_cfa rsp, 8");
   emit("leave");
   emit("ret");
-  emit(".cfi_endproc");
 
   comment("end Function");
 }
