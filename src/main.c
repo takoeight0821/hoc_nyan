@@ -26,6 +26,8 @@ int main(int argc, char** argv)
     eprintf("\n");
   }
 
+  tokens = preprocess(tokens);
+
   Program* prog = parse(tokens);
   sema(prog);
 

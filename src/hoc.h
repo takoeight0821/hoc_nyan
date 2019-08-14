@@ -319,4 +319,4 @@ void dump_type(Type* ty);
 void dump_function(Function* func);
 
 // preprocess.c
-Vector* preprocess(Vector* tokens);
+Token* preprocess(Token* tokens);

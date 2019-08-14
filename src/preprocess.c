@@ -1,5 +1,5 @@
 #include "hoc.h"
 
-Vector* preprocess(Vector* tokens) {
+Token* preprocess(Token* tokens) {
   return tokens;
 }
