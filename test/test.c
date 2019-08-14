@@ -42,6 +42,10 @@ struct list {
   struct list* cdr;
 };
 
+typedef struct single {
+  int x;
+} single_array[1];
+
 enum Enum {
   A,
   B,
@@ -413,7 +417,12 @@ int main() {
   }
   EXPECT(1, global_g[0]);
   EXPECT('h', global_h[0][0]);
-  EXPECT(55, sum(10));
+  /* EXPECT(55, sum(10)); */
+  {
+    single_array a;
+    a[0].x = 42;
+    EXPECT(42, a[0].x);
+  }
   return 0;
 }
 

@@ -177,7 +177,7 @@ static void emit_node(Node* node) {
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    size_t size = size_of(type_of(node->lhs));
+    size_t size = size_of(type_of(node));
     emit("add %s, %s", reg(AX, size), reg(DI, size));
     push(AX);
     comment("end NADD");
@@ -189,7 +189,7 @@ static void emit_node(Node* node) {
     emit_node(node->rhs);
     pop(DI);
     pop(AX);
-    size_t size = size_of(type_of(node->lhs));
+    size_t size = size_of(type_of(node));
     emit("sub %s, %s", reg(AX, size), reg(DI, size));
     push(AX);
     comment("end NSUB");
@@ -667,7 +667,6 @@ static void emit_function(Function* func) {
 
   // variable arguments list
   if (func->has_va_arg) {
-    eprintf("DEBUG: va_arg prologue\n");
     set_reg_nums(func->params);
     stack_size += emit_regsave_area();
   }

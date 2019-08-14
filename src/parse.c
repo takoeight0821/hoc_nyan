@@ -1009,8 +1009,10 @@ static void type_alias_def(void) {
   if (la(0) != TIDENT) {
     parse_error("ident", lt(0));
   }
-  add_typedef(lt(0)->ident, ty);
+  char* tag = lt(0)->ident;
   consume();
+  ty = read_type_suffix(ty);
+  add_typedef(tag, ty);
   if (!match(";")) {
     parse_error(";", lt(0));
   }
