@@ -10,6 +10,13 @@ typedef struct __io_file FILE;
 void* memcpy(void* dst, void* src, size_t size);
 #define EOF (-1)
 
+struct __va_list_elem {
+  int gp_offset;
+  int fp_offset;
+  void* overflow_arg_area;
+  void* reg_save_area;
+};
+
 #else
 #include <stdnoreturn.h>
 #include <stdbool.h>

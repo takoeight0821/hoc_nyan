@@ -8,6 +8,7 @@ static int label_id;
 static int stack_size;
 static char* func_end_label;
 static char* break_label;
+static int numgp;
 
 static char* reg(Reg r, size_t s) {
   if (s == 1) {
@@ -618,6 +619,30 @@ static void emit_node(Node* node) {
   }
 }
 
+static void set_reg_nums(Vector* params) {
+  numgp = params->length;
+}
+
+#define REGAREA_SIZE 176
+static int emit_regsave_area(void) {
+  emit("sub rsp, %d", REGAREA_SIZE);
+  emit("mov [rsp], rdi");
+  emit("mov [rsp + 8], rsi");
+  emit("mov [rsp + 16], rdx");
+  emit("mov [rsp + 24], rcx");
+  emit("mov [rsp + 32], r8");
+  emit("mov [rsp + 40], r9");
+  emit("movaps [rsp - 48], xmm0");
+  emit("movaps [rsp - 64], xmm1");
+  emit("movaps [rsp - 80], xmm2");
+  emit("movaps [rsp - 96], xmm3");
+  emit("movaps [rsp - 112], xmm4");
+  emit("movaps [rsp - 128], xmm5");
+  emit("movaps [rsp - 144], xmm6");
+  emit("movaps [rsp - 160], xmm7");
+  return REGAREA_SIZE;
+}
+
 static void emit_function(Function* func) {
   comment("start Function");
 
@@ -639,6 +664,14 @@ static void emit_function(Function* func) {
   emit(".cfi_def_cfa_offset 16");
   emit(".cfi_offset rbp, -16");
   emit("mov rbp, rsp");
+
+  // variable arguments list
+  if (func->has_va_arg) {
+    eprintf("DEBUG: va_arg prologue\n");
+    set_reg_nums(func->params);
+    stack_size += emit_regsave_area();
+  }
+
   emit(".cfi_def_cfa_register rbp");
   emit("sub rsp, %lu", func->local_size);
   stack_size += func->local_size + 8;
