@@ -9,7 +9,7 @@ hoc: $(OBJS)
 
 $(OBJS): src/hoc.h
 
-prepare_selfhost: hoc FORCE
+selfhost:
 	./hoc.sh src/containers.c
 	$(CC) -g -c src/containers.s -o gen_first/containers.o
 	./hoc.sh src/main.c
@@ -26,8 +26,6 @@ prepare_selfhost: hoc FORCE
 	$(CC) -g -c src/emit.s -o gen_first/emit.o
 	./hoc.sh src/utils.c
 	$(CC) -g -c src/utils.s -o gen_first/utils.o
-
-selfhost: prepare_selfhost
 	$(CC) -g -static -o gen_first/hoc $(OBJS:src/%=gen_first/%) $(LDFLAGS)
 
 gen_second: selfhost FORCE
@@ -47,13 +45,14 @@ gen_second: selfhost FORCE
 	$(CC) -g -c src/emit_1.s -o gen_second/emit.o
 	./hoc_1.sh src/utils.c
 	$(CC) -g -c src/utils_1.s -o gen_second/utils.o
+	$(CC) -g -static -o gen_second/hoc $(OBJS:src/%=gen_second/%) $(LDFLAGS)
 
-test: hoc selfhost FORCE
+test: hoc selfhost gen_second FORCE
 	./test.sh
 
 clean:
 	$(RM) hoc $(OBJS) $(OBJS:src/%=gen_first/%) $(SRCS:%.c=%.s)
-	$(RM) src/*_pp.c src/*_pp.o
+	$(RM) src/*_pp.c src/*_pp.o src/*_1.s
 
 FORCE:
 .PHONY: clean FORCE
