@@ -1,6 +1,9 @@
 # Vagrant
 .vagrant/
 
+.gdb_history
+peda-session-*
+
 tmp/
 main
 hoc
