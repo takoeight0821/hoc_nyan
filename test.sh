@@ -12,6 +12,14 @@ echo "~~~ gcc ~~~" &&
     ./gen_first/hoc test/tmp.c > test/tmp_hoc.s &&
     gcc -static -o test/tmp_hoc.out test/tmp_hoc.s &&
     ./test/tmp_hoc.out &&
+    cmp src/containers.s src/containers_1.s &&
+    cmp src/emit.s src/emit_1.s &&
+    cmp src/main.s src/main_1.s &&
+    cmp src/node.s src/node_1.s &&
+    cmp src/parse.s src/parse_1.s &&
+    cmp src/sema.s src/sema_1.s &&
+    cmp src/token.s src/token_1.s &&
+    cmp src/utils.s src/utils_1.s &&
     rm test/tmp.c test/tmp.s test/tmp.out test/tmp_hoc.s test/tmp_hoc.out &&
 
     echo OK
