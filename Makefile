@@ -14,9 +14,8 @@ prepare_selfhost: hoc FORCE
 	$(CC) -g -c src/containers.s -o gen_first/containers.o
 	./hoc.sh src/main.c
 	$(CC) -g -c src/main.s -o gen_first/main.o
-# undefined function
-#	./hoc.sh src/token.c
-#	$(CC) -c src/token.s -o gen_first/token.o
+	./hoc.sh src/token.c
+	$(CC) -c src/token.s -o gen_first/token.o
 	cp src/token.o gen_first/token.o
 	./hoc.sh src/sema.c
 	$(CC) -g -c src/sema.s -o gen_first/sema.o
@@ -28,7 +27,6 @@ prepare_selfhost: hoc FORCE
 	$(CC) -g -c src/node.s -o gen_first/node.o
 	./hoc.sh src/emit.c
 	$(CC) -g -c src/emit.s -o gen_first/emit.o
-#	cp src/utils.o gen_first/utils.o
 	./hoc.sh src/utils.c
 	$(CC) -g -c src/utils.s -o gen_first/utils.o
 
