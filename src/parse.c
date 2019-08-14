@@ -472,6 +472,10 @@ static Node* unary() {
     Node* node = new_node(NLOGNOT, tok);
     node->expr = cast();
     return node;
+  } else if ((tok = match("~"))) {
+    Node* node = new_node(NNOT, tok);
+    node->expr = cast();
+    return node;
   } else {
     Node* node = postfix();
     return node;

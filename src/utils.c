@@ -4,7 +4,11 @@ int roundup(int x, int round_to) {
   return (x + round_to - 1) & ~(round_to - 1);
 }
 
+#ifdef __hoc__
+char* format(char *fmt, ...) {
+#else
 char* format(const char *fmt, ...) {
+#endif
   char* buf = calloc(2048, sizeof(char));
   va_list ap;
   va_start(ap, fmt);
@@ -13,7 +17,11 @@ char* format(const char *fmt, ...) {
   return realloc(buf, sizeof(char) * (strlen(buf) + 1));
 }
 
+#ifdef __hoc__
+void error(char *fmt, ...) {
+#else
 void error(const char *fmt, ...) {
+#endif
   va_list ap;
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
@@ -21,8 +29,13 @@ void error(const char *fmt, ...) {
   exit(1);
 }
 
+#ifdef __hoc__
+void eprintf(char *fmt, ...) {
+#else
 void eprintf(const char *fmt, ...) {
+#endif
   va_list ap;
+
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   va_end(ap);
@@ -265,6 +278,13 @@ void dump_node(Node* node, int level) {
   case NLOGNOT:
     indent(level);
     eprintf("(!\n");
+    dump_node(node->expr, level+1);
+    indent(level+pad);
+    eprintf(")\n");
+    break;
+  case NNOT:
+    indent(level);
+    eprintf("(~\n");
     dump_node(node->expr, level+1);
     indent(level+pad);
     eprintf(")\n");

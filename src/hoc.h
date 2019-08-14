@@ -37,6 +37,7 @@ static void* __va_arg(struct __va_list_elem* ap) {
 
 #define va_start(ap, start) __hoc_builtin_va_start(ap, start)
 #define va_arg(ap, type) *(type *)__va_arg(ap)
+#define va_end(ap) (0)
 
 #else
 #include <stdnoreturn.h>
@@ -88,6 +89,7 @@ enum NodeTag {
     NEQ,
     NNE,
     NLOGNOT,
+    NNOT,
     NAND,
     NOR,
     NXOR,
@@ -270,9 +272,9 @@ void sema(Program* prog);
 
 // utils.c
 #ifdef __hoc__
-void error(char* fmt);
-char *format(char* fmt);
-void eprintf(char* fmt);
+void error(char* fmt, ...);
+char *format(char* fmt, ...);
+void eprintf(char* fmt, ...);
 #else
 noreturn void error(const char* fmt, ...) __attribute__((format(printf, 1, 2)));
 char *format(const char* fmt, ...) __attribute__((format(printf, 1, 2)));

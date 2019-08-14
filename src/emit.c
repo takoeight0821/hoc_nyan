@@ -340,6 +340,15 @@ static void emit_node(Node* node) {
     comment("end NLOGNOT");
     break;
   }
+  case NNOT: {
+    comment("start NNOT");
+    emit_node(node->expr);
+    pop(AX);
+    emit("not rax");
+    push(AX);
+    comment("end NNOT");
+    break;
+  }
   case NAND: {
     comment("start NAND");
     emit_node(node->lhs);

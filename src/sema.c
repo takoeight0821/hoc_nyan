@@ -286,6 +286,11 @@ void walk(Node* node) {
     node->type = int_type();
     break;
   }
+  case NNOT: {
+    walk(node->expr);
+    node->type = type_of(node->expr);
+    break;
+  }
   case NAND: {
     walk(node->lhs);
     walk(node->rhs);
