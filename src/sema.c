@@ -347,7 +347,11 @@ void walk(Node* node) {
     for (size_t i = 0; i < node->args->length; i++) {
       walk(node->args->ptr[i]);
     }
-    node->type = ret_type(node->name);
+    if (streq("__hoc_builtin_va_start", node->name)) {
+      node->type = void_type();
+    } else {
+      node->type = ret_type(node->name);
+    }
     break;
   }
   case NADDR: {
