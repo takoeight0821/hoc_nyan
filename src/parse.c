@@ -841,7 +841,7 @@ static Node* expr_stmt() {
   Node* node = new_node(NEXPR_STMT, peek(0));
   node->expr = expr();
   if (!match(";")) {
-    parse_error(";", peek(0));
+    parse_error("expr stmt: ;", peek(0));
   }
   return node;
 };
@@ -851,7 +851,7 @@ static Node* statement() {
   if (is_typename(peek(0))) {
     Node* node = declaration();
     if (!match(";")) {
-      parse_error(";", peek(0));
+      parse_error("local variable declaration: ;", peek(0));
     }
     return node;
   } else if ((tok = match("return"))) {
@@ -860,13 +860,13 @@ static Node* statement() {
       node->expr = expr();
     }
     if (!match(";")) {
-      parse_error(";", peek(0));
+      parse_error("return: ;", peek(0));
     }
     return node;
   } else if ((tok = match("break"))) {
     Node* node = new_node(NBREAK, tok);
     if (!match(";")) {
-      parse_error(";", peek(0));
+      parse_error("break: ;", peek(0));
     }
     return node;
   } else if ((tok = match("if"))) {
@@ -923,14 +923,16 @@ static Node* statement() {
       }
     }
     if (!match(";")) {
-      parse_error(";", peek(0));
+      parse_error("for init: ;", peek(0));
     }
 
     if (!(eq_reserved(peek(0), ";"))) {
       node->cond = expr();
+    } else {
+      node->cond = new_int_node(peek(0), 1);
     }
     if (!match(";")) {
-      parse_error(";", peek(0));
+      parse_error("for cond: ;", peek(0));
     }
 
     if (!(eq_reserved(peek(0), ")"))){
@@ -1098,7 +1100,7 @@ static void type_alias_def(void) {
   ty = read_type_suffix(ty);
   add_typedef(tag, ty);
   if (!match(";")) {
-    parse_error(";", peek(0));
+    parse_error("type alias: ;", peek(0));
   }
 }
 
