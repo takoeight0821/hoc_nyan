@@ -79,6 +79,7 @@ enum TokenTag {
   TSTRING,   // string literal
   TIDENT,    // identifier
   TRESERVED, // keyword or punctuator
+  TDEFINE,   // #define
 };
 
 typedef struct Token {
@@ -88,6 +89,7 @@ typedef struct Token {
   char* ident;
   char* str; // string literal
   char* start; // for error reporting
+  bool bol; // beginning of line
 } Token;
 
 enum NodeTag {

@@ -3,6 +3,7 @@
 // ソースコード
 static char* src;
 static char* cur;
+static bool bol;
 
 static void print_line(char* pos) {
   size_t line = 0;
@@ -51,6 +52,7 @@ static Token* new_token(enum TokenTag tag, char* start) {
   Token* t = calloc(1, sizeof(Token));
   t->tag = tag;
   t->start = start;
+  t->bol = bol;
   return t;
 }
 
@@ -65,6 +67,11 @@ static char* read_file(FILE* file) {
 }
 
 static void consume() {
+  if (*cur == '\n' || *cur == '\r') {
+    bol = true;
+  } else if (!(*cur == ' ' || *cur == '\t')) {
+    bol = false;
+  }
   cur++;
 }
 
@@ -136,6 +143,25 @@ static Token* new_reserved(char* start, char* ident) {
 static Token* next_token(void) {
   if (*cur == '\0') {
     return NULL; // new_token(TEOF, cur);
+  }
+
+  if (start_with("/*", cur)) {
+    while (!start_with("*/", cur)) {
+      consume();
+    }
+    consume();
+    consume();
+    return next_token();
+  }
+
+  if (bol && *cur == '#') {
+    consume();
+    if (start_with("define", cur)) {
+      return new_token(TDEFINE, cur);
+    } else {
+      print_line(cur);
+      error("invalid preprocessing directive\n");
+    }
   }
 
   if (strchr(" \t\n\r", *cur)) {

@@ -97,6 +97,10 @@ void dump_token(Token* tok) {
     eprintf("_%s_", tok->ident);
     break;
   }
+  case TDEFINE: {
+    eprintf("#define");
+    break;
+  }
   }
   if (tok->next != NULL) {
     eprintf(" ");
