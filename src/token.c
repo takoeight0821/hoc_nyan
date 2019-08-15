@@ -172,6 +172,13 @@ static Token* next_token(void) {
     return next_token();
   }
 
+  if (start_with("//", cur)) {
+    while (bol) {
+      consume();
+    }
+    return next_token();
+  }
+
   if (bol && *cur == '#') {
     consume();
     if (start_with("define", cur)) {

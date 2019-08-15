@@ -6,7 +6,8 @@ int roundup(int x, int round_to) {
 
 #ifdef __hoc__
 char* format(char *fmt, ...) {
-#else
+#endif
+#ifndef __hoc__
 char* format(const char *fmt, ...) {
 #endif
   char* buf = calloc(2048, sizeof(char));
@@ -19,7 +20,8 @@ char* format(const char *fmt, ...) {
 
 #ifdef __hoc__
 void error(char *fmt, ...) {
-#else
+#endif
+#ifndef __hoc__
 void error(const char *fmt, ...) {
 #endif
   va_list ap;
@@ -31,7 +33,8 @@ void error(const char *fmt, ...) {
 
 #ifdef __hoc__
 void eprintf(char *fmt, ...) {
-#else
+#endif
+#ifndef __hoc__
 void eprintf(const char *fmt, ...) {
 #endif
   va_list ap;

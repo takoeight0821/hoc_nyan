@@ -56,7 +56,8 @@ int vfprintf(FILE* stream, char* format, va_list ap);
 int vsprintf(char* str, char* format, va_list ap);
 int vsnprintf(char* str, size_t size, char* format, va_list ap);
 
-#else
+#endif
+#ifndef __hoc__
 #include <stdnoreturn.h>
 #include <stdbool.h>
 #include <ctype.h>
@@ -296,7 +297,8 @@ void sema(Program* prog);
 void error(char* fmt, ...);
 char *format(char* fmt, ...);
 void eprintf(char* fmt, ...);
-#else
+#endif
+#ifndef __hoc__
 noreturn void error(const char* fmt, ...) __attribute__((format(printf, 1, 2)));
 char *format(const char* fmt, ...) __attribute__((format(printf, 1, 2)));
 void eprintf(const char* fmt, ...);

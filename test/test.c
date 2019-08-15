@@ -1,4 +1,4 @@
-#include "../src/hoc.h"
+#include <hoc.h>
 
 #define EXPECT(expected, expr)                                          \
   {                                                                     \

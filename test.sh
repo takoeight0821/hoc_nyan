@@ -1,9 +1,9 @@
 #!/bin/bash
 
 echo "~~~ gcc ~~~" &&
-    gcc -static -o test/tmp.out test/test.c &&
+    gcc -I./include -static -o test/tmp.out test/test.c &&
     ./test/tmp.out &&
-    gcc -D__hoc__ -E -P test/test.c > test/tmp.c &&
+    gcc -I./include -D__hoc__ -E -P test/test.c > test/tmp.c &&
     echo "~~~ generation 0 ~~~" &&
     ./hoc test/tmp.c > test/tmp.s &&
     gcc -static -o test/tmp.out test/tmp.s &&
