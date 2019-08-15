@@ -29,23 +29,23 @@ selfhost:
 	$(CC) -g -static -o gen_first/hoc $(OBJS:src/%=gen_first/%) $(LDFLAGS)
 
 gen_second: selfhost FORCE
-	./hoc_1.sh src/containers.c
+	./gen_first/hoc src/containers.c > src/containers_1.s
 	$(CC) -g -c src/containers_1.s -o gen_second/containers.o
-	./hoc_1.sh src/main.c
+	./gen_first/hoc src/main.c > src/main_1.s
 	$(CC) -g -c src/main_1.s -o gen_second/main.o
-	./hoc_1.sh src/token.c
+	./gen_first/hoc src/token.c > src/token_1.s
 	$(CC) -c src/token_1.s -o gen_second/token.o
-	./hoc_1.sh src/sema.c
+	./gen_first/hoc src/sema.c > src/sema_1.s
 	$(CC) -g -c src/sema_1.s -o gen_second/sema.o
-	./hoc_1.sh src/parse.c
+	./gen_first/hoc src/parse.c > src/parse_1.s
 	$(CC) -c src/parse_1.s -o gen_second/parse.o
-	./hoc_1.sh src/node.c
+	./gen_first/hoc src/node.c > src/node_1.s
 	$(CC) -g -c src/node_1.s -o gen_second/node.o
-	./hoc_1.sh src/emit.c
+	./gen_first/hoc src/emit.c > src/emit_1.s
 	$(CC) -g -c src/emit_1.s -o gen_second/emit.o
-	./hoc_1.sh src/utils.c
+	./gen_first/hoc src/utils.c > src/utils_1.s
 	$(CC) -g -c src/utils_1.s -o gen_second/utils.o
-	./hoc_1.sh src/cpp.c
+	./gen_first/hoc src/cpp.c > src/cpp_1.s
 	$(CC) -g -c src/cpp_1.s -o gen_second/cpp.o
 	$(CC) -g -static -o gen_second/hoc $(OBJS:src/%=gen_second/%) $(LDFLAGS)
 
