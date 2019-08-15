@@ -28,6 +28,13 @@ int main(int argc, char** argv)
 
   tokens = preprocess(tokens);
 
+  if (dump) {
+    for (Token* t = tokens; t != NULL; t = t->next) {
+      dump_token(t);
+    }
+    eprintf("\n");
+  }
+
   Program* prog = parse(tokens);
   sema(prog);
 

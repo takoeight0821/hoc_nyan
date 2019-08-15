@@ -3,7 +3,7 @@
 // ソースコード
 static char* src;
 static char* cur;
-static bool bol;
+static bool bol = 1;
 
 static void print_line(char* pos) {
   size_t line = 0;
@@ -157,11 +157,16 @@ static Token* next_token(void) {
   if (bol && *cur == '#') {
     consume();
     if (start_with("define", cur)) {
-      return new_token(TDEFINE, cur);
+      Token* token = new_token(TDEFINE, cur);
+      cur += strlen("define");
+      return token;
     } else {
       print_line(cur);
       error("invalid preprocessing directive\n");
     }
+  } else if (*cur == '#') {
+    print_line(cur);
+    error("invalid #\n");
   }
 
   if (strchr(" \t\n\r", *cur)) {

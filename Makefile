@@ -53,6 +53,9 @@ gen_second: selfhost FORCE
 
 test: hoc selfhost gen_second FORCE
 	./test.sh
+	./hoc test/pp_test.c > test/pp_test.s
+	gcc -g -static -o test/pp_test test/pp_test.s
+	./test/pp_test
 
 clean:
 	$(RM) hoc $(OBJS) $(OBJS:src/%=gen_first/%) $(SRCS:%.c=%.s)
