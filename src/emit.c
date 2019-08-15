@@ -5,7 +5,6 @@ static char* reg32[9] = { "eax", "edi", "esi", "edx", "ecx", "r8d", "r9d", "r10d
 static char* reg8[9] = { "al", "dil", "sil", "dl", "cl", "r8b", "r9b", "r10b", "r11b" };
 static Reg argregs[6] = {DI, SI, DX, CX, R8, R9};
 static int label_id;
-static int stack_size;
 static char* func_end_label;
 static char* break_label;
 static int numgp;
@@ -51,12 +50,10 @@ static void comment(char *fmt, ...) {
 
 static void push(Reg src) {
   printf("\tpush %s\n", reg64[src]);
-  stack_size += 8;
 }
 
 static void pushi(int src) {
   printf("\tpush %d\n", src);
-  stack_size += 8;
 }
 
 static void pushstring(char* l) {
@@ -66,7 +63,6 @@ static void pushstring(char* l) {
 
 static void pop(Reg dst) {
   printf("\tpop %s\n", reg64[dst]);
-  stack_size -= 8;
 }
 
 /* R10レジスタにアライメント調整前のRSPの値を保存する */
@@ -707,7 +703,7 @@ static void set_reg_nums(Vector* params) {
   numgp = params->length;
 }
 
-static int emit_regsave_area(void) {
+static void emit_regsave_area(void) {
   emit("sub rsp, %d", REGAREA_SIZE);
   emit("mov [rsp], rdi");
   emit("mov [rsp + 8], rsi");
@@ -723,7 +719,6 @@ static int emit_regsave_area(void) {
   emit("movaps [rsp + 128], xmm5");
   emit("movaps [rsp + 144], xmm6");
   emit("movaps [rsp + 160], xmm7");
-  return REGAREA_SIZE;
 }
 
 static void emit_function(Function* func) {
@@ -744,16 +739,14 @@ static void emit_function(Function* func) {
   printf("%s:\n", func->name);
   emit("push rbp");
   emit("mov rbp, rsp");
-  stack_size = 8;
 
   // variable arguments list
   if (func->has_va_arg) {
     set_reg_nums(func->params);
-    stack_size += emit_regsave_area();
+    emit_regsave_area();
   }
 
   emit("sub rsp, %lu", func->local_size);
-  stack_size += func->local_size;
 
   for (size_t i = 0; i < func->params->length; i++) {
     Node* param = func->params->ptr[i];
