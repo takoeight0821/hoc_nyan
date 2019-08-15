@@ -69,8 +69,7 @@ static void pop(Reg dst) {
 static void align_rsp(void) {
   comment("start align rsp");
   emit("mov r10, rsp");
-  /* emit("add rsp, 15"); */
-  emit("and rsp, -16");
+  emit("and rsp, -16"); // 下位4bit(16で割ったあまり)を切り捨て
   comment("end align rsp");
 }
 
