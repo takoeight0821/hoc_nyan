@@ -140,6 +140,7 @@ static void emit_assign(Node* lhs, Node* rhs) {
 }
 
 static void emit_builtin_va_start(Node* node) {
+  align_rsp();
   emit_node(node);
   pop(AX); // address of va_list
   push(CX); // save register
@@ -148,6 +149,7 @@ static void emit_builtin_va_start(Node* node) {
   emit("lea rcx, [rbp - %d]", REGAREA_SIZE);
   emit("mov [rax + 16], rcx");
   pop(CX); // load register
+  revert_rsp();
 }
 
 static void emit_node(Node* node) {
