@@ -1,8 +1,10 @@
 #include <hoc.h>
 
-// ソースコード
+// ソースコードの先頭文字
 static char* src;
+// トークナイザの現在位置
 static char* cur;
+// 行頭か否か
 static bool bol = 1;
 
 static void print_line(char* pos) {
@@ -160,7 +162,7 @@ static char* read_include_path(void) {
 
 static Token* next_token(void) {
   if (*cur == '\0') {
-    return NULL; // new_token(TEOF, cur);
+    return NULL;
   }
 
   if (start_with("/*", cur)) {
