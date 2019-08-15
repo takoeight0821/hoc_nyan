@@ -464,8 +464,8 @@ static void emit_node(Node* node) {
     // TODO: ぶっ壊れてて第2世代コンパイラが死ぬ
     int pad = stack_size % 16;
     if (pad) {
-      emit("sub rsp, %d", pad); // BUG
-      stack_size += pad;
+      emit("sub rsp, %d", 16 - pad); // BUG
+      stack_size += (16 - pad);
     }
 
     // builtinを特別あつかい
@@ -493,8 +493,8 @@ static void emit_node(Node* node) {
     pop(R10);
 
     if (pad) {
-      emit("add rsp, %d", pad);
-      stack_size -= pad; // BUG
+      emit("add rsp, %d", 16 - pad);
+      stack_size -= (16 - pad); // BUG
     }
 
     push(AX);
@@ -702,7 +702,6 @@ static void set_reg_nums(Vector* params) {
 
 static int emit_regsave_area(void) {
   emit("sub rsp, %d", REGAREA_SIZE);
-  stack_size += REGAREA_SIZE;
   emit("mov [rsp], rdi");
   emit("mov [rsp + 8], rsi");
   emit("mov [rsp + 16], rdx");
@@ -747,7 +746,6 @@ static void emit_function(Function* func) {
   }
 
   emit("sub rsp, %lu", func->local_size);
-  /* stack_size += func->local_size; */
   stack_size += func->local_size + 8;
 
   for (size_t i = 0; i < func->params->length; i++) {
