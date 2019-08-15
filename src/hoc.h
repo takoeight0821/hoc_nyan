@@ -322,5 +322,5 @@ char* show_type(Type* ty);
 void dump_type(Type* ty);
 void dump_function(Function* func);
 
-// preprocess.c
+// cpp.c
 Token* preprocess(Token* tokens);

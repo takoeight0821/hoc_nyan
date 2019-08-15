@@ -24,7 +24,7 @@ echo "~~~ gcc ~~~" &&
     cmp src/sema.s src/sema_1.s &&
     cmp src/token.s src/token_1.s &&
     cmp src/utils.s src/utils_1.s &&
-    cmp src/preprocess.s src/preprocess_1.s &&
+    cmp src/cpp.s src/cpp_1.s &&
     rm test/tmp.c test/tmp.s test/tmp.out test/tmp_hoc.s test/tmp_hoc.out &&
 
     echo OK
