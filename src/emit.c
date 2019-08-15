@@ -461,10 +461,12 @@ static void emit_node(Node* node) {
 
     // スタックをがりがりいじりながらコード生成してるので、
     // rspのアライメントをうまいこと扱う必要がある。
-    int tmp = stack_size;
-    stack_size = roundup(stack_size, 16);
-    comment("DEBUG: %d, %d\n", tmp, stack_size);
-    emit("lea rsp, [rbp - %d]", stack_size);
+    // TODO: ぶっ壊れてて第2世代コンパイラが死ぬ
+    int pad = stack_size % 16;
+    if (pad) {
+      emit("sub rsp, %d", pad); // BUG
+      stack_size += pad;
+    }
 
     // builtinを特別あつかい
     if (streq("__hoc_builtin_va_start", node->name)) {
@@ -490,8 +492,10 @@ static void emit_node(Node* node) {
     pop(R11);
     pop(R10);
 
-    stack_size = tmp;
-    emit("lea rsp, [rbp - %d]", stack_size);
+    if (pad) {
+      emit("add rsp, %d", pad);
+      stack_size -= pad; // BUG
+    }
 
     push(AX);
     comment("end NCALL");
@@ -705,14 +709,14 @@ static int emit_regsave_area(void) {
   emit("mov [rsp + 24], rcx");
   emit("mov [rsp + 32], r8");
   emit("mov [rsp + 40], r9");
-  emit("movaps [rsp + 48], xmm0");
-  emit("movaps [rsp + 64], xmm1");
-  emit("movaps [rsp + 80], xmm2");
-  emit("movaps [rsp + 96], xmm3");
-  emit("movaps [rsp + 112], xmm4");
-  emit("movaps [rsp + 128], xmm5");
-  emit("movaps [rsp + 144], xmm6");
-  emit("movaps [rsp + 160], xmm7");
+  /* emit("movaps [rsp + 48], xmm0"); */
+  /* emit("movaps [rsp + 64], xmm1"); */
+  /* emit("movaps [rsp + 80], xmm2"); */
+  /* emit("movaps [rsp + 96], xmm3"); */
+  /* emit("movaps [rsp + 112], xmm4"); */
+  /* emit("movaps [rsp + 128], xmm5"); */
+  /* emit("movaps [rsp + 144], xmm6"); */
+  /* emit("movaps [rsp + 160], xmm7"); */
   return REGAREA_SIZE;
 }
 
@@ -734,6 +738,7 @@ static void emit_function(Function* func) {
   printf("%s:\n", func->name);
   emit("push rbp");
   emit("mov rbp, rsp");
+  stack_size = 0;
 
   // variable arguments list
   if (func->has_va_arg) {
@@ -742,6 +747,7 @@ static void emit_function(Function* func) {
   }
 
   emit("sub rsp, %lu", func->local_size);
+  /* stack_size += func->local_size; */
   stack_size += func->local_size + 8;
 
   for (size_t i = 0; i < func->params->length; i++) {
