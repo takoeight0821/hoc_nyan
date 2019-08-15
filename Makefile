@@ -59,7 +59,7 @@ test: hoc selfhost gen_second FORCE
 
 clean:
 	$(RM) hoc $(OBJS) $(OBJS:src/%=gen_first/%) $(SRCS:%.c=%.s)
-	$(RM) src/*_pp.c src/*_pp.o src/*_1.s
+	$(RM) src/*_pp.c src/*_pp.o src/*_1.s test/pp_test
 
 FORCE:
 .PHONY: clean FORCE
