@@ -4,6 +4,9 @@
 
 #include <pp_test.h>
 
+#ifdef A
+#endif
+
 int main(void) {
   A;
   F(return 2);

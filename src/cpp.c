@@ -1,4 +1,4 @@
-#include "hoc.h"
+#include <hoc.h>
 
 typedef struct MacroEnv {
   struct MacroEnv* next;
@@ -229,19 +229,41 @@ static void apply(char* name) {
 static char* include_path(char* path) {
   return format("./include/%s", path);
 }
+
+static void skip_to_endif(void) {
+  while (input && !(input->tag == TDIRECTIVE && streq(input->ident, "endif"))) {
+    consume();
+  }
+  consume();
+}
+
 static void traverse(void) {
-  if (input->tag == TDEFINE) {
+  if (input->tag == TDIRECTIVE && streq(input->ident, "define")) {
     consume();
     read_define(expect("macro name", TIDENT)->ident);
     traverse();
-  } else if (input->tag == TINCLUDE) {
-    Token* included = lex(include_path(input->ident));
+  } else if (input->tag == TDIRECTIVE && streq(input->ident, "include")) {
+    Token* included = lex(include_path(input->str));
     append(&included, input->next);
     input = included;
+  } else if (input->tag == TDIRECTIVE && streq(input->ident, "ifdef")) {
+    consume();
+    Token* tag = expect("macro name", TIDENT);
+    if (is_macro(tag)) {
+      skip_to_endif();
+    }
+  } else if (input->tag == TDIRECTIVE && streq(input->ident, "ifndef")) {
+    consume();
+    Token* tag = expect("macro name", TIDENT);
+    if (!is_macro(tag)) {
+      skip_to_endif();
+    }
+  } else if (input->tag == TDIRECTIVE && streq(input->ident, "endif")) {
+    eprintf("unexpected endif\n");
+    exit(1);
   } else if (is_macro(input)) {
     char* name = expect("macro name", TIDENT)->ident;
     apply(name);
-
   } else {
     Token* new = copy_token(input);
     append(&output, new);
@@ -250,6 +272,8 @@ static void traverse(void) {
 }
 
 Token* preprocess(Token* tokens) {
+  gbl_env = calloc(1, sizeof(MacroEnv));
+  gbl_env->name = "__hoc__";
   input = tokens;
 
   while (input) {

@@ -1,4 +1,4 @@
-#include "hoc.h"
+#include <hoc.h>
 
 // ソースコード
 static char* src;
@@ -175,17 +175,36 @@ static Token* next_token(void) {
   if (bol && *cur == '#') {
     consume();
     if (start_with("define", cur)) {
-      Token* token = new_token(TDEFINE, cur);
+      Token* token = new_token(TDIRECTIVE, cur);
       token->bol = true;
       cur += strlen("define");
+      token->ident = "define";
       return token;
     } else if (start_with("include", cur)) {
-      Token* token = new_token(TINCLUDE, cur);
+      Token* token = new_token(TDIRECTIVE, cur);
       token->bol = true;
       cur += strlen("include");
+      token->ident = "include";
       whitespace();
-      token->ident = read_include_path();
-      eprintf("DEBUG: %s\n", token->ident);
+      token->str = read_include_path();
+      return token;
+    } else if (start_with("ifdef", cur)) {
+      Token* token = new_token(TDIRECTIVE, cur);
+      token->bol = true;
+      cur += strlen("ifdef");
+      token->ident = "ifdef";
+      return token;
+    } else if (start_with("ifndef", cur)) {
+      Token* token = new_token(TDIRECTIVE, cur);
+      token->bol = true;
+      cur += strlen("ifndef");
+      token->ident = "ifndef";
+      return token;
+    } else if (start_with("endif", cur)) {
+      Token* token = new_token(TDIRECTIVE, cur);
+      token->bol = true;
+      cur += strlen("endif");
+      token->ident = "endif";
       return token;
     } else {
       print_line(cur);

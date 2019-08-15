@@ -1,13 +1,11 @@
-CFLAGS=-g -Wall -std=c11
+CFLAGS=-g -Wall -std=c11 -I./include
 SRCS=$(wildcard src/*.c)
 OBJS=$(SRCS:.c=.o)
-
-SH_SRCS=src/containers.c
 
 hoc: $(OBJS)
 	$(CC) -static -o hoc $(OBJS) $(LDFLAGS)
 
-$(OBJS): src/hoc.h
+$(OBJS): include/hoc.h
 
 selfhost:
 	./hoc.sh src/containers.c

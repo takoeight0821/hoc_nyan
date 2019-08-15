@@ -1,4 +1,4 @@
-#include "hoc.h"
+#include <hoc.h>
 
 int roundup(int x, int round_to) {
   return (x + round_to - 1) & ~(round_to - 1);
@@ -101,12 +101,8 @@ void dump_token(Token* tok) {
     eprintf("_%s_", tok->ident);
     break;
   }
-  case TDEFINE: {
-    eprintf("#define");
-    break;
-  }
-  case TINCLUDE: {
-    eprintf("#include \"%s\"", tok->ident);
+  case TDIRECTIVE: {
+    eprintf("#%s", tok->ident);
     break;
   }
   }
