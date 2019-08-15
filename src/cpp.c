@@ -249,19 +249,19 @@ static void traverse(void) {
   } else if (input->tag == TDIRECTIVE && streq(input->ident, "ifdef")) {
     consume();
     Token* tag = expect("macro name", TIDENT);
-    if (is_macro(tag)) {
+    if (!is_macro(tag)) {
       skip_to_endif();
     }
   } else if (input->tag == TDIRECTIVE && streq(input->ident, "ifndef")) {
     consume();
     Token* tag = expect("macro name", TIDENT);
-    if (!is_macro(tag)) {
+    if (is_macro(tag)) {
       skip_to_endif();
     }
   } else if (input->tag == TDIRECTIVE && streq(input->ident, "endif")) {
-    eprintf("unexpected endif\n");
-    exit(1);
+    consume();
   } else if (is_macro(input)) {
+    // TODO: 関数マクロの仮引数名と実引数が同じだと無限ループする
     char* name = expect("macro name", TIDENT)->ident;
     apply(name);
   } else {

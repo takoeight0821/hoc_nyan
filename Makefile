@@ -3,28 +3,28 @@ SRCS=$(wildcard src/*.c)
 OBJS=$(SRCS:.c=.o)
 
 hoc: $(OBJS)
-	$(CC) -static -o hoc $(OBJS) $(LDFLAGS)
+	$(CC) -o hoc $(OBJS) $(LDFLAGS)
 
 $(OBJS): include/hoc.h
 
 selfhost:
-	./hoc.sh src/containers.c
+	./hoc src/containers.c > src/containers.s
 	$(CC) -g -c src/containers.s -o gen_first/containers.o
-	./hoc.sh src/main.c
+	./hoc src/main.c > src/main.s
 	$(CC) -g -c src/main.s -o gen_first/main.o
-	./hoc.sh src/token.c
+	./hoc src/token.c > src/token.s
 	$(CC) -c src/token.s -o gen_first/token.o
-	./hoc.sh src/sema.c
+	./hoc src/sema.c > src/sema.s
 	$(CC) -g -c src/sema.s -o gen_first/sema.o
-	./hoc.sh src/parse.c
+	./hoc src/parse.c > src/parse.s
 	$(CC) -c src/parse.s -o gen_first/parse.o
-	./hoc.sh src/node.c
+	./hoc src/node.c > src/node.s
 	$(CC) -g -c src/node.s -o gen_first/node.o
-	./hoc.sh src/emit.c
+	./hoc src/emit.c > src/emit.s
 	$(CC) -g -c src/emit.s -o gen_first/emit.o
-	./hoc.sh src/utils.c
+	./hoc src/utils.c > src/utils.s
 	$(CC) -g -c src/utils.s -o gen_first/utils.o
-	./hoc.sh src/cpp.c
+	./hoc src/cpp.c > src/cpp.s
 	$(CC) -g -c src/cpp.s -o gen_first/cpp.o
 	$(CC) -g -static -o gen_first/hoc $(OBJS:src/%=gen_first/%) $(LDFLAGS)
 

@@ -173,7 +173,9 @@ static Token* next_token(void) {
   }
 
   if (start_with("//", cur)) {
-    while (bol) {
+    consume();
+    consume();
+    while (*cur != '\n') {
       consume();
     }
     return next_token();

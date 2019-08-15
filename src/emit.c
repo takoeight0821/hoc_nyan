@@ -25,9 +25,9 @@ static char* new_label(char* name) {
   return format(".L%s%u", name, label_id++);
 }
 
-#ifndef __hoc__
-__attribute__((format(printf, 1, 2))) static void emit(char *fmt, ...);
-#endif
+/* #ifndef __hoc__ */
+/* __attribute__((format(printf, 1, 2))) static void emit(char *fmt, ...); */
+/* #endif */
 
 static void emit(char *fmt, ...) {
   va_list ap;
@@ -37,9 +37,9 @@ static void emit(char *fmt, ...) {
   printf("\n");
 }
 
-#ifndef __hoc__
-__attribute__((format(printf, 1, 2))) static void comment(char *fmt, ...);
-#endif
+/* #ifndef __hoc__ */
+/* __attribute__((format(printf, 1, 2))) static void comment(char *fmt, ...); */
+/* #endif */
 
 static void comment(char *fmt, ...) {
   va_list ap;

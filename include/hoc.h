@@ -6,7 +6,7 @@ void* malloc(size_t size);
 void* calloc(size_t count, size_t size);
 void* realloc(void* old, size_t size);
 void free(void* ptr);
-#define NULL (0)
+#define NULL 0
 #define false 0
 #define true 1
 
@@ -20,7 +20,7 @@ int puts(char* msg);
 
 typedef void FILE;
 void* memcpy(void* dst, void* src, size_t size);
-#define EOF (-1)
+#define EOF -1
 
 char* strchr(char* s, int c);
 int fgetc(FILE* stream);
@@ -47,9 +47,9 @@ static void* __va_arg(struct __va_list_elem* ap) {
   return r;
 }
 
-#define va_start(ap, start) __hoc_builtin_va_start(ap, start)
-#define va_arg(ap, type) *(type *)__va_arg(ap)
-#define va_end(ap) (0)
+#define va_start(ap_, start) __hoc_builtin_va_start(ap_, start)
+#define va_arg(ap_, type) *(type *)__va_arg(ap_)
+#define va_end(ap_) (0)
 
 int vprintf(char* format, va_list ap);
 int vfprintf(FILE* stream, char* format, va_list ap);
