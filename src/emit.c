@@ -69,6 +69,21 @@ static void pop(Reg dst) {
   stack_size -= 8;
 }
 
+/* R10レジスタにアライメント調整前のRSPの値を保存する */
+static void align_rsp(void) {
+  comment("start align rsp");
+  emit("mov r10, rsp");
+  /* emit("add rsp, 15"); */
+  emit("and rsp, -16");
+  comment("end align rsp");
+}
+
+static void revert_rsp(void) {
+  comment("start revert rsp");
+  emit("mov rsp, r10");
+  comment("end revert rsp");
+}
+
 static void load(Reg dst, size_t size) {
   if (size == 1) {
     // 8bitの値は自動では0拡張されないので、movzxを使う
@@ -459,15 +474,6 @@ static void emit_node(Node* node) {
   case NCALL: {
     comment("start NCALL");
 
-    // スタックをがりがりいじりながらコード生成してるので、
-    // rspのアライメントをうまいこと扱う必要がある。
-    // TODO: ぶっ壊れてて第2世代コンパイラが死ぬ
-    int pad = stack_size % 16;
-    if (pad) {
-      emit("sub rsp, %d", 16 - pad); // BUG
-      stack_size += (16 - pad);
-    }
-
     // builtinを特別あつかい
     if (streq("__hoc_builtin_va_start", node->name)) {
       comment("start __hoc_builtin_va_start");
@@ -484,6 +490,10 @@ static void emit_node(Node* node) {
       pop(argregs[i]);
     }
 
+    // スタックをがりがりいじりながらコード生成してるので、
+    // rspのアライメントをうまいこと扱う必要がある。
+    align_rsp();
+
     push(R10);
     push(R11);
     emit("mov %s, %d", reg64[AX], 0);
@@ -492,10 +502,7 @@ static void emit_node(Node* node) {
     pop(R11);
     pop(R10);
 
-    if (pad) {
-      emit("add rsp, %d", 16 - pad);
-      stack_size -= (16 - pad); // BUG
-    }
+    revert_rsp();
 
     push(AX);
     comment("end NCALL");
@@ -737,7 +744,7 @@ static void emit_function(Function* func) {
   printf("%s:\n", func->name);
   emit("push rbp");
   emit("mov rbp, rsp");
-  stack_size = 0;
+  stack_size = 8;
 
   // variable arguments list
   if (func->has_va_arg) {
@@ -746,7 +753,7 @@ static void emit_function(Function* func) {
   }
 
   emit("sub rsp, %lu", func->local_size);
-  stack_size += func->local_size + 8;
+  stack_size += func->local_size;
 
   for (size_t i = 0; i < func->params->length; i++) {
     Node* param = func->params->ptr[i];
