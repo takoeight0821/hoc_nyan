@@ -226,11 +226,18 @@ static void apply(char* name) {
   }
 }
 
+static char* include_path(char* path) {
+  return format("./include/%s", path);
+}
 static void traverse(void) {
   if (input->tag == TDEFINE) {
     consume();
     read_define(expect("macro name", TIDENT)->ident);
     traverse();
+  } else if (input->tag == TINCLUDE) {
+    Token* included = lex(include_path(input->ident));
+    append(&included, input->next);
+    input = included;
   } else if (is_macro(input)) {
     char* name = expect("macro name", TIDENT)->ident;
     apply(name);

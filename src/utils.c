@@ -105,6 +105,10 @@ void dump_token(Token* tok) {
     eprintf("#define");
     break;
   }
+  case TINCLUDE: {
+    eprintf("#include \"%s\"", tok->ident);
+    break;
+  }
   }
   if (tok->next != NULL) {
     eprintf(" ");

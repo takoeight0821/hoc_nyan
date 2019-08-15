@@ -80,6 +80,7 @@ enum TokenTag {
   TIDENT,    // identifier
   TRESERVED, // keyword or punctuator
   TDEFINE,   // #define
+  TINCLUDE,  // #include
 };
 
 typedef struct Token {

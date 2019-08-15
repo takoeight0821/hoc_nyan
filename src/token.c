@@ -140,6 +140,24 @@ static Token* new_reserved(char* start, char* ident) {
   return t;
 }
 
+static char* read_include_path(void) {
+  StringBuilder* sb = new_sb();
+
+  if (*cur != '<') {
+    print_line(cur);
+    error("expected <, but actual %c\n", *cur);
+  }
+  consume();
+
+  while (*cur != '>') {
+    sb_putc(sb, *cur);
+    consume();
+  }
+
+  consume();
+  return sb_run(sb);
+}
+
 static Token* next_token(void) {
   if (*cur == '\0') {
     return NULL; // new_token(TEOF, cur);
@@ -160,6 +178,14 @@ static Token* next_token(void) {
       Token* token = new_token(TDEFINE, cur);
       token->bol = true;
       cur += strlen("define");
+      return token;
+    } else if (start_with("include", cur)) {
+      Token* token = new_token(TINCLUDE, cur);
+      token->bol = true;
+      cur += strlen("include");
+      whitespace();
+      token->ident = read_include_path();
+      eprintf("DEBUG: %s\n", token->ident);
       return token;
     } else {
       print_line(cur);
@@ -279,7 +305,7 @@ static Token* next_token(void) {
 Token* lex(char* path) {
   FILE* file = fopen(path, "r");
   if (file == NULL) {
-    error("cannot open file\n");
+    error("cannot open file: %s\n", path);
   }
 
   src = read_file(file);
