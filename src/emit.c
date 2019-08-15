@@ -461,11 +461,10 @@ static void emit_node(Node* node) {
 
     // スタックをがりがりいじりながらコード生成してるので、
     // rspのアライメントをうまいこと扱う必要がある。
-    int pad = stack_size % 16;
-    if (pad) {
-      emit("sub rsp, %d", pad);
-      stack_size += pad;
-    }
+    int tmp = stack_size;
+    stack_size = roundup(stack_size, 16);
+    comment("DEBUG: %d, %d\n", tmp, stack_size);
+    emit("lea rsp, [rbp - %d]", stack_size);
 
     // builtinを特別あつかい
     if (streq("__hoc_builtin_va_start", node->name)) {
@@ -491,10 +490,8 @@ static void emit_node(Node* node) {
     pop(R11);
     pop(R10);
 
-    if (pad) {
-      emit("add rsp, %d", pad);
-      stack_size -= pad;
-    }
+    stack_size = tmp;
+    emit("lea rsp, [rbp - %d]", stack_size);
 
     push(AX);
     comment("end NCALL");
@@ -701,20 +698,21 @@ static void set_reg_nums(Vector* params) {
 
 static int emit_regsave_area(void) {
   emit("sub rsp, %d", REGAREA_SIZE);
+  stack_size += REGAREA_SIZE;
   emit("mov [rsp], rdi");
   emit("mov [rsp + 8], rsi");
   emit("mov [rsp + 16], rdx");
   emit("mov [rsp + 24], rcx");
   emit("mov [rsp + 32], r8");
   emit("mov [rsp + 40], r9");
-  /* emit("movaps [rsp + 48], xmm0"); */
-  /* emit("movaps [rsp + 64], xmm1"); */
-  /* emit("movaps [rsp + 80], xmm2"); */
-  /* emit("movaps [rsp + 96], xmm3"); */
-  /* emit("movaps [rsp + 112], xmm4"); */
-  /* emit("movaps [rsp + 128], xmm5"); */
-  /* emit("movaps [rsp + 144], xmm6"); */
-  /* emit("movaps [rsp + 160], xmm7"); */
+  emit("movaps [rsp + 48], xmm0");
+  emit("movaps [rsp + 64], xmm1");
+  emit("movaps [rsp + 80], xmm2");
+  emit("movaps [rsp + 96], xmm3");
+  emit("movaps [rsp + 112], xmm4");
+  emit("movaps [rsp + 128], xmm5");
+  emit("movaps [rsp + 144], xmm6");
+  emit("movaps [rsp + 160], xmm7");
   return REGAREA_SIZE;
 }
 
