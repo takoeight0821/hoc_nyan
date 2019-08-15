@@ -314,6 +314,8 @@ void sb_puts(StringBuilder* sb, char* str);
 char* sb_run(StringBuilder* sb);
 void sb_destory(StringBuilder* sb);
 
+bool eq_reserved(Token* token, char* name);
+
 void dump_token(Token* tok);
 void dump_node(Node* node, int level);
 char* show_type(Type* ty);

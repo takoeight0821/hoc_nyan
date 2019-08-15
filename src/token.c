@@ -158,6 +158,7 @@ static Token* next_token(void) {
     consume();
     if (start_with("define", cur)) {
       Token* token = new_token(TDEFINE, cur);
+      token->bol = true;
       cur += strlen("define");
       return token;
     } else {

@@ -218,10 +218,6 @@ static Token* match(char* name) {
   }
 }
 
-static bool eq_reserved(Token* token, char* name) {
-  return (token->tag == TRESERVED && streq(token->ident, name));
-}
-
 static int is_typename(Token* t);
 static Node* variable();
 static Node* expr();

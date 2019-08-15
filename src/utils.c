@@ -79,6 +79,10 @@ void sb_destory(StringBuilder* sb) {
   free(sb);
 }
 
+bool eq_reserved(Token* token, char* name) {
+  return (token->tag == TRESERVED && streq(token->ident, name));
+}
+
 void dump_token(Token* tok) {
   switch (tok->tag) {
   case TINT: {
