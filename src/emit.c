@@ -715,14 +715,14 @@ static int emit_regsave_area(void) {
   emit("mov [rsp + 24], rcx");
   emit("mov [rsp + 32], r8");
   emit("mov [rsp + 40], r9");
-  /* emit("movaps [rsp + 48], xmm0"); */
-  /* emit("movaps [rsp + 64], xmm1"); */
-  /* emit("movaps [rsp + 80], xmm2"); */
-  /* emit("movaps [rsp + 96], xmm3"); */
-  /* emit("movaps [rsp + 112], xmm4"); */
-  /* emit("movaps [rsp + 128], xmm5"); */
-  /* emit("movaps [rsp + 144], xmm6"); */
-  /* emit("movaps [rsp + 160], xmm7"); */
+  emit("movaps [rsp + 48], xmm0");
+  emit("movaps [rsp + 64], xmm1");
+  emit("movaps [rsp + 80], xmm2");
+  emit("movaps [rsp + 96], xmm3");
+  emit("movaps [rsp + 112], xmm4");
+  emit("movaps [rsp + 128], xmm5");
+  emit("movaps [rsp + 144], xmm6");
+  emit("movaps [rsp + 160], xmm7");
   return REGAREA_SIZE;
 }
 
