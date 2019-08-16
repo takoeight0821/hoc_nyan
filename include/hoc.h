@@ -81,8 +81,6 @@ enum TokenTag {
   TIDENT,    // identifier
   TRESERVED, // keyword or punctuator
   TDIRECTIVE, // # directive
-  /* TDEFINE,   // #define */
-  /* TINCLUDE,  // #include */
 };
 
 typedef struct Token {
@@ -136,7 +134,6 @@ enum NodeTag {
     NFOR,
     NBLOCK,
     NSIZEOF,
-    NSTRING,
     NSWITCH,
     NCASE,
     NDEFAULT,
@@ -195,7 +192,6 @@ typedef struct Node {
   // expr "." name
   // (type *) expr
   struct Node* expr;
-  size_t str_id; // string literal
 
   char* name; // function call, variable definition, variable
 
@@ -242,7 +238,6 @@ typedef struct GVar {
 typedef struct Program {
   Vector* funcs;
   GVar* globals;
-  Vector* strs;
 } Program;
 
 typedef struct IProgram {

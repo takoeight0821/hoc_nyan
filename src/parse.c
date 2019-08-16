@@ -31,7 +31,6 @@ static Tag* tag_env;
 static Enum* enum_env;
 static GVar* global_env;
 static TypeDef* typedefs;
-static Vector* strs;
 static size_t str_count;
 
 static Node* new_int_node(Token* token, int i) {
@@ -107,13 +106,6 @@ static void add_enum(char* name, int val) {
   e->val = new_int_node(NULL, val);
   e->next = enum_env;
   enum_env = e;
-}
-
-// 文字列リテラルのインターン
-static size_t intern(char* str) {
-  size_t id = strs->length;
-  vec_push(strs, str);
-  return id;
 }
 
 static void add_typedef(char* name, Type* type) {
@@ -1164,7 +1156,6 @@ static Function* toplevel() {
 
 Program* parse(Token* t) {
   tokens = t;
-  strs = new_vec();
 
   init_typedef();
 
@@ -1178,7 +1169,6 @@ Program* parse(Token* t) {
     }
   }
 
-  prog->strs = strs;
   prog->globals = global_env;
 
   return prog;

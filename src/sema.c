@@ -423,10 +423,6 @@ void walk(Node* node) {
     node->type = int_type();
     break;
   }
-  case NSTRING: {
-    node->type = ptr_to(char_type());
-    break;
-  }
   case NSWITCH: {
     walk(node->expr);
     node->cases = new_vec();

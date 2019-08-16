@@ -56,11 +56,6 @@ static void pushi(int src) {
   printf("\tpush %d\n", src);
 }
 
-static void pushstring(char* l) {
-  emit("lea rax, %s", l);
-  push(AX);
-}
-
 static void pop(Reg dst) {
   printf("\tpop %s\n", reg64[dst]);
 }
@@ -626,13 +621,6 @@ static void emit_node(Node* node) {
     comment("end NSIZEOF");
     break;
   }
-  case NSTRING: {
-    comment("start NSTRING");
-    /* pushlabel(format(".string_%zu", node->str_id)); */
-    pushstring(format(".string_%zu", node->str_id));
-    comment("end NSTRING");
-    break;
-  }
   case NSWITCH: {
     comment("start NSWITCH");
     emit_node(node->expr);
@@ -794,10 +782,6 @@ static void emit_const(Type* type, Node* node) {
     }
     break;
   }
-  case NSTRING: {
-    emit(".quad .string_%zu", node->str_id);
-    break;
-  }
   default:
     bad_token(node->token, "emit error: value is not constant");
   }
@@ -807,10 +791,6 @@ void gen_x86(Program* prog) {
   puts(".intel_syntax noprefix");
 
   puts(".data");
-  for (size_t i = 0; i < prog->strs->length; i++) {
-    printf(".string_%zu:\n", i);
-    emit(".string \"%s\"", (char*)prog->strs->ptr[i]);
-  }
   for (GVar* gvar = prog->globals; gvar != NULL; gvar = gvar->next) {
     if (gvar->init != NULL && !gvar->is_extern) {
       printf("%s:\n", gvar->name);
