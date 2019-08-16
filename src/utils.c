@@ -145,7 +145,11 @@ static void show_type_(StringBuilder* sb, Type* ty) {
     }
     break;
   case TY_STRUCT: {
-    sb_puts(sb, format("struct %s", ty->tag));
+    if (ty->tag) {
+      sb_puts(sb, format("struct %s", ty->tag));
+    } else {
+      sb_puts(sb, "struct");
+    }
 
     // 以下のコードは無限ループを引き起こす
     /* sb_puts(sb, format("struct %s {", ty->tag)); */

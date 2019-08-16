@@ -69,7 +69,7 @@ int vsnprintf(char* str, size_t size, char* format, va_list ap);
 #include <stddef.h>
 #endif
 
-typedef struct Vector {
+typedef struct {
   void **ptr;
   size_t capacity;
   size_t length;

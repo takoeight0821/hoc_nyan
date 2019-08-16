@@ -289,7 +289,7 @@ static Type* type_specifier() {
       }
       consume();
     } else {
-      parse_error("ident", peek(0));
+      ty = new_type(TY_STRUCT, 0);
     }
 
     // struct definition

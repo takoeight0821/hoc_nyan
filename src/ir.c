@@ -1,5 +1,6 @@
-#include "hoc.h"
+#include <hoc.h>
 
+/* printing IR */
 char* show_ireg(IReg* reg) {
   return format("$%d", reg->id);
 }
