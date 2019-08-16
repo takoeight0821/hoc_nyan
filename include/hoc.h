@@ -241,6 +241,11 @@ typedef struct Program {
   Vector* strs;
 } Program;
 
+typedef struct IProgram {
+  Vector* ifuncs;
+  GVar* globals;
+} IProgram;
+
 typedef struct IReg {
   bool is_real;
   int id;

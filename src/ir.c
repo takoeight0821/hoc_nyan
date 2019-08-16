@@ -1,5 +1,33 @@
 #include <hoc.h>
 
+/* create IR */
+IReg* new_reg(int id) {
+  IReg* new = calloc(1, sizeof(IReg));
+  new->id = id;
+  return new;
+}
+
+IReg* real_reg(Reg reg) {
+  IReg* new = calloc(1, sizeof(IReg));
+  new->id = reg;
+  new->is_real = true;
+  return new;
+}
+
+IR* new_ir(enum IRTag op) {
+  IR* new = calloc(1, sizeof(IR));
+  new->op = op;
+  return new;
+}
+
+IR* new_binop_ir(enum IRTag op, IReg* r0, IReg* r1, IReg* r2) {
+  IR* new = new_ir(op);
+  new->r0 = r0;
+  new->r1 = r1;
+  new->r2 = r2;
+  return new;
+}
+
 /* printing IR */
 char* show_ireg(IReg* reg) {
   return format("$%d", reg->id);
