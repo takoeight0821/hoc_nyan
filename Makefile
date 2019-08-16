@@ -1,3 +1,4 @@
+CC=gcc
 CFLAGS=-g -Wall -std=c11 -I./include
 SRCS=$(wildcard src/*.c)
 OBJS=$(SRCS:src/%.c=build/g0/%.o)
@@ -25,7 +26,7 @@ build_g2: $(G2_ASMS)
 test: hoc build_g1 build_g2 FORCE
 	./test.sh
 	./hoc test/pp_test.c > test/pp_test.s
-	gcc -g -static -o test/pp_test.out test/pp_test.s
+	$(CC) -g -static -o test/pp_test.out test/pp_test.s
 	./test/pp_test.out
 
 clean:

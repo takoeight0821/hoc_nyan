@@ -32,6 +32,7 @@ static Enum* enum_env;
 static GVar* global_env;
 static TypeDef* typedefs;
 static Vector* strs;
+static size_t str_count;
 
 static Node* new_int_node(Token* token, int i) {
   Node* node = new_node(NINT, token);
@@ -498,11 +499,24 @@ static Node* integer() {
 }
 
 static Node* string() {
-  Node* node = new_node(NSTRING, peek(0));
+  Token* token = peek(0);
   char* str = expect(TSTRING, "string")->str;
+  Vector* str_vec = new_vec();
+  char* str_label = format(".string%zu", str_count++);
 
-  node->str_id = intern(str);
-  return node;
+  /* /\* eprintf("DEBUG: %s\n", str); *\/ */
+  for (char* c = str; *c != '\0'; c++) {
+    vec_push(str_vec, new_int_node(token, *c));
+  }
+  vec_push(str_vec, new_int_node(token, 0));
+
+  add_gvar(token, str_label, array_of(char_type(), strlen(str) + 1), NULL, str_vec);
+  return find_var(token, str_label);
+  /* Node* node = new_node(NSTRING, peek(0)); */
+  /* char* str = expect(TSTRING, "string")->str; */
+
+  /* node->str_id = intern(str); */
+  /* return node; */
 }
 
 static Node* logical_or() {

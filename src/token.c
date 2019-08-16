@@ -1,4 +1,5 @@
 #include <hoc.h>
+#include <assert.h>
 
 // ソースコードの先頭文字
 static char* src;
@@ -12,7 +13,7 @@ static void print_line(char* pos) {
   size_t column = 0;
   char* start = src; // 出力する行の先頭文字
 
-  for (char *c = src; c != pos; c++) {
+  for (char *c = src; c != pos && *c != '\0'; c++) {
     if (*c == '\n') {
       start = c + 1;
       line++;
