@@ -248,10 +248,12 @@ typedef struct IProgram {
 typedef struct IReg {
   bool is_real;
   int id;
+  size_t size;
 } IReg;
 
 enum IRTag {
   IIMM,
+  ILABEL,
   IADD,
   ISUB,
   IMUL,
@@ -268,14 +270,22 @@ enum IRTag {
   IXOR,
   ILOAD,
   ISTORE,
+  IMOV,
   ICALL,
   IBR,
   IJMP,
   IRET,
 };
 
+typedef struct Block {
+  char* label;
+  Vector* instrs;
+} Block;
+
+
 typedef struct IR {
   /* r0 = IIMM imm_int
+     r0 = ILABEL label
      r0 = IADD r1 r2
      r0 = ISUB r1 r2
      r0 = IMUL r1 r2
@@ -290,11 +300,12 @@ typedef struct IR {
      r0 = IAND r1 r2
      r0 = IOR r1 r2
      r0 = IXOR r1 r2
-     r0 = ILOAD size r1
-     ISTORE size r0 r1
+     r0 = ILOAD r1
+     ISTORE r0 r1
+     IMOV r0 r1
      r0 = ICALL func_name args
-     IBR r0 label0 label1
-     IJMP label0
+     IBR r0 then els
+     IJMP jump_to
      RET r0
    */
   enum IRTag op;
@@ -302,20 +313,17 @@ typedef struct IR {
   IReg* r0;
   IReg* r1;
   IReg* r2;
-  size_t size;
-  char* label0;
-  char* label1;
+  char* label;
+  Block* jump_to;
+  Block* then;
+  Block* els;
   char* func_name;
   Vector* args;
 } IR;
 
-typedef struct Block {
-  char* label;
-  Vector* instrs;
-} Block;
-
 typedef struct IFunc {
   char* name;
+  Vector* params;
   Vector* blocks;
   char* entry_label;
 } IFunc;

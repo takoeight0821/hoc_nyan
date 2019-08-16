@@ -1,11 +1,6 @@
 #include <hoc.h>
 
 /* create IR */
-IReg* new_reg(int id) {
-  IReg* new = calloc(1, sizeof(IReg));
-  new->id = id;
-  return new;
-}
 
 IReg* real_reg(Reg reg) {
   IReg* new = calloc(1, sizeof(IReg));
@@ -49,7 +44,9 @@ static char* show_args(Vector* args) {
 char* show_ir(IR* ir) {
   switch (ir->op) {
   case IIMM:
-    return format("%d", ir->imm_int);
+    return format("%s = %d", show_ireg(ir->r0), ir->imm_int);
+  case ILABEL:
+    return format("%s = %s", show_ireg(ir->r0), ir->label);
   case IADD:
     return format("%s = %s + %s", show_ireg(ir->r0), show_ireg(ir->r1), show_ireg(ir->r2));
   case ISUB:
@@ -79,15 +76,17 @@ char* show_ir(IR* ir) {
   case IXOR:
     return format("%s = %s ^ %s", show_ireg(ir->r0), show_ireg(ir->r1), show_ireg(ir->r2));
   case ILOAD:
-    return format("%s = load %zu %s", show_ireg(ir->r0), ir->size, show_ireg(ir->r1));
+    return format("%s = load %s", show_ireg(ir->r0), show_ireg(ir->r1));
   case ISTORE:
-    return format("store %zu %s <- %s", ir->size, show_ireg(ir->r0), show_ireg(ir->r1));
+    return format("store %s <- %s", show_ireg(ir->r0), show_ireg(ir->r1));
+  case IMOV:
+    return format("mov %s <- %s", show_ireg(ir->r0), show_ireg(ir->r1));
   case ICALL:
     return format("%s = call %s %s", show_ireg(ir->r0), ir->func_name, show_args(ir->args));
   case IBR:
-    return format("br %s %s %s", show_ireg(ir->r0), ir->label0, ir->label1);
+    return format("br %s %s %s", show_ireg(ir->r0), ir->then->label, ir->els->label);
   case IJMP:
-    return format("jmp %s", ir->label0);
+    return format("jmp %s", ir->jump_to->label);
   case IRET:
     return format("ret %s", show_ireg(ir->r0));
   }
