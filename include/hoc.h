@@ -241,6 +241,87 @@ typedef struct Program {
   Vector* strs;
 } Program;
 
+typedef struct IReg {
+  bool is_real;
+  int id;
+} IReg;
+
+enum IRTag {
+  IIMM,
+  IADD,
+  ISUB,
+  IMUL,
+  IDIV,
+  IMOD,
+  ILT,
+  ILE,
+  IGT,
+  IGE,
+  IEQ,
+  INE,
+  IAND,
+  IOR,
+  IXOR,
+  ILOAD,
+  ISTORE,
+  ICALL,
+  IBR,
+  IJMP,
+  IRET,
+};
+
+typedef struct IR {
+  /* r0 = IIMM imm_int
+     r0 = IADD r1 r2
+     r0 = ISUB r1 r2
+     r0 = IMUL r1 r2
+     r0 = IDIV r1 r2
+     r0 = IMOD r1 r2
+     r0 = ILT r1 r2
+     r0 = ILE r1 r2
+     r0 = IGT r1 r2
+     r0 = IGE r1 r2
+     r0 = IEQ r1 r2
+     r0 = INE r1 r2
+     r0 = IAND r1 r2
+     r0 = IOR r1 r2
+     r0 = IXOR r1 r2
+     r0 = ILOAD size r1
+     ISTORE size r0 r1
+     r0 = ICALL func_name args
+     IBR r0 label0 label1
+     IJMP label0
+     RET r0
+   */
+  enum IRTag op;
+  int imm_int;
+  IReg* r0;
+  IReg* r1;
+  IReg* r2;
+  size_t size;
+  char* label0;
+  char* label1;
+  char* func_name;
+  Vector* args;
+} IR;
+
+typedef struct Block {
+  char* label;
+  Vector* instrs;
+} Block;
+
+typedef struct IFunc {
+  char* name;
+  Vector* blocks;
+  char* entry_label;
+} IFunc;
+
+// ir.c
+char* show_ireg(IReg* reg);
+char* show_ir(IR* ir);
+char* show_block(Block* block);
+char* show_ifunc(IFunc* ifunc);
+
 // node.c
 Node* new_node(enum NodeTag tag, Token* token);
 Node* clone_node(Node* node);
