@@ -1,6 +1,7 @@
 # hoc_nyan
 
-a toy c compiler.
+A toy c compiler.
+Tested on Arch Linux.
 
 # Build
 
