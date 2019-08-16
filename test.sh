@@ -9,22 +9,22 @@ echo "~~~ gcc ~~~" &&
     gcc -static -o test/tmp.out test/tmp.s &&
     ./test/tmp.out &&
     echo "~~~ generation 1 ~~~" &&
-    ./gen_first/hoc test/tmp.c > test/tmp_hoc.s &&
+    ./build/g1/hoc test/tmp.c > test/tmp_hoc.s &&
     gcc -static -o test/tmp_hoc.out test/tmp_hoc.s &&
     ./test/tmp_hoc.out &&
     echo "~~~ generation 2 ~~~" &&
-    ./gen_second/hoc test/tmp.c > test/tmp_hoc.s &&
+    ./build/g2/hoc test/tmp.c > test/tmp_hoc.s &&
     gcc -static -o test/tmp_hoc.out test/tmp_hoc.s &&
     ./test/tmp_hoc.out &&
-    cmp src/containers.s src/containers_1.s &&
-    cmp src/emit.s src/emit_1.s &&
-    cmp src/main.s src/main_1.s &&
-    cmp src/node.s src/node_1.s &&
-    cmp src/parse.s src/parse_1.s &&
-    cmp src/sema.s src/sema_1.s &&
-    cmp src/token.s src/token_1.s &&
-    cmp src/utils.s src/utils_1.s &&
-    cmp src/cpp.s src/cpp_1.s &&
+    cmp build/g1/containers.s build/g2/containers.s &&
+    cmp build/g1/emit.s build/g2/emit.s &&
+    cmp build/g1/main.s build/g2/main.s &&
+    cmp build/g1/node.s build/g2/node.s &&
+    cmp build/g1/parse.s build/g2/parse.s &&
+    cmp build/g1/sema.s build/g2/sema.s &&
+    cmp build/g1/token.s build/g2/token.s &&
+    cmp build/g1/utils.s build/g2/utils.s &&
+    cmp build/g1/cpp.s build/g2/cpp.s &&
     rm test/tmp.c test/tmp.s test/tmp.out test/tmp_hoc.s test/tmp_hoc.out &&
 
     echo OK
