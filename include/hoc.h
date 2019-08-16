@@ -91,7 +91,11 @@ typedef struct Token {
   int integer;
   char* ident;
   char* str; // string literal
-  char* start; // for error reporting
+
+  /* for error reporting */
+  char* source;
+  char* start;
+
   bool bol; // beginning of line
 } Token;
 

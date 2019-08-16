@@ -8,12 +8,12 @@ static char* cur;
 // 行頭か否か
 static bool bol = 1;
 
-static void print_line(char* pos) {
+static void print_line(char* start, char* pos) {
   size_t line = 0;
   size_t column = 0;
-  char* start = src; // 出力する行の先頭文字
+  /* char* start = src; // 出力する行の先頭文字 */
 
-  for (char *c = src; c != pos && *c != '\0'; c++) {
+  for (char *c = start; c != pos && *c != '\0'; c++) {
     if (*c == '\n') {
       start = c + 1;
       line++;
@@ -42,7 +42,7 @@ static void print_line(char* pos) {
 }
 
 void warn_token(Token* tok, char* msg) {
-  print_line(tok->start);
+  print_line(tok->source, tok->start);
   eprintf("%s\n", msg);
 }
 
@@ -54,6 +54,7 @@ void bad_token(Token* tok, char* msg) {
 static Token* new_token(enum TokenTag tag, char* start) {
   Token* t = calloc(1, sizeof(Token));
   t->tag = tag;
+  t->source = src;
   t->start = start;
   t->bol = bol;
   return t;
@@ -147,7 +148,7 @@ static char* read_include_path(void) {
   StringBuilder* sb = new_sb();
 
   if (*cur != '<') {
-    print_line(cur);
+    print_line(src, cur);
     error("expected <, but actual %c\n", *cur);
   }
   consume();
@@ -219,11 +220,11 @@ static Token* next_token(void) {
       token->ident = "endif";
       return token;
     } else {
-      print_line(cur);
+      print_line(src, cur);
       error("invalid preprocessing directive\n");
     }
   } else if (*cur == '#') {
-    print_line(cur);
+    print_line(src, cur);
     error("invalid #\n");
   }
 
@@ -310,7 +311,7 @@ static Token* next_token(void) {
         t->integer = '\0';
         break;
       default:
-        print_line(cur);
+        print_line(src, cur);
         error("invalid escape sequence: %c\n", *cur);
       }
     } else {
@@ -318,7 +319,7 @@ static Token* next_token(void) {
     }
     consume();
     if (*cur != '\'') {
-      print_line(cur);
+      print_line(src, cur);
       error("expected ' but actual %c\n", *cur);
     }
     consume();
@@ -329,7 +330,7 @@ static Token* next_token(void) {
     return ident(cur);
   }
 
-  print_line(cur);
+  print_line(src, cur);
   error("invalid character: %c\n", *cur);
 }
 
