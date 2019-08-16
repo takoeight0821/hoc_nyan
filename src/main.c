@@ -3,6 +3,7 @@
 int main(int argc, char** argv)
 {
   bool dump = false;
+  bool use_ir = false;
   if (argc < 1) {
     error("./hoc file_name\n");
   }
@@ -11,9 +12,13 @@ int main(int argc, char** argv)
     dump = true;
   }
 
+  if (streq(argv[1], "-ir")) {
+    use_ir = true;
+  }
+
 
   Token* tokens;
-  if (dump) {
+  if (dump || use_ir) {
     tokens = lex(argv[2]);
   } else {
     tokens = lex(argv[1]);
@@ -44,6 +49,10 @@ int main(int argc, char** argv)
     }
   }
 
+  if (use_ir) {
+    IProgram* iprog = gen_ir(prog);
+    eprintf("%s\n", show_iprog(iprog));
+  }
   gen_x86(prog);
 
   return 0;

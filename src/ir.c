@@ -90,6 +90,7 @@ char* show_ir(IR* ir) {
   case IRET:
     return format("ret %s", show_ireg(ir->r0));
   }
+  error("unreachable\n");
 }
 
 char* show_block(Block* block) {
@@ -97,10 +98,10 @@ char* show_block(Block* block) {
   sb_puts(sb, format("%s: {\n", block->label));
   for (int i = 0; i < block->instrs->length; i++) {
     sb_puts(sb, " ");
-    sb_puts(sb, block->instrs->ptr[i]);
+    sb_puts(sb, show_ir(block->instrs->ptr[i]));
     sb_puts(sb, "\n");
   }
-  sb_puts(sb, "}\n");
+  sb_puts(sb, "}");
   return sb_run(sb);
 }
 
@@ -108,7 +109,16 @@ char* show_ifunc(IFunc* ifunc) {
   StringBuilder* sb = new_sb();
   sb_puts(sb, format("=== %s(%s) ===\n", ifunc->name, ifunc->entry_label));
   for (int i = 0; i < ifunc->blocks->length; i++) {
-    show_block(ifunc->blocks->ptr[i]);
+    sb_puts(sb, show_block(ifunc->blocks->ptr[i]));
+    sb_puts(sb, "\n");
+  }
+  return sb_run(sb);
+}
+
+char* show_iprog(IProgram* iprog) {
+  StringBuilder* sb = new_sb();
+  for (int i = 0; i < iprog->ifuncs->length; i++) {
+    sb_puts(sb, show_ifunc(iprog->ifuncs->ptr[i]));
   }
   return sb_run(sb);
 }

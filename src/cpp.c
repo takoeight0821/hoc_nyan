@@ -16,8 +16,6 @@ static void traverse(void);
 static Token* copy_token(Token* src) {
   Token* new = calloc(1, sizeof(Token));
   memcpy(new, src, sizeof(Token));
-  /* dump_token(new); */
-  /* warn_token(new, "DEBUG copy_token"); */
   new->next = NULL;
   return new;
 }

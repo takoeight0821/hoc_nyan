@@ -421,3 +421,9 @@ void dump_function(Function* func);
 
 // cpp.c
 Token* preprocess(Token* tokens);
+
+// ir.c
+char* show_iprog(IProgram* iprog);
+
+// gen_ir.c
+IProgram* gen_ir(Program* program);
