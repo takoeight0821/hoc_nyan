@@ -782,6 +782,18 @@ static void emit_const(Type* type, Node* node) {
     }
     break;
   }
+  case NGVAR: {
+    if (size_of(type) == 1) {
+      emit(".byte %s", node->name);
+    } else if (size_of(type) == 4) {
+      emit(".int %s", node->name);
+    } else if (size_of(type) == 8) {
+      emit(".quad %s", node->name);
+    } else {
+      bad_token(node->token, "emit error: emit_const(invalid size)");
+    }
+    break;
+  }
   case NSTRING: {
     emit(".quad .string_%zu", node->str_id);
     break;

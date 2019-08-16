@@ -1,5 +1,4 @@
 #include <hoc.h>
-#include <assert.h>
 
 // ソースコードの先頭文字
 static char* src;
@@ -89,6 +88,55 @@ static bool start_with(char* s1, char* s2) {
     }
   }
   return true;
+}
+
+static char read_char(void) {
+  char c;
+  if (*cur == '\\') {
+    consume();
+    switch (*cur) {
+    case 'a':
+      c = '\a';
+      break;
+    case 'b':
+      c = '\b';
+      break;
+    case 'f':
+      c = '\f';
+      break;
+    case 'n':
+      c = '\n';
+      break;
+    case 'r':
+      c = '\r';
+      break;
+    case 't':
+      c = '\t';
+      break;
+    case 'v':
+      c = '\v';
+      break;
+    case '\\':
+      c = '\\';
+      break;
+    case '\'':
+      c = '\'';
+      break;
+    case '\"':
+      c = '\"';
+      break;
+    case '0':
+      c = '\0';
+      break;
+    default:
+      print_line(src, cur);
+      error("invalid escape sequence: %c\n", *cur);
+    }
+  } else {
+    c = *cur;
+  }
+  consume();
+  return c;
 }
 
 static void whitespace() {
@@ -261,9 +309,8 @@ static Token* next_token(void) {
     char* start = cur;
     consume();
     StringBuilder* sb = new_sb();
-    while (*(cur - 1) == '\\' || *cur != '\"') {
-      sb_putc(sb, *cur);
-      consume();
+    while (*cur != '\"') {
+      sb_putc(sb, read_char());
     }
     consume();
     Token* tok = new_token(TSTRING, start);
@@ -274,50 +321,7 @@ static Token* next_token(void) {
   if ('\'' == *cur) {
     consume();
     Token* t = new_token(TINT, cur - 1);
-    if (*cur == '\\') {
-      consume();
-      switch (*cur) {
-      case 'a':
-        t->integer = '\a';
-        break;
-      case 'b':
-        t->integer = '\b';
-        break;
-      case 'f':
-        t->integer = '\f';
-        break;
-      case 'n':
-        t->integer = '\n';
-        break;
-      case 'r':
-        t->integer = '\r';
-        break;
-      case 't':
-        t->integer = '\t';
-        break;
-      case 'v':
-        t->integer = '\v';
-        break;
-      case '\\':
-        t->integer = '\\';
-        break;
-      case '\'':
-        t->integer = '\'';
-        break;
-      case '\"':
-        t->integer = '\"';
-        break;
-      case '0':
-        t->integer = '\0';
-        break;
-      default:
-        print_line(src, cur);
-        error("invalid escape sequence: %c\n", *cur);
-      }
-    } else {
-      t->integer = *cur;
-    }
-    consume();
+    t->integer = read_char();
     if (*cur != '\'') {
       print_line(src, cur);
       error("expected ' but actual %c\n", *cur);
