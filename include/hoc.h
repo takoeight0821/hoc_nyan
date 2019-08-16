@@ -347,7 +347,7 @@ void* vec_pop(Vector* v);
 void* vec_last(Vector* v);
 
 // emit.c
-typedef enum Reg {
+typedef enum {
   AX,
   DI,
   SI,

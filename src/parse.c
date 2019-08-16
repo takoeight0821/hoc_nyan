@@ -306,7 +306,9 @@ static Type* type_specifier() {
   } else if (match("enum")) {
     ty = int_type();
 
-    expect(TIDENT, "enum tag"); // タグは読み飛ばす
+    if (peek_tag(0) == TIDENT) {
+      consume(); // タグは読み飛ばす
+    }
 
     if (match("{")) {
       int val = 0;
