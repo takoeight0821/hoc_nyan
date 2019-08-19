@@ -14,7 +14,7 @@ $ make
 Run make to build by hoc:
 
 ```
-$ make selfhost
+$ make build_g1
 ```
 
 # Test
