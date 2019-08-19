@@ -1,4 +1,4 @@
-#include <hoc.h>
+#include "hoc.h"
 
 typedef struct MacroEnv {
   struct MacroEnv* next;

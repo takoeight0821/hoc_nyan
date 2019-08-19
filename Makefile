@@ -8,7 +8,7 @@ G2_ASMS=$(SRCS:src/%.c=build/g2/%.s)
 hoc: $(OBJS)
 	$(CC) -o hoc $(OBJS) $(LDFLAGS)
 
-build/g0/%.o : src/%.c include/hoc.h
+build/g0/%.o : src/%.c src/hoc.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 build/g1/%.s: src/%.c hoc

@@ -1,4 +1,4 @@
-#include <hoc.h>
+#include "hoc.h"
 
 static char* reg64[9] = { "rax", "rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11" };
 static char* reg32[9] = { "eax", "edi", "esi", "edx", "ecx", "r8d", "r9d", "r10d", "r11d" };

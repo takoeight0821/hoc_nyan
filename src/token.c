@@ -1,4 +1,4 @@
-#include <hoc.h>
+#include "hoc.h"
 
 // ソースコードの先頭文字
 static char* src;
@@ -195,13 +195,13 @@ static Token* new_reserved(char* start, char* ident) {
 static char* read_include_path(void) {
   StringBuilder* sb = new_sb();
 
-  if (*cur != '<') {
+  if (*cur != '"' && *cur != '<') {
     print_line(src, cur);
-    error("expected <, but actual %c\n", *cur);
+    error("expected \" or <, but actual %c\n", *cur);
   }
   consume();
 
-  while (*cur != '>') {
+  while (*cur != '"' && *cur != '>') {
     sb_putc(sb, *cur);
     consume();
   }

@@ -1,4 +1,4 @@
-#include <hoc.h>
+#include "hoc.h"
 
 static Vector* funcs; // Vector(Function*)
 static Vector* switches; // Vector(Node*(NSWITCH))

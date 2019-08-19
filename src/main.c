@@ -1,4 +1,4 @@
-#include <hoc.h>
+#include "hoc.h"
 
 int main(int argc, char** argv)
 {
