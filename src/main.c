@@ -18,11 +18,14 @@ int main(int argc, char** argv)
 
 
   Token* tokens;
+  char* path;
   if (dump || use_ir) {
-    tokens = lex(argv[2]);
+    path = format("%s/%s", dirname(format("%s", argv[2])), basename(format("%s", argv[2])));
   } else {
-    tokens = lex(argv[1]);
+    path = format("%s/%s", dirname(format("%s", argv[1])), basename(format("%s", argv[1])));
   }
+
+  tokens = lex(path);
 
   if (dump) {
     for (Token* t = tokens; t != NULL; t = t->next) {
@@ -31,7 +34,7 @@ int main(int argc, char** argv)
     eprintf("\n");
   }
 
-  tokens = preprocess(tokens);
+  tokens = preprocess(dirname(format("%s", path)), tokens);
 
   if (dump) {
     for (Token* t = tokens; t != NULL; t = t->next) {

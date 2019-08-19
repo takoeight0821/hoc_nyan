@@ -56,6 +56,9 @@ int vfprintf(FILE* stream, char* format, va_list ap);
 int vsprintf(char* str, char* format, va_list ap);
 int vsnprintf(char* str, size_t size, char* format, va_list ap);
 
+char* dirname(char* path);
+char* basename(char* path);
+
 #endif
 #ifndef __hoc__
 #include <stdnoreturn.h>
@@ -67,6 +70,7 @@ int vsnprintf(char* str, size_t size, char* format, va_list ap);
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+#include <libgen.h>
 #endif
 
 typedef struct {
@@ -420,7 +424,7 @@ void dump_type(Type* ty);
 void dump_function(Function* func);
 
 // cpp.c
-Token* preprocess(Token* tokens);
+Token* preprocess(char* dir, Token* tokens);
 
 // ir.c
 char* show_iprog(IProgram* iprog);

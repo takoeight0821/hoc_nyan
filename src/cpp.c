@@ -10,6 +10,7 @@ typedef struct MacroEnv {
 static Token* input;
 static Token* output;
 static MacroEnv* gbl_env;
+static char* src_dir;
 
 static void traverse(void);
 
@@ -227,7 +228,7 @@ static void apply(char* name) {
 }
 
 static char* include_path(char* path) {
-  return format("./include/%s", path);
+  return format("%s/%s", src_dir, path);
 }
 
 static void skip_to_endif(void) {
@@ -271,10 +272,11 @@ static void traverse(void) {
   }
 }
 
-Token* preprocess(Token* tokens) {
+Token* preprocess(char* dir, Token* tokens) {
   gbl_env = calloc(1, sizeof(MacroEnv));
   gbl_env->name = "__hoc__";
   input = tokens;
+  src_dir = dir;
 
   while (input) {
     traverse();
