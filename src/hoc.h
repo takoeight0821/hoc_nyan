@@ -59,6 +59,9 @@ int vsnprintf(char* str, size_t size, char* format, va_list ap);
 char* dirname(char* path);
 char* basename(char* path);
 
+int getopt(int argc, char** argv, char* optstring);
+extern int optind;
+
 #endif
 #ifndef __hoc__
 #include <stdnoreturn.h>
@@ -71,6 +74,7 @@ char* basename(char* path);
 #include <string.h>
 #include <stddef.h>
 #include <libgen.h>
+#include <getopt.h>
 #endif
 
 typedef struct {

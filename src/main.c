@@ -4,28 +4,24 @@ int main(int argc, char** argv)
 {
   bool dump = false;
   bool use_ir = false;
-  if (argc < 1) {
-    error("./hoc file_name\n");
+
+  int opt;
+  while ((opt = getopt(argc, argv, "di")) != -1) {
+    switch (opt) {
+    case 'd':
+      dump = true;
+      break;
+    case 'i':
+      use_ir = true;
+      break;
+    default:
+      error("Usage: %s [-d] [-i] filename\n", argv[0]);
+    }
   }
 
-  if (streq(argv[1], "-dump")) {
-    dump = true;
-  }
+  char* path = format("%s/%s", dirname(format("%s", argv[optind])), basename(format("%s", argv[optind])));
 
-  if (streq(argv[1], "-ir")) {
-    use_ir = true;
-  }
-
-
-  Token* tokens;
-  char* path;
-  if (dump || use_ir) {
-    path = format("%s/%s", dirname(format("%s", argv[2])), basename(format("%s", argv[2])));
-  } else {
-    path = format("%s/%s", dirname(format("%s", argv[1])), basename(format("%s", argv[1])));
-  }
-
-  tokens = lex(path);
+  Token* tokens = lex(path);
 
   if (dump) {
     for (Token* t = tokens; t != NULL; t = t->next) {
