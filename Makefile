@@ -1,4 +1,4 @@
-CC=gcc
+CC=clang
 CFLAGS=-g -Wall -std=c11 -I./include
 SRCS=$(wildcard src/*.c)
 OBJS=$(SRCS:src/%.c=build/g0/%.o)
