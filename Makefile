@@ -1,12 +1,12 @@
 CC=clang
-CFLAGS=-g -Wall -std=c11 -I./include
+CFLAGS+=-fno-omit-frame-pointer -g -Wall -std=c11 -I./include
 SRCS=$(wildcard src/*.c)
 OBJS=$(SRCS:src/%.c=build/g0/%.o)
 G1_ASMS=$(SRCS:src/%.c=build/g1/%.s)
 G2_ASMS=$(SRCS:src/%.c=build/g2/%.s)
 
 hoc: $(OBJS)
-	$(CC) -o hoc $(OBJS) $(LDFLAGS)
+	$(CC) -o hoc $(OBJS) $(CFLAGS) $(LDFLAGS)
 
 build/g0/%.o : src/%.c src/hoc.h
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -15,13 +15,13 @@ build/g1/%.s: src/%.c hoc
 	./hoc $< > $@
 
 build_g1: $(G1_ASMS)
-	$(CC) -g -static -o build/g1/hoc $(G1_ASMS) $(LDFLAGS)
+	$(CC) -g -static -o build/g1/hoc $(G1_ASMS) $(CFLAGS) $(LDFLAGS)
 
 build/g2/%.s: src/%.c hoc
 	./build/g1/hoc $< > $@
 
 build_g2: $(G2_ASMS)
-	$(CC) -g -static -o build/g2/hoc $(G2_ASMS) $(LDFLAGS)
+	$(CC) -g -static -o build/g2/hoc $(G2_ASMS) $(CFLAGS) $(LDFLAGS)
 
 test: hoc build_g1 build_g2 FORCE
 	./test.sh

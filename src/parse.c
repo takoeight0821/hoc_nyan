@@ -263,11 +263,12 @@ static Field* read_field() {
 }
 
 static Type* type_specifier() {
-  Type* ty = calloc(1, sizeof(Type));
+  /* Type* ty; */
 
   Token* tok;
   if ((tok = match("struct"))) {
-    char* tag;
+    Type* ty;
+    char* tag = "(noname)";
 
     if (peek_tag(0) == TIDENT) {
       tag = peek(0)->ident;
@@ -296,9 +297,8 @@ static Type* type_specifier() {
       set_field_offset(ty);
     }
 
+    return ty;
   } else if (match("enum")) {
-    ty = int_type();
-
     if (peek_tag(0) == TIDENT) {
       consume(); // タグは読み飛ばす
     }
@@ -323,14 +323,14 @@ static Type* type_specifier() {
       }
     }
 
+    return int_type();
   } else if ((peek_tag(0) == TIDENT || peek_tag(0) == TRESERVED) && find_type(peek(0)->ident)) {
-    ty = find_type(peek(0)->ident);
+    Type* ty = find_type(peek(0)->ident);
     consume();
+    return ty;
   } else {
-    ty = NULL;
+    return NULL;
   }
-
-  return ty;
 }
 
 static Node* term() {

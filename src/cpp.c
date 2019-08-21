@@ -69,11 +69,15 @@ static Token* get_macro_tokens(char* name) {
 }
 
 static MacroEnv* get_local_env(char* name, Vector* args) {
-  Vector* params;
+  Vector* params = NULL;
   for (MacroEnv* env = gbl_env; env != NULL; env = env->next) {
     if (streq(name, env->name)) {
       params = env->params;
     }
+  }
+
+  if (params == NULL) {
+    error("undefined macro %s\n", name);
   }
 
   MacroEnv* lcl_env = NULL;
@@ -94,7 +98,9 @@ static void pp_error(char* expected, Token* actual) {
 }
 
 static void consume(void) {
-  input = input->next;
+  if (input) {
+    input = input->next;
+  }
 }
 
 static Token* expect(char* expected, enum TokenTag tag) {
