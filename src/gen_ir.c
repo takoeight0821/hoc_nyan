@@ -8,7 +8,7 @@ typedef struct VarEnv {
 
 static int label_id;
 static int reg_id;
-static Block* out;
+static Block* current_block;
 static Vector* blocks;
 static VarEnv* var_env;
 
@@ -30,7 +30,7 @@ static IReg* lookup_var(char* name) {
 }
 
 static char* new_label(char* name) {
-  char* label = format(".L%s", name);
+  char* label = format(".L%s%d", name, label_id);
   label_id++;
   return label;
 }
@@ -46,6 +46,12 @@ static Block* new_block(char* label) {
   new->label = label;
   new->instrs = new_vec();
   return new;
+}
+
+static void in_new_block(char* label) {
+  Block* block = new_block(label);
+  vec_push(blocks, block);
+  current_block = block;
 }
 
 static IR* imm(IReg* reg, int val) {
@@ -71,8 +77,22 @@ static IR* label(IReg* reg, char* name) {
   return new;
 }
 
+static IR* branch(IReg* cond, char* then_label, char* else_label) {
+  IR* new = new_ir(IBR);
+  new->r0 = cond;
+  new->then = then_label;
+  new->els = else_label;
+  return new;
+}
+
+static IR* jmp(char* jump_to) {
+  IR* new = new_ir(IJMP);
+  new->jump_to = jump_to;
+  return new;
+}
+
 static void emit_ir(IR* ir) {
-  vec_push(out->instrs, ir);
+  vec_push(current_block->instrs, ir);
 }
 
 static IReg* emit_expr(Node* node) {
@@ -88,6 +108,83 @@ static IReg* emit_expr(Node* node) {
   case NGVAR: {
     IReg* reg = new_reg();
     emit_ir(label(reg, node->name));
+    return reg;
+  }
+  case NADD: {
+    IReg* lhs = emit_expr(node->lhs);
+    IReg* rhs = emit_expr(node->rhs);
+    IReg* reg = new_reg();
+    emit_ir(new_binop_ir(IADD, reg, lhs, rhs));
+    return reg;
+  }
+  case NSUB: {
+    IReg* lhs = emit_expr(node->lhs);
+    IReg* rhs = emit_expr(node->rhs);
+    IReg* reg = new_reg();
+    emit_ir(new_binop_ir(ISUB, reg, lhs, rhs));
+    return reg;
+  }
+  case NMUL: {
+    IReg* lhs = emit_expr(node->lhs);
+    IReg* rhs = emit_expr(node->rhs);
+    IReg* reg = new_reg();
+    emit_ir(new_binop_ir(IMUL, reg, lhs, rhs));
+    return reg;
+  }
+  case NDIV: {
+    IReg* lhs = emit_expr(node->lhs);
+    IReg* rhs = emit_expr(node->rhs);
+    IReg* reg = new_reg();
+    emit_ir(new_binop_ir(IDIV, reg, lhs, rhs));
+    return reg;
+  }
+  case NMOD: {
+    IReg* lhs = emit_expr(node->lhs);
+    IReg* rhs = emit_expr(node->rhs);
+    IReg* reg = new_reg();
+    emit_ir(new_binop_ir(IMOD, reg, lhs, rhs));
+    return reg;
+  }
+  case NLT: {
+    IReg* lhs = emit_expr(node->lhs);
+    IReg* rhs = emit_expr(node->rhs);
+    IReg* reg = new_reg();
+    emit_ir(new_binop_ir(ILT, reg, lhs, rhs));
+    return reg;
+  }
+  case NLE: {
+    IReg* lhs = emit_expr(node->lhs);
+    IReg* rhs = emit_expr(node->rhs);
+    IReg* reg = new_reg();
+    emit_ir(new_binop_ir(ILE, reg, lhs, rhs));
+    return reg;
+  }
+  case NGT: {
+    IReg* lhs = emit_expr(node->lhs);
+    IReg* rhs = emit_expr(node->rhs);
+    IReg* reg = new_reg();
+    emit_ir(new_binop_ir(IGT, reg, lhs, rhs));
+    return reg;
+  }
+  case NGE: {
+    IReg* lhs = emit_expr(node->lhs);
+    IReg* rhs = emit_expr(node->rhs);
+    IReg* reg = new_reg();
+    emit_ir(new_binop_ir(IGE, reg, lhs, rhs));
+    return reg;
+  }
+  case NEQ: {
+    IReg* lhs = emit_expr(node->lhs);
+    IReg* rhs = emit_expr(node->rhs);
+    IReg* reg = new_reg();
+    emit_ir(new_binop_ir(IEQ, reg, lhs, rhs));
+    return reg;
+  }
+  case NNE: {
+    IReg* lhs = emit_expr(node->lhs);
+    IReg* rhs = emit_expr(node->rhs);
+    IReg* reg = new_reg();
+    emit_ir(new_binop_ir(INE, reg, lhs, rhs));
     return reg;
   }
   }
@@ -115,6 +212,39 @@ static void emit_stmt(Node* node) {
     }
     break;
   }
+  case NIF: {
+    IReg* cond = emit_expr(node->cond);
+
+    char* then_label = new_label("then");
+    char* end_label = new_label("endif");
+
+    emit_ir(branch(cond, then_label, end_label));
+
+    in_new_block(then_label);
+    emit_stmt(node->then);
+
+    in_new_block(end_label);
+    break;
+  }
+  case NIFELSE: {
+    IReg* cond = emit_expr(node->cond);
+
+    char* then_label = new_label("then");
+    char* else_label = new_label("else");
+    char* end_label = new_label("endif");
+
+    emit_ir(branch(cond, then_label, else_label));
+
+    in_new_block(then_label);
+    emit_stmt(node->then);
+    emit_ir(jmp(end_label));
+
+    in_new_block(else_label);
+    emit_stmt(node->els);
+
+    in_new_block(end_label);
+    break;
+  }
   }
 }
 
@@ -131,10 +261,8 @@ static IFunc* emit_func(Function* func) {
     assign_var(((Node*)func->params->ptr[i])->name, reg);
   }
 
-  Block* entry = new_block(new_label("entry"));
-  ifunc->entry_label = entry->label;
-  out = entry;
-  vec_push(blocks, entry);
+  ifunc->entry_label = new_label("entry");
+  in_new_block(ifunc->entry_label);
   emit_stmt(func->body);
   return ifunc;
 }

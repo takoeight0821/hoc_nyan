@@ -322,9 +322,9 @@ typedef struct IR {
   IReg* r1;
   IReg* r2;
   char* label;
-  Block* jump_to;
-  Block* then;
-  Block* els;
+  char* jump_to;
+  char* then;
+  char* els;
   char* func_name;
   Vector* args;
 } IR;
@@ -432,6 +432,9 @@ Token* preprocess(char* dir, Token* tokens);
 
 // ir.c
 char* show_iprog(IProgram* iprog);
+IReg* real_reg(Reg reg);
+IR* new_ir(enum IRTag op);
+IR* new_binop_ir(enum IRTag op, IReg* r0, IReg* r1, IReg* r2);
 
 // gen_ir.c
 IProgram* gen_ir(Program* program);

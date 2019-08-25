@@ -84,9 +84,9 @@ char* show_ir(IR* ir) {
   case ICALL:
     return format("%s = call %s %s", show_ireg(ir->r0), ir->func_name, show_args(ir->args));
   case IBR:
-    return format("br %s %s %s", show_ireg(ir->r0), ir->then->label, ir->els->label);
+    return format("br %s %s %s", show_ireg(ir->r0), ir->then, ir->els);
   case IJMP:
-    return format("jmp %s", ir->jump_to->label);
+    return format("jmp %s", ir->jump_to);
   case IRET:
     return format("ret %s", show_ireg(ir->r0));
   }
