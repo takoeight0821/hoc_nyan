@@ -35,9 +35,10 @@ static char* new_label(char* name) {
   return label;
 }
 
-static IReg* new_reg(void) {
+static IReg* new_reg(size_t size) {
   IReg* new = calloc(1, sizeof(IReg));
   new->id = reg_id++;
+  new->size = size;
   return new;
 }
 
@@ -77,6 +78,20 @@ static IR* label(IReg* reg, char* name) {
   return new;
 }
 
+static IR* alloc(IReg* reg, int size) {
+  IR* new = new_ir(IALLOC);
+  new->r0 = reg;
+  new->imm_int = size;
+  return new;
+}
+
+static IR* load(IReg* dst, IReg* src) {
+  IR* new = new_ir(ILOAD);
+  new->r0 = dst;
+  new->r1 = src;
+  return new;
+}
+
 static IR* branch(IReg* cond, char* then_label, char* else_label) {
   IR* new = new_ir(IBR);
   new->r0 = cond;
@@ -98,92 +113,97 @@ static void emit_ir(IR* ir) {
 static IReg* emit_expr(Node* node) {
   switch (node->tag) {
   case NINT: {
-    IReg* reg = new_reg();
+    IReg* reg = new_reg(4);
     emit_ir(imm(reg, node->integer));
     return reg;
   }
   case NVAR: {
-    return lookup_var(node->name);
+    IReg* addr = lookup_var(node->name);
+    IReg* val = new_reg(size_of(type_of(node)));
+    emit_ir(load(val, addr));
+    return val;
   }
   case NGVAR: {
-    IReg* reg = new_reg();
-    emit_ir(label(reg, node->name));
-    return reg;
+    IReg* addr = new_reg(8);
+    IReg* val = new_reg(size_of(type_of(node)));
+    emit_ir(label(addr, node->name));
+    emit_ir(load(val, addr));
+    return val;
   }
   case NADD: {
     IReg* lhs = emit_expr(node->lhs);
     IReg* rhs = emit_expr(node->rhs);
-    IReg* reg = new_reg();
+    IReg* reg = new_reg(size_of(type_of(node)));
     emit_ir(new_binop_ir(IADD, reg, lhs, rhs));
     return reg;
   }
   case NSUB: {
     IReg* lhs = emit_expr(node->lhs);
     IReg* rhs = emit_expr(node->rhs);
-    IReg* reg = new_reg();
+    IReg* reg = new_reg(size_of(type_of(node)));
     emit_ir(new_binop_ir(ISUB, reg, lhs, rhs));
     return reg;
   }
   case NMUL: {
     IReg* lhs = emit_expr(node->lhs);
     IReg* rhs = emit_expr(node->rhs);
-    IReg* reg = new_reg();
+    IReg* reg = new_reg(size_of(type_of(node)));
     emit_ir(new_binop_ir(IMUL, reg, lhs, rhs));
     return reg;
   }
   case NDIV: {
     IReg* lhs = emit_expr(node->lhs);
     IReg* rhs = emit_expr(node->rhs);
-    IReg* reg = new_reg();
+    IReg* reg = new_reg(size_of(type_of(node)));
     emit_ir(new_binop_ir(IDIV, reg, lhs, rhs));
     return reg;
   }
   case NMOD: {
     IReg* lhs = emit_expr(node->lhs);
     IReg* rhs = emit_expr(node->rhs);
-    IReg* reg = new_reg();
+    IReg* reg = new_reg(size_of(type_of(node)));
     emit_ir(new_binop_ir(IMOD, reg, lhs, rhs));
     return reg;
   }
   case NLT: {
     IReg* lhs = emit_expr(node->lhs);
     IReg* rhs = emit_expr(node->rhs);
-    IReg* reg = new_reg();
+    IReg* reg = new_reg(size_of(type_of(node)));
     emit_ir(new_binop_ir(ILT, reg, lhs, rhs));
     return reg;
   }
   case NLE: {
     IReg* lhs = emit_expr(node->lhs);
     IReg* rhs = emit_expr(node->rhs);
-    IReg* reg = new_reg();
+    IReg* reg = new_reg(size_of(type_of(node)));
     emit_ir(new_binop_ir(ILE, reg, lhs, rhs));
     return reg;
   }
   case NGT: {
     IReg* lhs = emit_expr(node->lhs);
     IReg* rhs = emit_expr(node->rhs);
-    IReg* reg = new_reg();
+    IReg* reg = new_reg(size_of(type_of(node)));
     emit_ir(new_binop_ir(IGT, reg, lhs, rhs));
     return reg;
   }
   case NGE: {
     IReg* lhs = emit_expr(node->lhs);
     IReg* rhs = emit_expr(node->rhs);
-    IReg* reg = new_reg();
+    IReg* reg = new_reg(size_of(type_of(node)));
     emit_ir(new_binop_ir(IGE, reg, lhs, rhs));
     return reg;
   }
   case NEQ: {
     IReg* lhs = emit_expr(node->lhs);
     IReg* rhs = emit_expr(node->rhs);
-    IReg* reg = new_reg();
+    IReg* reg = new_reg(size_of(type_of(node)));
     emit_ir(new_binop_ir(IEQ, reg, lhs, rhs));
     return reg;
   }
   case NNE: {
     IReg* lhs = emit_expr(node->lhs);
     IReg* rhs = emit_expr(node->rhs);
-    IReg* reg = new_reg();
+    IReg* reg = new_reg(size_of(type_of(node)));
     emit_ir(new_binop_ir(INE, reg, lhs, rhs));
     return reg;
   }
@@ -193,7 +213,8 @@ static IReg* emit_expr(Node* node) {
 static void emit_stmt(Node* node) {
   switch (node->tag) {
   case NDEFVAR: {
-    IReg* new = new_reg();
+    IReg* new = new_reg(8);
+    emit_ir(alloc(new, size_of(type_of(node))));
     assign_var(node->name, new);
     break;
   }
@@ -256,7 +277,7 @@ static IFunc* emit_func(Function* func) {
   blocks = ifunc->blocks;
 
   for (int i = 0; i < func->params->length; i++) {
-    IReg* reg = new_reg();
+    IReg* reg = new_reg(size_of(type_of(func->params->ptr[i])));
     vec_push(ifunc->params, reg);
     assign_var(((Node*)func->params->ptr[i])->name, reg);
   }

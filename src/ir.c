@@ -25,7 +25,7 @@ IR* new_binop_ir(enum IRTag op, IReg* r0, IReg* r1, IReg* r2) {
 
 /* printing IR */
 char* show_ireg(IReg* reg) {
-  return format("$%d", reg->id);
+  return format("$%d(%zu)", reg->id, reg->size);
 }
 
 static char* show_args(Vector* args) {
@@ -75,6 +75,8 @@ char* show_ir(IR* ir) {
     return format("%s = %s | %s", show_ireg(ir->r0), show_ireg(ir->r1), show_ireg(ir->r2));
   case IXOR:
     return format("%s = %s ^ %s", show_ireg(ir->r0), show_ireg(ir->r1), show_ireg(ir->r2));
+  case IALLOC:
+    return format("%s = alloc %d", show_ireg(ir->r0), ir->imm_int);
   case ILOAD:
     return format("%s = load %s", show_ireg(ir->r0), show_ireg(ir->r1));
   case ISTORE:
