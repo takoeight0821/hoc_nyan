@@ -60,6 +60,12 @@ static void pop(Reg dst) {
   printf("\tpop %s\n", reg64[dst]);
 }
 
+static void pop_unused_value(Node* node) {
+  if (node->tag != NDEFVAR && node->type != NULL && node->type->ty != TY_VOID) {
+    pop(AX);
+  }
+}
+
 /* R10レジスタにアライメント調整前のRSPの値を保存する */
 static void align_rsp(void) {
   comment("start align rsp");
@@ -446,10 +452,7 @@ static void emit_node(Node* node) {
   case NCOMMA: {
     comment("start NCOMMA");
     emit_node(node->lhs);
-    // pop unused value
-    if (node->lhs->type != NULL && node->lhs->type->ty != TY_VOID) {
-      pop(AX);
-    }
+    pop_unused_value(node->lhs);
     emit_node(node->rhs);
     comment("end NCOMMA");
     break;
@@ -657,9 +660,7 @@ static void emit_node(Node* node) {
     comment("start NCASE");
     printf("%s:\n", node->name);
     emit_node(node->body);
-    if (type_of(node->body) != NULL && type_of(node->body)->ty != TY_VOID) {
-      pop(AX); // pop unused value
-    }
+    pop_unused_value(node->body);
     comment("end NCASE");
     break;
   }
@@ -667,9 +668,7 @@ static void emit_node(Node* node) {
     comment("start NDEFAULT");
     printf("%s:\n", node->name);
     emit_node(node->body);
-    if (type_of(node->body) != NULL && type_of(node->body)->ty != TY_VOID) {
-      pop(AX); // pop unused value
-    }
+    pop_unused_value(node->body);
     comment("end NDEFAULT");
     break;
   }

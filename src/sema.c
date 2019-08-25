@@ -328,7 +328,7 @@ void walk(Node* node) {
     break;
   }
   case NDEFVAR: {
-    node->type = NULL;
+    /* node->type = NULL; */
     break;
   }
   case NASSIGN: {
