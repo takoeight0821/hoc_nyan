@@ -4,6 +4,8 @@
 .gdb_history
 peda-session-*
 
+.idea/
+
 tmp/
 main
 hoc
