@@ -207,6 +207,14 @@ static IReg* emit_expr(Node* node) {
     emit_ir(new_binop_ir(INE, reg, lhs, rhs));
     return reg;
   }
+  case NLOGNOT: {
+    IReg* val = emit_expr(node->expr);
+    IReg* zero = new_reg(4);
+    IReg* reg = new_reg(4);
+    emit_ir(imm(zero, 0));
+    emit_ir(new_binop_ir(IEQ, reg, val, zero));
+    return reg;
+  }
   }
 }
 
