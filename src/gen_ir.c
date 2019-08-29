@@ -117,6 +117,21 @@ static void emit_ir(IR* ir) {
   vec_push(current_block->instrs, ir);
 }
 
+static IReg* emit_lval(Node* node) {
+  switch (node->tag) {
+  case NVAR: {
+    return lookup_var(node->name);
+  }
+  case NGVAR: {
+    IReg* addr = new_reg(8);
+    emit_ir(label(addr, node->name));
+    return addr;
+  }
+  }
+  bad_token(node->token, "gen_ir error: emit_lval");
+  return NULL;
+}
+
 static IReg* emit_expr(Node* node) {
   switch (node->tag) {
   case NINT: {
@@ -125,15 +140,14 @@ static IReg* emit_expr(Node* node) {
     return reg;
   }
   case NVAR: {
-    IReg* addr = lookup_var(node->name);
+    IReg* addr = emit_lval(node);
     IReg* val = new_reg(size_of(type_of(node)));
     emit_ir(load(val, addr));
     return val;
   }
   case NGVAR: {
-    IReg* addr = new_reg(8);
+    IReg* addr = emit_lval(node);
     IReg* val = new_reg(size_of(type_of(node)));
-    emit_ir(label(addr, node->name));
     emit_ir(load(val, addr));
     return val;
   }
