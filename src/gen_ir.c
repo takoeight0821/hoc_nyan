@@ -216,16 +216,23 @@ static IReg* emit_expr(Node* node) {
   }
   case NLOGNOT: {
     IReg* val = emit_expr(node->expr);
-    IReg* zero = new_reg(4);
-    IReg* reg = new_reg(4);
+    IReg* zero = new_reg(size_of(type_of(node)));
+    IReg* reg = new_reg(size_of(type_of(node)));
     emit_ir(imm(zero, 0));
     emit_ir(new_binop_ir(IEQ, reg, val, zero));
     return reg;
   }
   case NNOT: {
     IReg* val = emit_expr(node->expr);
-    IReg* reg = new_reg(4);
+    IReg* reg = new_reg(size_of(type_of(node)));
     emit_ir(not(reg, val));
+    return reg;
+  }
+  case NAND: {
+    IReg* lhs = emit_expr(node->lhs);
+    IReg* rhs = emit_expr(node->rhs);
+    IReg* reg = new_reg(size_of(type_of(node)));
+    emit_ir(new_binop_ir(IAND, reg, lhs, rhs));
     return reg;
   }
   }
