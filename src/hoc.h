@@ -276,6 +276,7 @@ enum IRTag {
   IAND,
   IOR,
   IXOR,
+  INOT,
   IALLOC,
   ILOAD,
   ISTORE,
@@ -309,6 +310,7 @@ typedef struct IR {
      r0 = IAND r1 r2
      r0 = IOR r1 r2
      r0 = IXOR r1 r2
+     r0 = INOT r1
      r0 = IALLOC imm_int
      r0 = ILOAD r1
      ISTORE r0 r1

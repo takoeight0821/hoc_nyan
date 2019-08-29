@@ -78,6 +78,13 @@ static IR* label(IReg* reg, char* name) {
   return new;
 }
 
+static IR* not(IReg* reg, IReg* val) {
+  IR* new = new_ir(INOT);
+  new->r0 = reg;
+  new->r1 = val;
+  return new;
+}
+
 static IR* alloc(IReg* reg, int size) {
   IR* new = new_ir(IALLOC);
   new->r0 = reg;
@@ -213,6 +220,12 @@ static IReg* emit_expr(Node* node) {
     IReg* reg = new_reg(4);
     emit_ir(imm(zero, 0));
     emit_ir(new_binop_ir(IEQ, reg, val, zero));
+    return reg;
+  }
+  case NNOT: {
+    IReg* val = emit_expr(node->expr);
+    IReg* reg = new_reg(4);
+    emit_ir(not(reg, val));
     return reg;
   }
   }

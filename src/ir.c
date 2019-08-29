@@ -75,6 +75,8 @@ char* show_ir(IR* ir) {
     return format("%s = %s | %s", show_ireg(ir->r0), show_ireg(ir->r1), show_ireg(ir->r2));
   case IXOR:
     return format("%s = %s ^ %s", show_ireg(ir->r0), show_ireg(ir->r1), show_ireg(ir->r2));
+  case INOT:
+    return format("%s = not %s", show_ireg(ir->r0), show_ireg(ir->r1));
   case IALLOC:
     return format("%s = alloc %d", show_ireg(ir->r0), ir->imm_int);
   case ILOAD:
