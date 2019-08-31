@@ -296,7 +296,6 @@ typedef struct Block {
   Vector* instrs;
 } Block;
 
-
 typedef struct IR {
   /* r0 = IIMM imm_int
      r0 = ILABEL label
