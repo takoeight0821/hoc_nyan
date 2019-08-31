@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS+=-fno-omit-frame-pointer -g -Wall -std=c11 -I./include
+CFLAGS+=-fno-omit-frame-pointer -g -Wall -std=c11
 SRCS=$(wildcard src/*.c)
 OBJS=$(SRCS:src/%.c=build/g0/%.o)
 G1_ASMS=$(SRCS:src/%.c=build/g1/%.s)
