@@ -97,11 +97,11 @@ char* show_ir(IR* ir) {
   error("unreachable\n");
 }
 
-char* show_block(Block* block) {
+char* show_block(int* inst_count, Block* block) {
   StringBuilder* sb = new_sb();
   sb_puts(sb, format("%s: {\n", block->label));
-  for (int i = 0; i < block->instrs->length; i++) {
-    sb_puts(sb, " ");
+  for (int i = 0; i < block->instrs->length; i++, (*inst_count)++) {
+    sb_puts(sb, format(" [%d] ", *inst_count));
     sb_puts(sb, show_ir(block->instrs->ptr[i]));
     sb_puts(sb, "\n");
   }
@@ -111,9 +111,10 @@ char* show_block(Block* block) {
 
 char* show_ifunc(IFunc* ifunc) {
   StringBuilder* sb = new_sb();
+  int inst_count = 0;
   sb_puts(sb, format("=== %s(%s) ===\n", ifunc->name, ifunc->entry_label));
   for (int i = 0; i < ifunc->blocks->length; i++) {
-    sb_puts(sb, show_block(ifunc->blocks->ptr[i]));
+    sb_puts(sb, show_block(&inst_count, ifunc->blocks->ptr[i]));
     sb_puts(sb, "\n");
   }
   return sb_run(sb);

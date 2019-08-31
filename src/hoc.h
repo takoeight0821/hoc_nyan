@@ -257,6 +257,10 @@ typedef struct IReg {
   bool is_real;
   int id;
   size_t size;
+
+  // for register allocation
+  int def;
+  int last_use;
 } IReg;
 
 enum IRTag {
@@ -343,7 +347,7 @@ typedef struct IFunc {
 // ir.c
 char* show_ireg(IReg* reg);
 char* show_ir(IR* ir);
-char* show_block(Block* block);
+char* show_block(int* inst_count, Block* block);
 char* show_ifunc(IFunc* ifunc);
 
 // node.c
