@@ -1,4 +1,4 @@
-CC=clang
+CC=gcc
 CFLAGS+=-fno-omit-frame-pointer -g -Wall -std=c11
 SRCS=$(wildcard src/*.c)
 OBJS=$(SRCS:src/%.c=build/g0/%.o)
