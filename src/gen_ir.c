@@ -78,7 +78,7 @@ static IR* label(IReg* reg, char* name) {
   return new;
 }
 
-static IR* not(IReg* reg, IReg* val) {
+static IR* bitwise_not(IReg* reg, IReg* val) {
   IR* new = new_ir(INOT);
   new->r0 = reg;
   new->r1 = val;
@@ -239,7 +239,7 @@ static IReg* emit_expr(Node* node) {
   case NNOT: {
     IReg* val = emit_expr(node->expr);
     IReg* reg = new_reg(size_of(type_of(node)));
-    emit_ir(not(reg, val));
+    emit_ir(bitwise_not(reg, val));
     return reg;
   }
   case NAND: {

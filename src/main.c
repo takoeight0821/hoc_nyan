@@ -51,8 +51,9 @@ int main(int argc, char** argv)
   if (use_ir) {
     IProgram* iprog = gen_ir(prog);
     eprintf("%s\n", show_iprog(iprog));
+  } else {
+    gen_x86(prog);
   }
-  gen_x86(prog);
 
   return 0;
 }
