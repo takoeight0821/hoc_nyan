@@ -16,6 +16,26 @@ IR* new_binop_ir(enum IRTag op, IReg* r0, IReg* r1, IReg* r2) {
   return new;
 }
 
+/* count local variable size */
+
+int count_stack_size(IFunc* func) {
+  int size = 0;
+
+  for (int i = 0; i < func->blocks->length; i++) {
+    Block* block = func->blocks->ptr[i];
+
+    for (int i = 0; i < block->instrs->length; i++) {
+      IR* inst = block->instrs->ptr[i];
+
+      if (inst->op == IALLOC) {
+        size += inst->imm_int;
+      }
+    }
+  }
+
+  return size;
+}
+
 /* printing IR */
 char* show_ireg(IReg* reg) {
   return format("$%d(%zu,%d,%d->%d)", reg->id, reg->size, reg->real_reg, reg->def, reg->last_use);

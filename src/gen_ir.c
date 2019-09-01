@@ -340,7 +340,7 @@ static IFunc* emit_func(Function* func) {
   ifunc->has_va_arg = func->has_va_arg;
   ifunc->params = new_vec();
 
-  if (!func->body) {
+  if (func->body) {
     ifunc->blocks = new_vec();
     blocks = ifunc->blocks;
 

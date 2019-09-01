@@ -50,6 +50,17 @@ static void emit_const(Type* type, Node* node) {
 }
 
 static void emit_function(IFunc* func) {
+  if (!func->is_static) {
+    printf(".global %s\n", func->name);
+  }
+  printf("%s:\n", func->name);
+
+  emit("push %%rbp");
+  emit("mov %%rsp, %%rbp");
+  emit("sub %%rsp, %d", count_stack_size(func));
+
+  emit("leave");
+  emit("ret");
 }
 
 void gen_x86(IProgram* prog) {

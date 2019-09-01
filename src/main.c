@@ -52,6 +52,7 @@ int main(int argc, char** argv)
     IProgram* iprog = gen_ir(prog);
     alloc_regs(iprog);
     eprintf("%s\n", show_iprog(iprog));
+    gen_x86(iprog);
   } else {
     emit_x86(prog);
   }

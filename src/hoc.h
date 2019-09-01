@@ -346,6 +346,7 @@ typedef struct IFunc {
 } IFunc;
 
 // ir.c
+int count_stack_size(IFunc* func);
 char* show_ireg(IReg* reg);
 char* show_ir(IR* ir);
 char* show_block(int* inst_count, Block* block);
