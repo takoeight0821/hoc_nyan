@@ -99,6 +99,13 @@ static IR* load(IReg* dst, IReg* src) {
   return new;
 }
 
+static IR* store(IReg* dst, IReg* src) {
+  IR* new = new_ir(ISTORE);
+  new->r1 = dst;
+  new->r2 = src;
+  return new;
+}
+
 static IR* branch(IReg* cond, char* then_label, char* else_label) {
   IR* new = new_ir(IBR);
   new->r1 = cond;
@@ -127,8 +134,10 @@ static IReg* emit_lval(Node* node) {
     emit_ir(label(addr, node->name));
     return addr;
   }
+  default: {
+    bad_token(node->token, "gen_ir error: emit_lval");
   }
-  bad_token(node->token, "gen_ir error: emit_lval");
+  }
   return NULL;
 }
 
@@ -149,6 +158,12 @@ static IReg* emit_expr(Node* node) {
     IReg* addr = emit_lval(node);
     IReg* val = new_reg(size_of(type_of(node)));
     emit_ir(load(val, addr));
+    return val;
+  }
+  case NASSIGN: {
+    IReg* addr = emit_lval(node->lhs);
+    IReg* val = emit_expr(node->rhs);
+    emit_ir(store(addr, val));
     return val;
   }
   case NADD: {
@@ -249,6 +264,10 @@ static IReg* emit_expr(Node* node) {
     emit_ir(new_binop_ir(IAND, reg, lhs, rhs));
     return reg;
   }
+  default: {
+    dump_node(node, 0);
+    error("unimplemented: emit_expr\n");
+  }
   }
 }
 
@@ -261,7 +280,7 @@ static void emit_stmt(Node* node) {
     break;
   }
   case NEXPR_STMT: {
-    emit_expr(node);
+    emit_expr(node->expr);
     break;
   }
   case NRETURN: {
@@ -307,6 +326,9 @@ static void emit_stmt(Node* node) {
 
     in_new_block(end_label);
     break;
+  }
+  default: {
+    error("unimplemented: emit_stmt\n");
   }
   }
 }

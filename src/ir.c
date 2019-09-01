@@ -2,13 +2,6 @@
 
 /* create IR */
 
-IReg* real_reg(Reg reg) {
-  IReg* new = calloc(1, sizeof(IReg));
-  new->id = reg;
-  new->is_real = true;
-  return new;
-}
-
 IR* new_ir(enum IRTag op) {
   IR* new = calloc(1, sizeof(IR));
   new->op = op;
@@ -113,6 +106,12 @@ char* show_ifunc(IFunc* ifunc) {
   StringBuilder* sb = new_sb();
   int inst_count = 0;
   sb_puts(sb, format("=== %s(%s) ===\n", ifunc->name, ifunc->entry_label));
+  sb_puts(sb, "params: ");
+  for (int i = 0; i < ifunc->params->length; i++) {
+    sb_puts(sb, show_ireg(ifunc->params->ptr[i]));
+    sb_puts(sb, " ");
+  }
+  sb_puts(sb, "\n");
   for (int i = 0; i < ifunc->blocks->length; i++) {
     sb_puts(sb, show_block(&inst_count, ifunc->blocks->ptr[i]));
     sb_puts(sb, "\n");

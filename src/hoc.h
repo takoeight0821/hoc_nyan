@@ -254,7 +254,7 @@ typedef struct IProgram {
 } IProgram;
 
 typedef struct IReg {
-  bool is_real;
+  int real_reg;
   int id;
   size_t size;
 
