@@ -18,7 +18,7 @@ IR* new_binop_ir(enum IRTag op, IReg* r0, IReg* r1, IReg* r2) {
 
 /* printing IR */
 char* show_ireg(IReg* reg) {
-  return format("$%d(%zu, %d -> %d)", reg->id, reg->size, reg->def, reg->last_use);
+  return format("$%d(%zu,%d,%d->%d)", reg->id, reg->size, reg->real_reg, reg->def, reg->last_use);
 }
 
 static char* show_args(Vector* args) {

@@ -1,5 +1,8 @@
 #include "hoc.h"
 
+/* static char* regs[9] = { "r10", "r11", "rbx", "r12", "r13", "r14", "r15" }; */
+static int num_regs = 9;
+
 static void set_last_use(IReg* reg, int last_use) {
   if (reg && reg->last_use < last_use) {
     reg->last_use = last_use;
@@ -41,9 +44,32 @@ static Vector* collect_regs(IFunc* func) {
   return regs;
 }
 
+void scan(Vector* regs) {
+  IReg** used = calloc(num_regs, sizeof(IReg*));
+
+  for (int i = 0; i < regs->length; i++) {
+    IReg* reg = regs->ptr[i];
+    bool found = false;
+
+    for (int i = 0; i < num_regs - 1; i++) {
+      if (!(used[i] && reg->def < used[i]->last_use)) {
+        reg->real_reg = i;
+        used[i] = reg;
+        found = true;
+        break;
+      }
+    }
+
+    if (!found)
+      error("error: register allocation %s\n", show_ireg(reg));
+  }
+}
+
 void alloc_regs(IProgram* prog) {
   for (int i = 0; i < prog->ifuncs->length; i++) {
     Vector* regs = collect_regs(prog->ifuncs->ptr[i]);
+
+    scan(regs);
 
     for (int i = 0; i < regs->length; i++) {
       printf("%s ", show_ireg(regs->ptr[i]));
