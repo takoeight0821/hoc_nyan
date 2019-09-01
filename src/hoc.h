@@ -338,6 +338,8 @@ typedef struct IR {
 
 typedef struct IFunc {
   char* name;
+  bool is_static;
+  bool has_va_arg;
   Vector* params;
   Vector* blocks;
   char* entry_label;
@@ -451,3 +453,4 @@ void alloc_regs(IProgram* prog);
 
 // gen_x86.c
 #define NUM_REGS 9
+void gen_x86(IProgram* prog);

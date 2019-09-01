@@ -336,19 +336,25 @@ static void emit_stmt(Node* node) {
 static IFunc* emit_func(Function* func) {
   IFunc* ifunc = calloc(1, sizeof(IFunc));
   ifunc->name = func->name;
+  ifunc->is_static = func->is_static;
+  ifunc->has_va_arg = func->has_va_arg;
   ifunc->params = new_vec();
-  ifunc->blocks = new_vec();
-  blocks = ifunc->blocks;
 
-  for (int i = 0; i < func->params->length; i++) {
-    IReg* reg = new_reg(size_of(type_of(func->params->ptr[i])));
-    vec_push(ifunc->params, reg);
-    assign_var(((Node*)func->params->ptr[i])->name, reg);
+  if (!func->body) {
+    ifunc->blocks = new_vec();
+    blocks = ifunc->blocks;
+
+    for (int i = 0; i < func->params->length; i++) {
+      IReg* reg = new_reg(size_of(type_of(func->params->ptr[i])));
+      vec_push(ifunc->params, reg);
+      assign_var(((Node*)func->params->ptr[i])->name, reg);
+    }
+
+    ifunc->entry_label = new_label("entry");
+    in_new_block(ifunc->entry_label);
+    emit_stmt(func->body);
   }
 
-  ifunc->entry_label = new_label("entry");
-  in_new_block(ifunc->entry_label);
-  emit_stmt(func->body);
   return ifunc;
 }
 
