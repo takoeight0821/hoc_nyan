@@ -41,11 +41,11 @@ __attribute__((format(printf, 1, 2))) static void comment(char *fmt, ...);
 #endif
 
 static void comment(char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  printf("# ");
-  vprintf(fmt, ap);
-  printf("\n");
+  /* va_list ap; */
+  /* va_start(ap, fmt); */
+  /* printf("# "); */
+  /* vprintf(fmt, ap); */
+  /* printf("\n"); */
 }
 
 static void push(Reg src) {
