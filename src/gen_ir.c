@@ -66,7 +66,7 @@ static IR* imm(IReg* reg, int val) {
 static IR* ret(IReg* val) {
   IR* new = calloc(1, sizeof(IR));
   new->op = IRET;
-  new->r0 = val;
+  new->r1 = val;
   return new;
 }
 
@@ -101,7 +101,7 @@ static IR* load(IReg* dst, IReg* src) {
 
 static IR* branch(IReg* cond, char* then_label, char* else_label) {
   IR* new = new_ir(IBR);
-  new->r0 = cond;
+  new->r1 = cond;
   new->then = then_label;
   new->els = else_label;
   return new;

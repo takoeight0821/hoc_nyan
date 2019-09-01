@@ -316,12 +316,12 @@ typedef struct IR {
      r0 = INOT r1
      r0 = IALLOC imm_int
      r0 = ILOAD r1
-     ISTORE r0 r1
-     IMOV r0 r1
+     ISTORE r1 r2
+     IMOV r1 r2
      r0 = ICALL func_name args
-     IBR r0 then els
+     IBR r1 then els
      IJMP jump_to
-     RET r0
+     RET r1
    */
   enum IRTag op;
   int imm_int;
@@ -445,3 +445,6 @@ IR* new_binop_ir(enum IRTag op, IReg* r0, IReg* r1, IReg* r2);
 
 // gen_ir.c
 IProgram* gen_ir(Program* program);
+
+// regalloc.c
+void alloc_regs(IProgram* prog);

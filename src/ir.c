@@ -25,7 +25,7 @@ IR* new_binop_ir(enum IRTag op, IReg* r0, IReg* r1, IReg* r2) {
 
 /* printing IR */
 char* show_ireg(IReg* reg) {
-  return format("$%d(%zu)", reg->id, reg->size);
+  return format("$%d(%zu, %d -> %d)", reg->id, reg->size, reg->def, reg->last_use);
 }
 
 static char* show_args(Vector* args) {
@@ -82,17 +82,17 @@ char* show_ir(IR* ir) {
   case ILOAD:
     return format("%s = load %s", show_ireg(ir->r0), show_ireg(ir->r1));
   case ISTORE:
-    return format("store %s <- %s", show_ireg(ir->r0), show_ireg(ir->r1));
+    return format("store %s <- %s", show_ireg(ir->r1), show_ireg(ir->r2));
   case IMOV:
-    return format("mov %s <- %s", show_ireg(ir->r0), show_ireg(ir->r1));
+    return format("mov %s <- %s", show_ireg(ir->r1), show_ireg(ir->r2));
   case ICALL:
     return format("%s = call %s %s", show_ireg(ir->r0), ir->func_name, show_args(ir->args));
   case IBR:
-    return format("br %s %s %s", show_ireg(ir->r0), ir->then, ir->els);
+    return format("br %s %s %s", show_ireg(ir->r1), ir->then, ir->els);
   case IJMP:
     return format("jmp %s", ir->jump_to);
   case IRET:
-    return format("ret %s", show_ireg(ir->r0));
+    return format("ret %s", show_ireg(ir->r1));
   }
   error("unreachable\n");
 }
