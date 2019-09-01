@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     alloc_regs(iprog);
     eprintf("%s\n", show_iprog(iprog));
   } else {
-    gen_x86(prog);
+    emit_x86(prog);
   }
 
   return 0;

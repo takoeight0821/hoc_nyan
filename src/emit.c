@@ -786,7 +786,7 @@ static void emit_const(Type* type, Node* node) {
   }
 }
 
-void gen_x86(Program* prog) {
+void emit_x86(Program* prog) {
   puts(".intel_syntax noprefix");
 
   puts(".data");

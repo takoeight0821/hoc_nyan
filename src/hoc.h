@@ -386,7 +386,7 @@ typedef enum {
   R11,
 } Reg;
 
-void gen_x86(Program* prog);
+void emit_x86(Program* prog);
 
 // token.c
 void warn_token(Token* tok, char* msg);
@@ -448,3 +448,6 @@ IProgram* gen_ir(Program* program);
 
 // regalloc.c
 void alloc_regs(IProgram* prog);
+
+// gen_x86.c
+#define NUM_REGS 9
