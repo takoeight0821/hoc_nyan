@@ -317,7 +317,7 @@ typedef struct IR {
      r0 = IALLOC imm_int
      r0 = ILOAD r1
      ISTORE r1 r2
-     IMOV r1 r2
+     r0 = IMOV r1
      r0 = ICALL func_name args
      IBR r1 then els
      IJMP jump_to

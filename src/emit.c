@@ -158,6 +158,7 @@ static void emit_node(Node* node) {
   if (!node) {
     return;
   }
+
   switch (node->tag) {
   case NINT:
     comment("start NINT");

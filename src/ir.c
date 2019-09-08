@@ -97,7 +97,7 @@ char* show_ir(IR* ir) {
   case ISTORE:
     return format("store %s <- %s", show_ireg(ir->r1), show_ireg(ir->r2));
   case IMOV:
-    return format("mov %s <- %s", show_ireg(ir->r1), show_ireg(ir->r2));
+    return format("mov %s <- %s", show_ireg(ir->r0), show_ireg(ir->r1));
   case ICALL:
     return format("%s = call %s %s", show_ireg(ir->r0), ir->func_name, show_args(ir->args));
   case IBR:

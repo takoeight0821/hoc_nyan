@@ -65,12 +65,11 @@ void scan(Vector* regs) {
 void alloc_regs(IProgram* prog) {
   for (int i = 0; i < prog->ifuncs->length; i++) {
     Vector* regs = collect_regs(prog->ifuncs->ptr[i]);
-
     scan(regs);
 
     for (int i = 0; i < regs->length; i++) {
-      printf("%s ", show_ireg(regs->ptr[i]));
+      eprintf("%s ", show_ireg(regs->ptr[i]));
     }
-    printf("\n");
+    eprintf("\n");
   }
 }
