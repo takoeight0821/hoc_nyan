@@ -264,6 +264,20 @@ static IReg* emit_expr(Node* node) {
     emit_ir(new_binop_ir(IAND, reg, lhs, rhs));
     return reg;
   }
+  case NOR: {
+    IReg* lhs = emit_expr(node->lhs);
+    IReg* rhs = emit_expr(node->rhs);
+    IReg* reg = new_reg(size_of(type_of(node)));
+    emit_ir(new_binop_ir(IOR, reg, lhs, rhs));
+    return reg;
+  }
+  case NXOR: {
+    IReg* lhs = emit_expr(node->lhs);
+    IReg* rhs = emit_expr(node->rhs);
+    IReg* reg = new_reg(size_of(type_of(node)));
+    emit_ir(new_binop_ir(IXOR, reg, lhs, rhs));
+    return reg;
+  }
   default: {
     dump_node(node, 0);
     error("unimplemented: emit_expr\n");
