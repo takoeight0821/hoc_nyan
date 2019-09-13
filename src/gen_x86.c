@@ -106,11 +106,73 @@ static void emit_ir(IR* ir) {
     emit_mov(get_reg(ir->r0->real_reg, 8), "rax");
     break;
   }
+  case IMOD: {
+    emit_mov("rdx", "0");
+    emit_mov("rax", get_reg(ir->r1->real_reg, 8));
+    emit("div %s", get_reg(ir->r2->real_reg, ir->r2->size));
+    emit_mov(get_reg(ir->r0->real_reg, 8), "rdx");
+    break;
+  }
+  case ILT: {
+    emit("cmp %s, %s", get_reg(ir->r1->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
+    emit("setl al");
+    emit("movzx rax, al");
+    emit_mov(get_reg(ir->r0->real_reg, 8), "rax");
+    break;
+  }
+  case ILE: {
+    emit("cmp %s, %s", get_reg(ir->r1->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
+    emit("setle al");
+    emit("movzx rax, al");
+    emit_mov(get_reg(ir->r0->real_reg, 8), "rax");
+    break;
+  }
+  case IGT: {
+    emit("cmp %s, %s", get_reg(ir->r1->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
+    emit("setg al");
+    emit("movzx rax, al");
+    emit_mov(get_reg(ir->r0->real_reg, 8), "rax");
+    break;
+  }
+  case IGE: {
+    emit("cmp %s, %s", get_reg(ir->r1->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
+    emit("setge al");
+    emit("movzx rax, al");
+    emit_mov(get_reg(ir->r0->real_reg, 8), "rax");
+    break;
+  }
   case IEQ: {
     emit("cmp %s, %s", get_reg(ir->r1->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
     emit("sete al");
     emit("movzx rax, al");
     emit_mov(get_reg(ir->r0->real_reg, 8), "rax");
+    break;
+  }
+  case INE: {
+    emit("cmp %s, %s", get_reg(ir->r1->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
+    emit("sete al");
+    emit("movzx rax, al");
+    emit_mov(get_reg(ir->r0->real_reg, 8), "rax");
+    break;
+  }
+  case IAND: {
+    emit_mov(get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r1->real_reg, ir->r0->size));
+    emit("and %s, %s", get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
+    break;
+  }
+  case IOR: {
+    emit_mov(get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r1->real_reg, ir->r0->size));
+    emit("or %s, %s", get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
+    break;
+  }
+  case IXOR: {
+    emit_mov(get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r1->real_reg, ir->r0->size));
+    emit("xor %s, %s", get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
+    break;
+  }
+  case INOT: {
+    emit_mov(get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r1->real_reg, ir->r0->size));
+    emit("not %s", get_reg(ir->r0->real_reg, ir->r0->size));
     break;
   }
   case IRET: {
