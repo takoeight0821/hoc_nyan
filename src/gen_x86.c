@@ -106,9 +106,30 @@ static void emit_ir(IR* ir) {
     emit_mov(get_reg(ir->r0->real_reg, 8), "rax");
     break;
   }
+  case IEQ: {
+    emit("cmp %s, %s", get_reg(ir->r1->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
+    emit("sete al");
+    emit("movzx rax, al");
+    emit_mov(get_reg(ir->r0->real_reg, 8), "rax");
+    break;
+  }
   case IRET: {
-    emit("mov rax, %s", get_reg(ir->r1->real_reg, 8));
+    emit_mov("rax", get_reg(ir->r1->real_reg, 8));
     emit("jmp %s", func_end_label);
+    break;
+  }
+  case IMOV: {
+    emit_mov(get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r1->real_reg, ir->r0->size));
+    break;
+  }
+  case IBR: {
+    emit("cmp, %s, 0", get_reg(ir->r1->real_reg, ir->r1->size));
+    emit("je %s", ir->els);
+    emit("jmp %s", ir->then);
+    break;
+  }
+  case IJMP: {
+    emit("jmp %s", ir->jump_to);
     break;
   }
   }
