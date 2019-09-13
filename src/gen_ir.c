@@ -106,6 +106,13 @@ static IR* store(IReg* dst, IReg* src) {
   return new;
 }
 
+static IR* move(IReg* dst, IReg* src) {
+  IR* new = new_ir(IMOV);
+  new->r0 = dst;
+  new->r1 = src;
+  return new;
+}
+
 static IR* branch(IReg* cond, char* then_label, char* else_label) {
   IR* new = new_ir(IBR);
   new->r1 = cond;
@@ -276,6 +283,35 @@ static IReg* emit_expr(Node* node) {
     IReg* rhs = emit_expr(node->rhs);
     IReg* reg = new_reg(size_of(type_of(node)));
     emit_ir(new_binop_ir(IXOR, reg, lhs, rhs));
+    return reg;
+  }
+  case NLOGAND: {
+    char* when_false = new_label("when_false");
+    char* when_true = new_label("when_true");
+    char* end = new_label("end");
+
+    IReg* reg = new_reg(size_of(type_of(node)));
+
+    IReg* lhs = emit_expr(node->lhs);
+
+    IReg* zero = new_reg(size_of(type_of(node->lhs)));
+    emit_ir(imm(zero, 0));
+
+    IReg* lhs_cond = new_reg(size_of(type_of(node->lhs)));
+    emit_ir(new_binop_ir(IEQ, lhs_cond, lhs, zero));
+
+    emit_ir(branch(lhs_cond, when_false, when_true));
+
+    in_new_block(when_true);
+    IReg* rhs = emit_expr(node->rhs);
+    emit_ir(move(reg, rhs));
+    emit_ir(jmp(end));
+
+    in_new_block(when_false);
+    emit_ir(imm(reg, 0));
+    emit_ir(jmp(end));
+
+    in_new_block(end);
     return reg;
   }
   default: {
