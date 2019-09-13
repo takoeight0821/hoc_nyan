@@ -7,7 +7,7 @@ static void set_last_use(IReg* reg, int last_use) {
 }
 
 static void set_def(IReg* reg, int def) {
-  if (reg) {
+  if (reg && reg->def == 0) {
     reg->def = def;
   }
 }
