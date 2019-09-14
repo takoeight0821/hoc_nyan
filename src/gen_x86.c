@@ -206,6 +206,7 @@ static void emit_ir(IR* ir) {
     emit("call %s", ir->func_name);
     emit("pop r11");
     emit("pop r10");
+    emit_mov(get_reg(ir->r0->real_reg, 8), "rax");
     break;
   }
   case IRET: {

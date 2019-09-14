@@ -9,6 +9,7 @@ typedef struct VarEnv {
 static int label_id;
 static int reg_id;
 static Block* current_block;
+static char* break_label;
 static Vector* blocks;
 static VarEnv* var_env;
 
@@ -131,6 +132,8 @@ static void emit_ir(IR* ir) {
   vec_push(current_block->instrs, ir);
 }
 
+static IReg* emit_expr(Node* node);
+
 static IReg* emit_lval(Node* node) {
   switch (node->tag) {
   case NVAR: {
@@ -140,6 +143,17 @@ static IReg* emit_lval(Node* node) {
     IReg* addr = new_reg(8);
     emit_ir(label(addr, node->name));
     return addr;
+  }
+  case NMEMBER: {
+    IReg* addr = emit_lval(node->expr);
+    IReg* offset = new_reg(8);
+    emit_ir(imm(offset, field_offset(type_of(node->expr)->fields, node->name)));
+    IReg* reg = new_reg(8);
+    emit_ir(new_binop_ir(IADD, reg, addr, offset));
+    return reg;
+  }
+  case NDEREF: {
+    return emit_expr(node->expr);
   }
   default: {
     bad_token(node->token, "gen_ir error: emit_lval");
@@ -337,6 +351,66 @@ static IReg* emit_expr(Node* node) {
     in_new_block(end);
     return reg;
   }
+  case NCOMMA: {
+    emit_expr(node->lhs);
+    return emit_expr(node->rhs);
+  }
+  case NDEFVAR: {
+    // for initializer
+    return NULL;
+  }
+  case NCALL: {
+    Vector* args = new_vec();
+
+    for (size_t i = 0; i < node->args->length; i++) {
+      IReg* arg = emit_expr(node->args->ptr[i]);
+      vec_push(args, arg);
+    }
+
+    IR* ir = new_ir(ICALL);
+    ir->r0 = new_reg(size_of(type_of(node)));
+    ir->func_name = node->name;
+    ir->args = args;
+
+    return ir->r0;
+  }
+  case NADDR: {
+    return emit_lval(node->expr);
+  }
+  case NDEREF: {
+    IReg* reg = new_reg(size_of(type_of(node)));
+    IReg* addr = emit_expr(node->expr);
+    emit_ir(load(reg, addr));
+    return reg;
+  }
+  case NMEMBER: {
+    IReg* reg = new_reg(size_of(type_of(node)));
+    IReg* addr = emit_lval(node);
+    emit_ir(load(reg, addr));
+    return reg;
+  }
+  case NSIZEOF: {
+    IReg* reg = new_reg(size_of(type_of(node->expr)));
+    emit_ir(imm(reg, size_of(type_of(node->expr))));
+    return reg;
+  }
+  case NCAST: {
+    IReg* reg = new_reg(size_of(type_of(node->expr)));
+    emit_ir(move(reg, emit_expr(node->expr)));
+    return reg;
+  }
+  case NEXPR_STMT: 
+  case NRETURN:
+  case NIF:
+  case NIFELSE:
+  case NWHILE:
+  case NBLOCK:
+  case NFOR:
+  case NSWITCH:
+  case NCASE:
+  case NDEFAULT:
+  case NBREAK:
+    bad_token(node->token, "error: statement cannot appear on here");
   }
   dump_node(node, 0);
   error("unimplemented: emit_expr\n");
@@ -398,9 +472,66 @@ static void emit_stmt(Node* node) {
     in_new_block(end_label);
     break;
   }
-  default: {
-    error("unimplemented: emit_stmt\n");
+  case NCOMMA: {
+    // for initializer
+    warn_token(node->token, "warning(expr_stmt): NCOMMA");
+    emit_expr(node->lhs);
+    emit_expr(node->rhs);
+    break;
   }
+  case NWHILE: {
+    warn_token(node->token, "unimplemented");
+    break;
+  }
+  case NFOR: {
+    warn_token(node->token, "unimplemented");
+    break;
+  }
+  case NSWITCH: {
+    IReg* val = emit_expr(node->expr);
+
+    for (size_t i = 0; i < node->cases->length; i++) {
+      Node* clause = node->cases->ptr[i];
+
+      if (clause->tag == NDEFAULT) {
+        emit_ir(jmp(clause->name));
+      } else {
+        IReg* c_val = emit_expr(clause->expr);
+        IReg* cond = new_reg(4);
+        emit_ir(new_binop_ir(IEQ, cond, val, c_val));
+        char* next = new_label("next");
+        emit_ir(branch(cond, clause->name, next));
+        in_new_block(next);
+      }
+    }
+    char* prev_break = break_label;
+    break_label = new_label("break");
+    emit_stmt(node->body);
+
+    in_new_block(break_label);
+    break_label = prev_break;
+    
+    break;
+  }
+  case NCASE: {
+    warn_token(node->token, "unimplemented");
+    break;
+  }
+  case NDEFAULT: {
+    warn_token(node->token, "unimplemented");
+    break;
+  }
+  case NBREAK: {
+    warn_token(node->token, "unimplemented");
+    break;
+  }
+  case NINT: case NVAR: case NGVAR:
+  case NADD: case NSUB: case NMUL: case NDIV: case NMOD:
+  case NLT: case NLE: case NGT: case NGE: case NEQ: case NNE:
+  case NLOGNOT: case NNOT: case NAND: case NOR: case NXOR:
+  case NLOGAND: case NLOGOR: case NASSIGN: case NCALL:
+  case NADDR: case NDEREF: case NMEMBER: case NSIZEOF: case NCAST:
+    bad_token(node->token, "error: expression cannot appear on here");
   }
 }
 
