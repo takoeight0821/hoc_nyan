@@ -40,13 +40,6 @@ static Vector* collect_regs(IFunc* func) {
   int ic = 0;
   Vector* regs = new_vec();
 
-  for (int i = 0; i < func->params->length; i++) {
-    IReg* param = func->params->ptr[i];
-    set_def(param, ic);
-    set_last_use(param, ic);
-    vec_push(regs, param);
-  }
-
   for (int i = 0; i < func->blocks->length; i++) {
     Block* block = func->blocks->ptr[i];
     three_to_two(block);
