@@ -21,8 +21,8 @@ static char* get_reg(int rn, size_t size) {
   switch (size) {
   case 1: return regs8[rn];
   case 4: return regs32[rn];
-  case 8: return regs[rn];
-  default: error("invalid size register\n");
+  default: return regs[rn]; // sizeが8以上なら配列
+    // FIXME: 型に応じて使うレジスタを決めるように変更
   }
 }
 
@@ -58,11 +58,11 @@ static void emit_const(Type* type, Node* node) {
   }
   case NGVAR: {
     if (size_of(type) == 1) {
-      emit(".byte %s", node->name);
+      emit("db %s", node->name);
     } else if (size_of(type) == 4) {
-      emit(".int %s", node->name);
+      emit("dd %s", node->name);
     } else if (size_of(type) == 8) {
-      emit(".quad %s", node->name);
+      emit("dq %s", node->name);
     } else {
       bad_token(node->token, "emit error: emit_const(invalid size)");
     }
@@ -224,7 +224,9 @@ static void emit_ir(IR* ir) {
     break;
   }
   case IRET: {
-    emit_mov("rax", get_reg(ir->r1->real_reg, 8));
+    if (ir->r1) {
+      emit_mov("rax", get_reg(ir->r1->real_reg, 8));
+    } 
     emit("jmp %s", func_end_label);
     break;
   }
@@ -253,6 +255,11 @@ static void emit_block(Block* block) {
 }
 
 static void emit_function(IFunc* func) {
+  if (!func->blocks) {
+    printf("extern %s\n", func->name);
+    return;
+  }
+
   func_end_label = new_label("end");
 
   if (!func->is_static) {
@@ -265,11 +272,6 @@ static void emit_function(IFunc* func) {
   emit("sub rsp, %d", count_stack_size(func));
   emit("and rsp, -16");
 
-  /* for (size_t i = 0; i < func->params->length; i++) { */
-  /*   IReg* param = func->params->ptr[i]; */
-  /*   emit("mov [%s], %s", get_reg(param->real_reg, 8), argregs[i]); */
-  /* } */
-
   for (size_t i = 0; i < func->blocks->length; i++) {
     emit_block(func->blocks->ptr[i]);
   }
@@ -281,6 +283,12 @@ static void emit_function(IFunc* func) {
 }
 
 void gen_x86(IProgram* prog) {
+  for (GVar* gvar = prog->globals; gvar != NULL; gvar = gvar->next) {
+    if (gvar->is_extern) {
+      printf("extern %s\n", gvar->name);
+    }
+  }
+
   puts("section .data");
   for (GVar* gvar = prog->globals; gvar != NULL; gvar = gvar->next) {
     if (gvar->init && !gvar->is_extern) {

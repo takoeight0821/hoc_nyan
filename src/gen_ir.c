@@ -64,13 +64,6 @@ static IR* imm(IReg* reg, int val) {
   return new;
 }
 
-static IR* ret(IReg* val) {
-  IR* new = calloc(1, sizeof(IR));
-  new->op = IRET;
-  new->r1 = val;
-  return new;
-}
-
 static IR* label(IReg* reg, char* name) {
   IR* new = calloc(1, sizeof(IR));
   new->op = ILABEL;
@@ -183,15 +176,25 @@ static IReg* emit_expr(Node* node) {
   }
   case NVAR: {
     IReg* addr = emit_lval(node);
-    IReg* val = new_reg(size_of(type_of(node)));
-    emit_ir(load(val, addr));
-    return val;
+
+    if (node->type->array_size == 0) {
+      IReg* val = new_reg(size_of(type_of(node)));
+      emit_ir(load(val, addr));
+      return val;
+    } else {
+      return addr;
+    }
   }
   case NGVAR: {
     IReg* addr = emit_lval(node);
-    IReg* val = new_reg(size_of(type_of(node)));
-    emit_ir(load(val, addr));
-    return val;
+
+    if (node->type->array_size == 0) {
+      IReg* val = new_reg(size_of(type_of(node)));
+      emit_ir(load(val, addr));
+      return val;
+    } else {
+      return addr;
+    }
   }
   case NASSIGN: {
     IReg* addr = emit_lval(node->lhs);
@@ -415,8 +418,10 @@ static IReg* emit_expr(Node* node) {
     emit_ir(move(reg, emit_expr(node->expr)));
     return reg;
   }
+  default: {
+    bad_token(node->token, "error: statement cannot appear on here");
   }
-  bad_token(node->token, "error: statement cannot appear on here");
+  }
 }
 
 static void emit_stmt(Node* node) {
@@ -432,8 +437,17 @@ static void emit_stmt(Node* node) {
     break;
   }
   case NRETURN: {
-    IReg* val = emit_expr(node->expr);
-    emit_ir(ret(val));
+    if (node->expr) {
+      IReg* val = emit_expr(node->expr);
+      IR* new = calloc(1, sizeof(IR));
+      new->op = IRET;
+      new->r1 = val;
+      emit_ir(new);
+    } else {
+      IR* new = calloc(1, sizeof(IR));
+      new->op = IRET;
+      emit_ir(new);
+    }
     break;
   }
   case NBLOCK: {
@@ -548,25 +562,47 @@ static IFunc* emit_func(Function* func) {
   ifunc->has_va_arg = func->has_va_arg;
   ifunc->params = new_vec();
 
-  if (func->body) {
-    ifunc->blocks = new_vec();
-    blocks = ifunc->blocks;
-
-    ifunc->entry_label = new_label("entry");
-    in_new_block(ifunc->entry_label);
-
-    for (int i = 0; i < func->params->length; i++) {
-      IReg* reg = new_reg(8);
-      emit_ir(alloc(reg, size_of(type_of(func->params->ptr[i]))));
-      emit_ir(storearg(reg, i, size_of(type_of(func->params->ptr[i]))));
-      vec_push(ifunc->params, reg);
-      assign_var(((Node*)func->params->ptr[i])->name, reg);
-    }
-
-    emit_stmt(func->body);
+  if (!func->body) {
+    return ifunc;
   }
 
+  ifunc->blocks = new_vec();
+  blocks = ifunc->blocks;
+
+  ifunc->entry_label = new_label("entry");
+  in_new_block(ifunc->entry_label);
+
+  for (int i = 0; i < func->params->length; i++) {
+    IReg* reg = new_reg(8);
+    emit_ir(alloc(reg, size_of(type_of(func->params->ptr[i]))));
+    emit_ir(storearg(reg, i, size_of(type_of(func->params->ptr[i]))));
+    vec_push(ifunc->params, reg);
+    assign_var(((Node*)func->params->ptr[i])->name, reg);
+  }
+
+  emit_stmt(func->body);
+
   return ifunc;
+}
+
+IFunc* is_defined_proto(Vector* funcs, char* name) {
+  for (size_t i = 0; i < funcs->length; i++) {
+    IFunc* func = funcs->ptr[i];
+    if (streq(func->name, name) && !func->blocks) {
+      return func;
+    }
+  }
+  return false;
+}
+
+IFunc* is_defined(Vector* funcs, char* name) {
+  for (size_t i = 0; i < funcs->length; i++) {
+    IFunc* func = funcs->ptr[i];
+    if (streq(func->name, name) && func->blocks) {
+      return func;
+    }
+  }
+  return false;
 }
 
 IProgram* gen_ir(Program* program) {
@@ -575,7 +611,17 @@ IProgram* gen_ir(Program* program) {
   ip->ifuncs = new_vec();
 
   for (int i = 0; i < program->funcs->length; i++) {
-    vec_push(ip->ifuncs, emit_func(program->funcs->ptr[i]));
+    Function* func = program->funcs->ptr[i];
+    IFunc* ifunc = emit_func(func);
+
+    // プロトタイプ宣言を上書きする。
+    // gen_x86ですべてのプロトタイプ宣言を外部関数だと解釈する
+    IFunc* proto = is_defined_proto(ip->ifuncs, func->name);
+    if (proto) {
+      memcpy(proto, ifunc, sizeof(IFunc));
+    } else {
+      vec_push(ip->ifuncs, ifunc);
+    }
   }
 
   return ip;

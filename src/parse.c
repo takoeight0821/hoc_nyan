@@ -495,7 +495,7 @@ static Node* string() {
 
   char* str = expect(TSTRING, "string")->str;
   Vector* str_vec = new_vec();
-  char* str_label = format(".string%zu", str_count++);
+  char* str_label = format("Lstring%zu", str_count++); // TODO: -iオプションが渡されているかいないかでラベル名を変える
 
   for (char* c = str; *c != '\0'; c++) {
     vec_push(str_vec, new_int_node(token, *c));

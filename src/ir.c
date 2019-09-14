@@ -107,7 +107,11 @@ char* show_ir(IR* ir) {
   case IJMP:
     return format("jmp %s", ir->jump_to);
   case IRET:
-    return format("ret %s", show_ireg(ir->r1));
+    if (ir->r1) {
+      return format("ret %s", show_ireg(ir->r1));
+    } else {
+      return format("ret");
+    }
   }
   error("unreachable\n");
 }
@@ -125,6 +129,10 @@ char* show_block(int* inst_count, Block* block) {
 }
 
 char* show_ifunc(IFunc* ifunc) {
+  if (!ifunc->blocks) {
+    return format("extern %s", ifunc->name);
+  }
+
   StringBuilder* sb = new_sb();
   int inst_count = 0;
   sb_puts(sb, format("=== %s(%s) ===\n", ifunc->name, ifunc->entry_label));
