@@ -320,7 +320,7 @@ typedef struct IR {
      r0 = INOT r1
      r0 = IALLOC imm_int
      r0 = ILOAD r1
-     ISTOREARG r1 imm_int
+     ISTOREARG r1 imm_int size
      ISTORE r1 r2
      r0 = IMOV r1
      r0 = ICALL func_name args
@@ -330,6 +330,7 @@ typedef struct IR {
    */
   enum IRTag op;
   int imm_int;
+  size_t size;
   IReg* r0;
   IReg* r1;
   IReg* r2;

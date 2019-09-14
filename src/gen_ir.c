@@ -87,6 +87,7 @@ static IR* bitwise_not(IReg* reg, IReg* val) {
 }
 
 static IR* alloc(IReg* reg, int size) {
+  assert(reg->size == 8);
   IR* new = new_ir(IALLOC);
   new->r0 = reg;
   new->imm_int = size;
@@ -100,11 +101,12 @@ static IR* load(IReg* dst, IReg* src) {
   return new;
 }
 
-static IR* storearg(IReg* dst, int arg_index) {
+static IR* storearg(IReg* dst, int arg_index, size_t size) {
   assert(dst);
   IR* new = new_ir(ISTOREARG);
   new->r1 = dst;
   new->imm_int = arg_index;
+  new->size = size;
   return new;
 }
 
@@ -566,9 +568,9 @@ static IFunc* emit_func(Function* func) {
     in_new_block(ifunc->entry_label);
 
     for (int i = 0; i < func->params->length; i++) {
-      IReg* reg = new_reg(size_of(type_of(func->params->ptr[i])));
+      IReg* reg = new_reg(8);
       emit_ir(alloc(reg, size_of(type_of(func->params->ptr[i]))));
-      emit_ir(storearg(reg, i));
+      emit_ir(storearg(reg, i, size_of(type_of(func->params->ptr[i]))));
       vec_push(ifunc->params, reg);
       assign_var(((Node*)func->params->ptr[i])->name, reg);
     }

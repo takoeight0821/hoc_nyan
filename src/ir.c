@@ -95,7 +95,7 @@ char* show_ir(IR* ir) {
   case ILOAD:
     return format("%s = load %s", show_ireg(ir->r0), show_ireg(ir->r1));
   case ISTOREARG:
-    return format("storearg %s <- %d", show_ireg(ir->r1), ir->imm_int);
+    return format("storearg %s <- %d(%zu)", show_ireg(ir->r1), ir->imm_int, ir->size);
   case ISTORE:
     return format("store %s <- %s", show_ireg(ir->r1), show_ireg(ir->r2));
   case IMOV:

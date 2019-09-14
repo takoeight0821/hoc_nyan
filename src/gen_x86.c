@@ -5,6 +5,8 @@ static char* regs32[NUM_REGS] = { "r10d", "r11d", "ebx", "r12d", "r13d", "r14d",
 static char* regs8[NUM_REGS] = { "r10b", "r11b", "bl", "r12b", "r13b", "r14b", "r15b" };
 
 static char* argregs[6] = { "rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+static char* argregs32[6] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
+static char* argregs8[6] = {"di", "si", "dx", "cx", "r8b", "r9b"};
 
 static char* func_end_label;
 static int label_id = 0;
@@ -193,7 +195,14 @@ static void emit_ir(IR* ir) {
     break;
   }
   case ISTOREARG: {
-    emit("mov [%s], %s", get_reg(ir->r1->real_reg, 8), argregs[ir->imm_int]);
+    assert(ir->size == 8 || ir->size == 4 || ir->size == 1);
+    if (ir->size == 8) {
+      emit("mov [%s], %s", get_reg(ir->r1->real_reg, 8), argregs[ir->imm_int]);
+    } else if (ir->size == 4) {
+      emit("mov [%s], %s", get_reg(ir->r1->real_reg, 8), argregs32[ir->imm_int]);
+    } else if (ir->size == 1) {
+      emit("mov [%s], %s", get_reg(ir->r1->real_reg, 8), argregs8[ir->imm_int]);
+    }
     break;
   }
   case ISTORE: {
@@ -266,7 +275,8 @@ static void emit_function(IFunc* func) {
   }
 
   printf("%s:\n", func_end_label);
-  emit("leave");
+  emit("mov rsp, rbp");
+  emit("pop rbp");
   emit("ret");
 }
 
