@@ -197,7 +197,7 @@ static void emit_ir(IR* ir) {
   }
   case ICALL: {
     for (size_t i = 0; i < ir->args->length; i++) {
-      emit_mov(argregs[i], ir->args->ptr[i]);
+      emit_mov(argregs[i], get_reg(((IReg*)ir->args->ptr[i])->real_reg, 8));
     }
 
     emit("push r10");
@@ -219,7 +219,7 @@ static void emit_ir(IR* ir) {
     break;
   }
   case IBR: {
-    emit("cmp, %s, 0", get_reg(ir->r1->real_reg, ir->r1->size));
+    emit("cmp %s, 0", get_reg(ir->r1->real_reg, ir->r1->size));
     emit("je %s", ir->els);
     emit("jmp %s", ir->then);
     break;

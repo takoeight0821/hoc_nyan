@@ -371,6 +371,7 @@ static IReg* emit_expr(Node* node) {
     ir->r0 = new_reg(size_of(type_of(node)));
     ir->func_name = node->name;
     ir->args = args;
+    emit_ir(ir);
 
     return ir->r0;
   }
@@ -514,11 +515,13 @@ static void emit_stmt(Node* node) {
     break;
   }
   case NCASE: {
-    warn_token(node->token, "unimplemented");
+    in_new_block(node->name);
+    emit_stmt(node->body);
     break;
   }
   case NDEFAULT: {
-    warn_token(node->token, "unimplemented");
+    in_new_block(node->name);
+    emit_stmt(node->body);
     break;
   }
   case NBREAK: {

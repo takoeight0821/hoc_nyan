@@ -32,6 +32,12 @@ static Vector* collect_regs(IFunc* func) {
       set_last_use(inst->r1, ic);
       set_last_use(inst->r2, ic);
 
+      if (inst->args) {
+        for (size_t i = 0; i < inst->args->length; i++) {
+          set_last_use(inst->args->ptr[i], ic);
+        }
+      }
+
       if (inst->r0) {
         vec_push(regs, inst->r0);
       }
