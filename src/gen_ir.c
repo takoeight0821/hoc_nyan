@@ -100,7 +100,17 @@ static IR* load(IReg* dst, IReg* src) {
   return new;
 }
 
+static IR* storearg(IReg* dst, int arg_index) {
+  assert(dst);
+  IR* new = new_ir(ISTOREARG);
+  new->r1 = dst;
+  new->imm_int = arg_index;
+  return new;
+}
+
 static IR* store(IReg* dst, IReg* src) {
+  assert(dst);
+  assert(src);
   IR* new = new_ir(ISTORE);
   new->r1 = dst;
   new->r2 = src;
@@ -357,6 +367,9 @@ static IReg* emit_expr(Node* node) {
   }
   case NDEFVAR: {
     // for initializer
+    IReg* new = new_reg(8);
+    emit_ir(alloc(new, size_of(type_of(node))));
+    assign_var(node->name, new);
     return NULL;
   }
   case NCALL: {
@@ -549,14 +562,17 @@ static IFunc* emit_func(Function* func) {
     ifunc->blocks = new_vec();
     blocks = ifunc->blocks;
 
+    ifunc->entry_label = new_label("entry");
+    in_new_block(ifunc->entry_label);
+
     for (int i = 0; i < func->params->length; i++) {
       IReg* reg = new_reg(size_of(type_of(func->params->ptr[i])));
+      emit_ir(alloc(reg, size_of(type_of(func->params->ptr[i]))));
+      emit_ir(storearg(reg, i));
       vec_push(ifunc->params, reg);
       assign_var(((Node*)func->params->ptr[i])->name, reg);
     }
 
-    ifunc->entry_label = new_label("entry");
-    in_new_block(ifunc->entry_label);
     emit_stmt(func->body);
   }
 

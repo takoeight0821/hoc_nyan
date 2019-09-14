@@ -1,5 +1,29 @@
 #include "hoc.h"
 
+// Rewrite `A = B op C` to `A = B; A = A op C`.
+static void three_to_two(Block* block) {
+  Vector* v = new_vec();
+
+  for (size_t i = 0; i < block->instrs->length; i++) {
+    IR* inst = block->instrs->ptr[i];
+
+    if (!inst->r0 || !inst->r1 || !inst->r2) {
+      vec_push(v, inst);
+      continue;
+    }
+
+    IR* ir2 = new_ir(IMOV);
+    ir2->r0 = inst->r0;
+    ir2->r1 = inst->r1;
+    vec_push(v, ir2);
+
+    inst->r1 = inst->r0;
+    vec_push(v, inst);
+  }
+
+  block->instrs = v;
+}
+
 static void set_last_use(IReg* reg, int last_use) {
   if (reg && reg->last_use < last_use) {
     reg->last_use = last_use;
@@ -25,6 +49,7 @@ static Vector* collect_regs(IFunc* func) {
 
   for (int i = 0; i < func->blocks->length; i++) {
     Block* block = func->blocks->ptr[i];
+    three_to_two(block);
 
     for (int j = 0; j < block->instrs->length; j++, ic++) {
       IR* inst = block->instrs->ptr[j];

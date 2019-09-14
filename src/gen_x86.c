@@ -88,12 +88,12 @@ static void emit_ir(IR* ir) {
     break;
   }
   case IADD: {
-    emit_mov(get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r1->real_reg, ir->r0->size));
+    assert(ir->r0 == ir->r1);
     emit("add %s, %s", get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
     break;
   }
   case ISUB: {
-    emit_mov(get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r1->real_reg, ir->r0->size));
+    assert(ir->r0 == ir->r1);
     emit("sub %s, %s", get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
     break;
   }
@@ -160,17 +160,17 @@ static void emit_ir(IR* ir) {
     break;
   }
   case IAND: {
-    emit_mov(get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r1->real_reg, ir->r0->size));
+    assert(ir->r0 == ir->r1);
     emit("and %s, %s", get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
     break;
   }
   case IOR: {
-    emit_mov(get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r1->real_reg, ir->r0->size));
+    assert(ir->r0 == ir->r1);
     emit("or %s, %s", get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
     break;
   }
   case IXOR: {
-    emit_mov(get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r1->real_reg, ir->r0->size));
+    assert(ir->r0 == ir->r1);
     emit("xor %s, %s", get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
     break;
   }
@@ -192,8 +192,13 @@ static void emit_ir(IR* ir) {
     }
     break;
   }
+  case ISTOREARG: {
+    emit("mov [%s], %s", get_reg(ir->r1->real_reg, 8), argregs[ir->imm_int]);
+    break;
+  }
   case ISTORE: {
     emit("mov [%s], %s", get_reg(ir->r1->real_reg, 8), get_reg(ir->r2->real_reg, ir->r2->size));
+    break;
   }
   case ICALL: {
     for (size_t i = 0; i < ir->args->length; i++) {
@@ -250,6 +255,11 @@ static void emit_function(IFunc* func) {
   emit("mov rbp, rsp");
   emit("sub rsp, %d", count_stack_size(func));
   emit("and rsp, -16");
+
+  /* for (size_t i = 0; i < func->params->length; i++) { */
+  /*   IReg* param = func->params->ptr[i]; */
+  /*   emit("mov [%s], %s", get_reg(param->real_reg, 8), argregs[i]); */
+  /* } */
 
   for (size_t i = 0; i < func->blocks->length; i++) {
     emit_block(func->blocks->ptr[i]);

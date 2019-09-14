@@ -94,6 +94,8 @@ char* show_ir(IR* ir) {
     return format("%s = alloc %d", show_ireg(ir->r0), ir->imm_int);
   case ILOAD:
     return format("%s = load %s", show_ireg(ir->r0), show_ireg(ir->r1));
+  case ISTOREARG:
+    return format("storearg %s <- %d", show_ireg(ir->r1), ir->imm_int);
   case ISTORE:
     return format("store %s <- %s", show_ireg(ir->r1), show_ireg(ir->r2));
   case IMOV:

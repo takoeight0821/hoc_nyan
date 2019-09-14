@@ -10,6 +10,8 @@ void free(void* ptr);
 #define false 0
 #define true 1
 
+#define assert(e) e
+
 extern void* stderr;
 
 int printf();
@@ -75,6 +77,7 @@ extern int optind;
 #include <stddef.h>
 #include <libgen.h>
 #include <getopt.h>
+#include <assert.h>
 #endif
 
 typedef struct {
@@ -283,6 +286,7 @@ enum IRTag {
   INOT,
   IALLOC,
   ILOAD,
+  ISTOREARG,
   ISTORE,
   IMOV,
   ICALL,
@@ -316,6 +320,7 @@ typedef struct IR {
      r0 = INOT r1
      r0 = IALLOC imm_int
      r0 = ILOAD r1
+     ISTOREARG r1 imm_int
      ISTORE r1 r2
      r0 = IMOV r1
      r0 = ICALL func_name args
