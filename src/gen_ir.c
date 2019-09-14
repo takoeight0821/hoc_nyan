@@ -337,11 +337,9 @@ static IReg* emit_expr(Node* node) {
     in_new_block(end);
     return reg;
   }
-  default: {
-    dump_node(node, 0);
-    error("unimplemented: emit_expr\n");
   }
-  }
+  dump_node(node, 0);
+  error("unimplemented: emit_expr\n");
 }
 
 static void emit_stmt(Node* node) {
