@@ -29,6 +29,13 @@ test: hoc build_g1 build_g2 FORCE
 	$(CC) -g -static -o test/pp_test.out test/pp_test.s
 	./test/pp_test.out
 
+ir_test: hoc FORCE
+	gcc -I./include -D__hoc__ -E -P test/test.c > test/tmp.c
+	./hoc -i test/tmp.c > test/tmp_hoc_i.s
+	nasm -felf64 test/tmp_hoc_i.s
+	gcc -static -o test/tmp_hoc_i.out test/tmp_hoc_i.o
+	./test/test_hoc_i.out
+
 clean:
 	$(RM) hoc $(OBJS) $(G1_ASMS) $(G2_ASMS) build/g1/hoc build/g2/hoc
 	$(RM) test/pp_test.out

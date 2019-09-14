@@ -399,7 +399,12 @@ void emit_x86(Program* prog);
 
 // token.c
 void warn_token(Token* tok, char* msg);
+#ifdef __hoc__
 void bad_token(Token* tok, char* msg);
+#endif
+#ifndef __hoc__
+noreturn void bad_token(Token* tok, char* msg);
+#endif
 Token* lex(char* path);
 
 // parse.c

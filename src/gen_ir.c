@@ -415,21 +415,8 @@ static IReg* emit_expr(Node* node) {
     emit_ir(move(reg, emit_expr(node->expr)));
     return reg;
   }
-  case NEXPR_STMT: 
-  case NRETURN:
-  case NIF:
-  case NIFELSE:
-  case NWHILE:
-  case NBLOCK:
-  case NFOR:
-  case NSWITCH:
-  case NCASE:
-  case NDEFAULT:
-  case NBREAK:
-    bad_token(node->token, "error: statement cannot appear on here");
   }
-  dump_node(node, 0);
-  error("unimplemented: emit_expr\n");
+  bad_token(node->token, "error: statement cannot appear on here");
 }
 
 static void emit_stmt(Node* node) {
@@ -540,7 +527,8 @@ static void emit_stmt(Node* node) {
     break;
   }
   case NBREAK: {
-    warn_token(node->token, "unimplemented");
+    assert(break_label);
+    emit_ir(jmp(break_label));
     break;
   }
   case NINT: case NVAR: case NGVAR:
