@@ -4,8 +4,12 @@ static char* regs[NUM_REGS] = { "r10", "r11", "rbx", "r12", "r13", "r14", "r15" 
 static char* regs32[NUM_REGS] = { "r10d", "r11d", "ebx", "r12d", "r13d", "r14d", "r15d" };
 static char* regs8[NUM_REGS] = { "r10b", "r11b", "bl", "r12b", "r13b", "r14b", "r15b" };
 
+static char* argregs[6] = { "rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+
 static char* func_end_label;
 static int label_id = 0;
+
+static int stack_pos = 0;
 
 static char* new_label(char* name) {
   return format(".L%s%u", name, label_id++);
@@ -173,6 +177,35 @@ static void emit_ir(IR* ir) {
   case INOT: {
     emit_mov(get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r1->real_reg, ir->r0->size));
     emit("not %s", get_reg(ir->r0->real_reg, ir->r0->size));
+    break;
+  }
+  case IALLOC: {
+    stack_pos += ir->imm_int;
+    emit("lea %s, [rbp - %d]", get_reg(ir->r0->real_reg, 8), stack_pos);
+    break;
+  }
+  case ILOAD: {
+    if (ir->r0->size == 1) {
+      emit("movsx %s, byte [%s]", get_reg(ir->r0->real_reg, 4), get_reg(ir->r1->real_reg, 8));
+    } else {
+      emit("mov %s, [%s]", get_reg(ir->r0->real_reg, ir->r0->size), get_reg(ir->r1->real_reg, 8));
+    }
+    break;
+  }
+  case ISTORE: {
+    emit("mov [%s], %s", get_reg(ir->r1->real_reg, 8), get_reg(ir->r2->real_reg, ir->r2->size));
+  }
+  case ICALL: {
+    for (size_t i = 0; i < ir->args->length; i++) {
+      emit_mov(argregs[i], ir->args->ptr[i]);
+    }
+
+    emit("push r10");
+    emit("push r11");
+    emit("mov rax, 0");
+    emit("call %s", ir->func_name);
+    emit("pop r11");
+    emit("pop r10");
     break;
   }
   case IRET: {
