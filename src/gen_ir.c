@@ -199,6 +199,7 @@ static IReg* emit_expr(Node* node) {
   case NASSIGN: {
     IReg* addr = emit_lval(node->lhs);
     IReg* val = emit_expr(node->rhs);
+    // FIXME: valのsizeをnode->lhsのsizeに置き換えたレジスタを用意する
     emit_ir(store(addr, val));
     return val;
   }
@@ -497,7 +498,26 @@ static void emit_stmt(Node* node) {
     break;
   }
   case NWHILE: {
-    warn_token(node->token, "unimplemented");
+    char* begin = new_label("begin");
+    char* end = new_label("end");
+    char* prev_break = break_label;
+    break_label = end;
+
+    in_new_block(begin);
+    IReg* cond = emit_expr(node->cond);
+    IReg* zero = new_reg(size_of(type_of(node->cond)));
+    emit_ir(imm(zero, 0));
+    IReg* cond1 = new_reg(size_of(type_of(node->cond)));
+    emit_ir(new_binop_ir(IEQ, cond1, cond, zero));
+    char* body = new_label("body");
+    emit_ir(branch(cond1, end, body));
+
+    in_new_block(body);
+    emit_stmt(node->body);
+    emit_ir(jmp(begin));
+
+    in_new_block(end);
+    break_label = prev_break;
     break;
   }
   case NFOR: {

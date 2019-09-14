@@ -156,7 +156,7 @@ static void emit_ir(IR* ir) {
   }
   case INE: {
     emit("cmp %s, %s", get_reg(ir->r1->real_reg, ir->r0->size), get_reg(ir->r2->real_reg, ir->r0->size));
-    emit("sete al");
+    emit("setne al");
     emit("movzx rax, al");
     emit_mov(get_reg(ir->r0->real_reg, 8), "rax");
     break;
