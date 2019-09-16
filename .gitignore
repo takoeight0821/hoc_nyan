@@ -11,6 +11,8 @@ main
 hoc
 .clang_complete
 
+test/tmp.c
+
 *_pp.c
 *.s
 
