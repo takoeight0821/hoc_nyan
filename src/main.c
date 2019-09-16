@@ -50,6 +50,7 @@ int main(int argc, char** argv)
 
   if (use_ir) {
     IProgram* iprog = gen_ir(prog);
+    eprintf("%s\n", show_iprog(iprog));
     alloc_regs(iprog);
     eprintf("%s\n", show_iprog(iprog));
     gen_x86(iprog);

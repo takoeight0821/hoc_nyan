@@ -11,8 +11,6 @@ static char* argregs8[6] = {"di", "si", "dx", "cx", "r8b", "r9b"};
 static char* func_end_label;
 static int label_id = 0;
 
-static int stack_pos = 0;
-
 static char* new_label(char* name) {
   return format(".L%s%u", name, label_id++);
 }
@@ -186,8 +184,6 @@ static void emit_ir(IR* ir) {
     break;
   }
   case IALLOC: {
-    stack_pos += ir->imm_int;
-    emit("lea %s, [rbp - %d]", get_reg(ir->r0->real_reg, 8), stack_pos);
     break;
   }
   case ILOAD: {
@@ -200,6 +196,7 @@ static void emit_ir(IR* ir) {
   }
   case ISTOREARG: {
     assert(ir->size == 8 || ir->size == 4 || ir->size == 1);
+    assert(ir->r1->size == 8);
     if (ir->size == 8) {
       emit("mov [%s], %s", get_reg(ir->r1->real_reg, 8), argregs[ir->imm_int]);
     } else if (ir->size == 4) {
@@ -263,7 +260,6 @@ static void emit_function(IFunc* func) {
     printf("extern %s\n", func->name);
     return;
   }
-  stack_pos = 0;
 
   func_end_label = new_label("end");
 

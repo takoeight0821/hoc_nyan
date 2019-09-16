@@ -320,9 +320,9 @@ typedef struct IR {
      r0 = IXOR r1 r2
      r0 = INOT r1
      r0 = IADDRESS imm_int
-     r0 = IALLOC imm_int
+     IALLOC imm_int
      r0 = ILOAD r1
-     ISTOREARG r1 imm_int size
+     r0 = ISTOREARG imm_int size
      ISTORE r1 r2
      r0 = IMOV r1
      r0 = ICALL func_name args

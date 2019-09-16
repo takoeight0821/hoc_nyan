@@ -93,7 +93,7 @@ char* show_ir(IR* ir) {
   case IADDRESS: 
     return format("%s = address %d", show_ireg(ir->r0), ir->imm_int);
   case IALLOC:
-    return format("%s = alloc %d", show_ireg(ir->r0), ir->imm_int);
+    return format("alloc %d", ir->imm_int);
   case ILOAD:
     return format("%s = load %s", show_ireg(ir->r0), show_ireg(ir->r1));
   case ISTOREARG:
