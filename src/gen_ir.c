@@ -133,6 +133,13 @@ static IR* jmp(char* jump_to) {
   return new;
 }
 
+static IR* address(IReg* addr, int offset) {
+  IR* new = new_ir(IADDRESS);
+  new->r0 = addr;
+  new->imm_int = offset;
+  return new;
+}
+
 static void emit_ir(IR* ir) {
   vec_push(current_block->instrs, ir);
 }
@@ -142,7 +149,9 @@ static IReg* emit_expr(Node* node);
 static IReg* emit_lval(Node* node) {
   switch (node->tag) {
   case NVAR: {
-    return lookup_var(node->name);
+    IReg* addr = new_reg(8);
+    emit_ir(address(addr, node->offset));
+    return addr;
   }
   case NGVAR: {
     IReg* addr = new_reg(8);
@@ -376,7 +385,7 @@ static IReg* emit_expr(Node* node) {
     // for initializer
     IReg* new = new_reg(8);
     emit_ir(alloc(new, size_of(type_of(node))));
-    assign_var(node->name, new);
+    /* assign_var(node->name, new); */
     return NULL;
   }
   case NCALL: {
@@ -431,7 +440,7 @@ static void emit_stmt(Node* node) {
   case NDEFVAR: {
     IReg* new = new_reg(8);
     emit_ir(alloc(new, size_of(type_of(node))));
-    assign_var(node->name, new);
+    /* assign_var(node->name, new); */
     break;
   }
   case NEXPR_STMT: {
