@@ -348,13 +348,13 @@ int main() {
     int a = 42;
     EXPECT(42, a);
   }
-  /* { */
-  /*   int sum = 0; */
-  /*   for (int a = 0; a < 10; a = a + 1) { */
-  /*     sum = sum + a; */
-  /*   } */
-  /*   EXPECT(45, sum); */
-  /* } */
+  {
+    int sum = 0;
+    for (int a = 0; a < 10; a = a + 1) {
+      sum = sum + a;
+    }
+    EXPECT(45, sum);
+  }
   EXPECT(0, static_func());
   EXPECT(10, '\n');
   EXPECT(9, '\t');
@@ -391,14 +391,14 @@ int main() {
     EXPECT(sizeof(a[0]), 12);
     EXPECT(sizeof(a[0][0]), 4);
   }
-  /* { */
-  /*   int i = 1; */
-  /*   int sum = 0; */
-  /*   for (; i < 10;) { */
-  /*     sum += i++; */
-  /*   } */
-  /*   EXPECT(45, sum); */
-  /* } */
+  {
+    int i = 1;
+    int sum = 0;
+    for (; i < 10;) {
+      sum += i++;
+    }
+    EXPECT(45, sum);
+  }
   EXPECT(42, global_d);
   EXPECT('e', global_e);
   EXPECT('h', global_f[0]);

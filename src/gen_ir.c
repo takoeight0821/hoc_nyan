@@ -535,22 +535,32 @@ static void emit_stmt(Node* node) {
     char* prev_break = break_label;
     break_label = end;
 
-    emit_expr(node->init);
+    if (node->init) {
+      emit_expr(node->init);
+    }
 
     in_new_block(begin);
-    IReg* cond = emit_expr(node->cond);
-    IReg* cond1 = new_reg(size_of(type_of(node->cond)));
-    IReg* zero = new_reg(size_of(type_of(node->cond)));
-    emit_ir(imm(zero, 0));
-    emit_ir(new_binop_ir(IEQ, cond1, cond, zero));
 
+    assert(node->cond);
     char* body = new_label("body");
-    emit_ir(branch(cond1, end, body));
+    if (node->cond) {
+      IReg* cond = emit_expr(node->cond);
+      IReg* cond1 = new_reg(size_of(type_of(node->cond)));
+      IReg* zero = new_reg(size_of(type_of(node->cond)));
+      emit_ir(imm(zero, 0));
+      emit_ir(new_binop_ir(IEQ, cond1, cond, zero));
+
+      emit_ir(branch(cond1, end, body));
+    } else {
+      emit_ir(jmp(body));
+    }
 
     in_new_block(body);
     emit_stmt(node->body);
-    emit_expr(node->step);
-    emit_ir(jmp(end));
+    if (node->step) {
+      emit_expr(node->step);
+    }
+    emit_ir(jmp(begin));
 
     in_new_block(end);
     break_label = prev_break;
