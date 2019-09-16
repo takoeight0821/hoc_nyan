@@ -181,6 +181,10 @@ static void emit_ir(IR* ir) {
     emit("not %s", get_reg(ir->r0->real_reg, ir->r0->size));
     break;
   }
+  case IADDRESS: {
+    emit("lea %s, [rbp - %d]", get_reg(ir->r0->real_reg, 8), ir->imm_int);
+    break;
+  }
   case IALLOC: {
     stack_pos += ir->imm_int;
     emit("lea %s, [rbp - %d]", get_reg(ir->r0->real_reg, 8), stack_pos);
@@ -259,6 +263,7 @@ static void emit_function(IFunc* func) {
     printf("extern %s\n", func->name);
     return;
   }
+  stack_pos = 0;
 
   func_end_label = new_label("end");
 

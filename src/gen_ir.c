@@ -199,9 +199,10 @@ static IReg* emit_expr(Node* node) {
   case NASSIGN: {
     IReg* addr = emit_lval(node->lhs);
     IReg* val = emit_expr(node->rhs);
-    // FIXME: valのsizeをnode->lhsのsizeに置き換えたレジスタを用意する
-    emit_ir(store(addr, val));
-    return val;
+    IReg* val1 = new_reg(size_of(type_of(node->lhs)));
+    emit_ir(move(val1, val));
+    emit_ir(store(addr, val1));
+    return val1;
   }
   case NADD: {
     IReg* lhs = emit_expr(node->lhs);
@@ -452,9 +453,12 @@ static void emit_stmt(Node* node) {
     break;
   }
   case NBLOCK: {
+    // FIXME: スコープを正しく切る
+    VarEnv* prev = var_env; 
     for (int i = 0; i < node->stmts->length; i++) {
       emit_stmt(node->stmts->ptr[i]);
     }
+    var_env = prev;
     break;
   }
   case NIF: {
@@ -521,7 +525,31 @@ static void emit_stmt(Node* node) {
     break;
   }
   case NFOR: {
-    warn_token(node->token, "unimplemented");
+    char* begin = new_label("begin");
+    char* end = new_label("end");
+    char* prev_break = break_label;
+    break_label = end;
+
+    emit_expr(node->init);
+
+    in_new_block(begin);
+    IReg* cond = emit_expr(node->cond);
+    IReg* cond1 = new_reg(size_of(type_of(node->cond)));
+    IReg* zero = new_reg(size_of(type_of(node->cond)));
+    emit_ir(imm(zero, 0));
+    IR* c = new_binop_ir(IEQ, cond1, cond, zero);
+
+    char* body = new_label("body");
+    emit_ir(branch(cond1, end, body));
+
+    in_new_block(body);
+    emit_stmt(node->body);
+    emit_expr(node->step);
+    emit_ir(jmp(end));
+
+    in_new_block(end);
+    break_label = prev_break;
+
     break;
   }
   case NSWITCH: {
