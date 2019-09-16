@@ -7,6 +7,8 @@ static char* regs8[NUM_REGS] = { "r10b", "r11b", "bl", "r12b", "r13b", "r14b", "
 static char* argregs[6] = { "rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static char* argregs32[6] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static char* argregs8[6] = {"di", "si", "dx", "cx", "r8b", "r9b"};
+static int numgp;
+#define REGAREA_SIZE 176
 
 static char* func_end_label;
 static int label_id = 0;
@@ -75,6 +77,16 @@ static void emit_mov(char* dst, char* src) {
   if (!streq(dst, src)) {
     emit("mov %s, %s", dst, src);
   }
+}
+
+static void emit_builtin_va_start(IReg* addr) {
+  emit("push rcx");
+  emit("mov rax, %s", get_reg(addr->real_reg, 8));
+  emit("mov dword [rax], %d", numgp * 8);
+  emit("mov dword [rax + 4], 48");
+  emit("lea rcx, [rbp - %d]", REGAREA_SIZE);
+  emit("mov [rax + 16], rcx");
+  emit("pop rcx");
 }
 
 static void emit_ir(IR* ir) {
@@ -211,6 +223,11 @@ static void emit_ir(IR* ir) {
     break;
   }
   case ICALL: {
+    if (streq("__hoc_builtin_va_start", ir->func_name)) {
+      emit_builtin_va_start(ir->args->ptr[0]);
+      break;
+    }
+
     for (size_t i = 0; i < ir->args->length; i++) {
       emit_mov(argregs[i], get_reg(((IReg*)ir->args->ptr[i])->real_reg, 8));
     }
@@ -255,6 +272,28 @@ static void emit_block(Block* block) {
   }
 }
 
+static void set_reg_nums(Vector* params) {
+  numgp = params->length;
+}
+
+static void emit_regsave_area(void) {
+  emit("sub rsp, %d", REGAREA_SIZE);
+  emit("mov [rsp], rdi");
+  emit("mov [rsp + 8], rsi");
+  emit("mov [rsp + 16], rdx");
+  emit("mov [rsp + 24], rcx");
+  emit("mov [rsp + 32], r8");
+  emit("mov [rsp + 40], r9");
+  emit("movaps [rsp + 48], xmm0");
+  emit("movaps [rsp + 64], xmm1");
+  emit("movaps [rsp + 80], xmm2");
+  emit("movaps [rsp + 96], xmm3");
+  emit("movaps [rsp + 112], xmm4");
+  emit("movaps [rsp + 128], xmm5");
+  emit("movaps [rsp + 144], xmm6");
+  emit("movaps [rsp + 160], xmm7");
+}
+
 static void emit_function(IFunc* func) {
   if (!func->blocks) {
     printf("extern %s\n", func->name);
@@ -270,6 +309,12 @@ static void emit_function(IFunc* func) {
 
   emit("push rbp");
   emit("mov rbp, rsp");
+
+  if (func->has_va_arg) {
+    set_reg_nums(func->params);
+    emit_regsave_area();
+  }
+
   emit("sub rsp, %d", count_stack_size(func));
   emit("and rsp, -16");
 

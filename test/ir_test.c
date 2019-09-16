@@ -79,15 +79,15 @@ int no_args(void) {
   return 0;
 }
 
-/* int sum(int count, ...) { */
-/*   int sum = 0; */
-/*   va_list args; */
-/*   va_start(args, count); */
-/*   for (int i = 0; i < count; i++) { */
-/*     sum += va_arg(args, int); */
-/*   } */
-/*   return sum; */
-/* } */
+int sum(int count, ...) {
+  int sum = 0;
+  va_list args;
+  va_start(args, count);
+  for (int i = 0; i < count; i++) {
+    sum += va_arg(args, int);
+  }
+  return sum;
+}
 
 int main() {
   EXPECT(0, 0);
@@ -424,7 +424,7 @@ int main() {
     a[0].x = 42;
     EXPECT(42, a[0].x);
   }
-  /* EXPECT(6, sum(3, 1, 2, 3)); */
+  EXPECT(6, sum(3, 1, 2, 3));
   return 0;
 }
 
