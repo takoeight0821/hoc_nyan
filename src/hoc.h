@@ -466,5 +466,5 @@ IProgram* gen_ir(Program* program);
 void alloc_regs(IProgram* prog);
 
 // gen_x86.c
-#define NUM_REGS 9
+#define NUM_REGS 7
 void gen_x86(IProgram* prog);

@@ -32,6 +32,16 @@ static void set_def(IReg* reg, int def) {
   }
 }
 
+static bool collected(Vector* regs, IReg* reg) {
+  for (size_t i = 0; i < regs->length; i++) {
+    IReg* elem = regs->ptr[i];
+    if (reg->id == elem->id) {
+      return true;
+    }
+  }
+  return false;
+}
+
 static Vector* collect_regs(IFunc* func) {
   int ic = 0;
   Vector* regs = new_vec();
@@ -52,7 +62,7 @@ static Vector* collect_regs(IFunc* func) {
         }
       }
 
-      if (inst->r0) {
+      if (inst->r0 && !collected(regs, inst->r0)) {
         vec_push(regs, inst->r0);
       }
     }
@@ -70,6 +80,7 @@ void scan(Vector* regs) {
 
     for (int i = 0; i < NUM_REGS - 1; i++) {
       if (!(used[i] && reg->def < used[i]->last_use)) {
+        assert(i < NUM_REGS);
         reg->real_reg = i;
         used[i] = reg;
         found = true;
