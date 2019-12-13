@@ -264,6 +264,7 @@ typedef struct IReg {
   // for register allocation
   int def;
   int last_use;
+  bool spill;
 } IReg;
 
 enum IRTag {

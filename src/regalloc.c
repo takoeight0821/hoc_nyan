@@ -71,6 +71,17 @@ static Vector* collect_regs(IFunc* func) {
   return regs;
 }
 
+static int choose_to_spill(IReg **used) {
+  int k = 0;
+  for (int i = 1; i < NUM_REGS; i++) {
+    if (used[k]->last_use < used[i]->last_use) {
+      k = i;
+    }
+  }
+  return k;
+
+}
+
 void scan(Vector* regs) {
   IReg** used = calloc(NUM_REGS, sizeof(IReg*));
 
@@ -88,8 +99,15 @@ void scan(Vector* regs) {
       }
     }
 
-    if (!found)
+    if (!found) {
+      used[NUM_REGS - 1] = reg;
+      int k = choose_to_spill(used);
+      reg->real_reg = k;
+      used[k]->real_reg = NUM_REGS - 1;
+      used[k]->spill = true;
+      used[k] = reg;
       error("error: register allocation %s\n", show_ireg(reg));
+    }
   }
 }
 
@@ -105,5 +123,9 @@ void alloc_regs(IProgram* prog) {
       }
       eprintf("\n");
     } 
+
+    // TODO: Reserve stack area to spilled register
+
+    // TODO: Convert accesses to spilled registers to load and stores
   }
 }
