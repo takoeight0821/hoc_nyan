@@ -1,34 +1,34 @@
 #include "hoc.h"
 
-typedef struct VarEnv {
-  struct VarEnv* next;
-  char* name;
-  IReg* reg;
-} VarEnv;
+// typedef struct VarEnv {
+//   struct VarEnv* next;
+//   char* name;
+//   IReg* reg;
+// } VarEnv;
 
 static int label_id;
 static int reg_id;
 static Block* current_block;
 static char* break_label;
 static Vector* blocks;
-static VarEnv* var_env;
+// static VarEnv* var_env;
 
-static void assign_var(char* name, IReg* reg) {
-  VarEnv* new = calloc(1, sizeof(VarEnv));
-  new->name = name;
-  new->reg = reg;
-  new->next = var_env;
-  var_env = new;
-}
+// static void assign_var(char* name, IReg* reg) {
+//   VarEnv* new = calloc(1, sizeof(VarEnv));
+//   new->name = name;
+//   new->reg = reg;
+//   new->next = var_env;
+//   var_env = new;
+// }
 
-static IReg* lookup_var(char* name) {
-  for (VarEnv* env = var_env; env != NULL; env = env->next) {
-    if (streq(env->name, name)) {
-      return env->reg;
-    }
-  }
-  return NULL;
-}
+// static IReg* lookup_var(char* name) {
+//   for (VarEnv* env = var_env; env != NULL; env = env->next) {
+//     if (streq(env->name, name)) {
+//       return env->reg;
+//     }
+//   }
+//   return NULL;
+// }
 
 static char* new_label(char* name) {
   char* label = format(".L%s%d", name, label_id);
@@ -459,11 +459,11 @@ static void emit_stmt(Node* node) {
   }
   case NBLOCK: {
     // FIXME: スコープを正しく切る
-    VarEnv* prev = var_env; 
+    // VarEnv* prev = var_env; 
     for (int i = 0; i < node->stmts->length; i++) {
       emit_stmt(node->stmts->ptr[i]);
     }
-    var_env = prev;
+    // var_env = prev;
     break;
   }
   case NIF: {
@@ -643,7 +643,7 @@ static IFunc* emit_func(Function* func) {
     emit_ir(address(reg, param->offset));
     emit_ir(storearg(reg, i, size_of(type_of(func->params->ptr[i]))));
     vec_push(ifunc->params, reg);
-    assign_var(((Node*)func->params->ptr[i])->name, reg);
+    // assign_var(((Node*)func->params->ptr[i])->name, reg);
   }
 
   emit_stmt(func->body);

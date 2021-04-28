@@ -66,6 +66,6 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-SHELL
     sudo pacman -Syu --noconfirm
     sudo pacman -S base-devel --noconfirm
-    sudo pacman -S gdb vim bat --noconfirm
+    sudo pacman -S gdb vim bat nasm --noconfirm
   SHELL
 end
