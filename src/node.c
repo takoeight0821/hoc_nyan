@@ -76,9 +76,15 @@ Field *look_struct(Field *fields, char *name) {
 }
 
 Type *field_type(Field *fields, char *name) {
-  return look_struct(fields, name)->type;
+  Field *field = look_struct(fields, name);
+  if (!field)
+    error("unreachable(field_type)");
+  return field->type;
 }
 
 size_t field_offset(Field *fields, char *name) {
-  return look_struct(fields, name)->offset;
+  Field *field = look_struct(fields, name);
+  if (!field)
+    error("unreachable(field_offset)");
+  return field->offset;
 }
