@@ -2,75 +2,75 @@
 
 typedef struct LVar {
   struct LVar *next;
-  char* name;
-  Type* type;
+  char *name;
+  Type *type;
   int offset;
 } LVar;
 
 typedef struct Tag {
-  struct Tag* next;
-  Type* type;
+  struct Tag *next;
+  Type *type;
 } Tag;
 
 typedef struct TypeDef {
-  struct TypeDef* next;
-  char* name;
-  Type* type;
+  struct TypeDef *next;
+  char *name;
+  Type *type;
 } TypeDef;
 
 typedef struct Enum {
-  struct Enum* next;
-  char* name;
-  Node* val;
+  struct Enum *next;
+  char *name;
+  Node *val;
 } Enum;
 
-static Token* tokens;
-static LVar* local_env;
+static Token *tokens;
+static LVar *local_env;
 static size_t local_size;
-static Tag* tag_env;
-static Enum* enum_env;
-static GVar* global_env;
-static TypeDef* typedefs;
+static Tag *tag_env;
+static Enum *enum_env;
+static GVar *global_env;
+static TypeDef *typedefs;
 static size_t str_count;
 
-static Node* new_int_node(Token* token, int i) {
-  Node* node = new_node(NINT, token);
+static Node *new_int_node(Token *token, int i) {
+  Node *node = new_node(NINT, token);
   node->integer = i;
   node->type = int_type();
   return node;
 }
 
-static Node* new_var(Token* tok, char* name, Type* type, size_t offset) {
-  Node* var = new_node(NVAR, tok);
+static Node *new_var(Token *tok, char *name, Type *type, size_t offset) {
+  Node *var = new_node(NVAR, tok);
   var->name = name;
   var->type = type;
   var->offset = offset;
   return var;
 }
 
-static Node* new_gvar(Token* tok, char* name, Type* type) {
-  Node* gvar = new_node(NGVAR, tok);
+static Node *new_gvar(Token *tok, char *name, Type *type) {
+  Node *gvar = new_node(NGVAR, tok);
   gvar->name = name;
   gvar->type = type;
   return gvar;
 }
 
-static Node* find_var(Token* tok, char* name) {
-  for (LVar* env = local_env; env != NULL; env = env->next) {
+static Node *find_var(Token *tok, char *name) {
+  for (LVar *env = local_env; env != NULL; env = env->next) {
     if (streq(name, env->name)) {
       return new_var(tok, env->name, env->type, env->offset);
     }
   }
 
-  for (GVar* env = global_env; env != NULL; env = env->next) {
+  for (GVar *env = global_env; env != NULL; env = env->next) {
     if (streq(name, env->name)) {
       return new_gvar(tok, env->name, env->type);
     }
   }
 
-  for (Enum* env = enum_env; env != NULL; env = env->next) {
+  for (Enum *env = enum_env; env != NULL; env = env->next) {
     if (streq(name, env->name)) {
-      Node* val = clone_node(env->val);
+      Node *val = clone_node(env->val);
       val->token = tok;
       return val;
     }
@@ -80,9 +80,9 @@ static Node* find_var(Token* tok, char* name) {
   return NULL;
 }
 
-static void add_lvar(Token* tok, char* name, Type* ty) {
+static void add_lvar(Token *tok, char *name, Type *ty) {
   local_size += size_of(ty);
-  LVar* lvar = calloc(sizeof(LVar), 1);
+  LVar *lvar = calloc(sizeof(LVar), 1);
   lvar->name = name;
   lvar->type = ty;
   lvar->offset = local_size;
@@ -90,8 +90,9 @@ static void add_lvar(Token* tok, char* name, Type* ty) {
   local_env = lvar;
 }
 
-static void add_gvar(Token* tok, char* name, Type* type, Node* init, Vector* inits) {
-  GVar* gvar = calloc(sizeof(GVar), 1);
+static void add_gvar(Token *tok, char *name, Type *type, Node *init,
+                     Vector *inits) {
+  GVar *gvar = calloc(sizeof(GVar), 1);
   gvar->name = name;
   gvar->type = type;
   gvar->init = init;
@@ -100,16 +101,16 @@ static void add_gvar(Token* tok, char* name, Type* type, Node* init, Vector* ini
   global_env = gvar;
 }
 
-static void add_enum(char* name, int val) {
-  Enum* e = calloc(1, sizeof(Enum));
+static void add_enum(char *name, int val) {
+  Enum *e = calloc(1, sizeof(Enum));
   e->name = name;
   e->val = new_int_node(NULL, val);
   e->next = enum_env;
   enum_env = e;
 }
 
-static void add_typedef(char* name, Type* type) {
-  TypeDef* td = calloc(1, sizeof(TypeDef));
+static void add_typedef(char *name, Type *type) {
+  TypeDef *td = calloc(1, sizeof(TypeDef));
   td->name = name;
   td->type = type;
   td->next = typedefs;
@@ -123,8 +124,8 @@ static void init_typedef(void) {
   add_typedef("long", long_type());
 }
 
-static Type* find_type(char* name) {
-  for (TypeDef* td = typedefs; td != NULL; td = td->next) {
+static Type *find_type(char *name) {
+  for (TypeDef *td = typedefs; td != NULL; td = td->next) {
     if (streq(name, td->name)) {
       return td->type;
     }
@@ -132,8 +133,8 @@ static Type* find_type(char* name) {
   return NULL;
 }
 
-static Type* find_tag(char* tag_name) {
-  for (Tag* tag = tag_env; tag != NULL; tag = tag->next) {
+static Type *find_tag(char *tag_name) {
+  for (Tag *tag = tag_env; tag != NULL; tag = tag->next) {
     if (streq(tag_name, tag->type->tag)) {
       return tag->type;
     }
@@ -141,8 +142,8 @@ static Type* find_tag(char* tag_name) {
   return NULL;
 }
 
-static Node* new_subscript(Token* token, Node* value, Node* index) {
-  Node* node = new_node(NDEREF, token);
+static Node *new_subscript(Token *token, Node *value, Node *index) {
+  Node *node = new_node(NDEREF, token);
   node->expr = new_node(NADD, token);
   node->expr->lhs = value;
   node->expr->rhs = index;
@@ -152,8 +153,9 @@ static Node* new_subscript(Token* token, Node* value, Node* index) {
 /*
  * a op= b -> a = a op b
  */
-static Node* new_assign_node(Token* token, enum NodeTag op, Node* lhs, Node* rhs) {
-  Node* node = new_node(NASSIGN, token);
+static Node *new_assign_node(Token *token, enum NodeTag op, Node *lhs,
+                             Node *rhs) {
+  Node *node = new_node(NASSIGN, token);
   node->lhs = lhs;
   if (op) {
     node->rhs = new_node(op, token);
@@ -165,12 +167,10 @@ static Node* new_assign_node(Token* token, enum NodeTag op, Node* lhs, Node* rhs
   return node;
 }
 
-static void consume() {
-  tokens = tokens->next;
-}
+static void consume() { tokens = tokens->next; }
 
-static Token* peek(size_t i) {
-  Token* t = tokens;
+static Token *peek(size_t i) {
+  Token *t = tokens;
   // i回nextをたどるとi+1個目の要素になる
   for (size_t j = i; j > 0; j--) {
     t = t->next;
@@ -178,17 +178,15 @@ static Token* peek(size_t i) {
   return t;
 }
 
-static enum TokenTag peek_tag(size_t i) {
-  return peek(i)->tag;
-}
+static enum TokenTag peek_tag(size_t i) { return peek(i)->tag; }
 
-static void parse_error(char* expected, Token* actual) {
+static void parse_error(char *expected, Token *actual) {
   bad_token(actual, format("%s expected", expected));
 }
 
-static Token* expect(enum TokenTag tag, char* expected) {
+static Token *expect(enum TokenTag tag, char *expected) {
   if (peek_tag(0) == tag) {
-    Token* t = tokens;
+    Token *t = tokens;
     consume();
     return t;
   }
@@ -196,14 +194,14 @@ static Token* expect(enum TokenTag tag, char* expected) {
   return NULL;
 }
 
-static char* read_ident(void) {
-  Token* token = expect(TIDENT, "ident");
+static char *read_ident(void) {
+  Token *token = expect(TIDENT, "ident");
   return token->ident;
 }
 
-static Token* match(char* name) {
+static Token *match(char *name) {
   if (peek_tag(0) == TRESERVED && streq(peek(0)->ident, name)) {
-    Token* t = peek(0);
+    Token *t = peek(0);
     consume();
     return t;
   } else {
@@ -211,30 +209,30 @@ static Token* match(char* name) {
   }
 }
 
-static int is_typename(Token* t);
-static Node* variable();
-static Node* expr();
-static Node* term();
-static Node* integer();
-static Node* string();
-static Node* add();
-static Node* mul();
-static Node* cast();
-static Node* unary();
-static Node* equality();
-static Node* relational();
-static Node* bit_and();
-static Node* bit_xor();
-static Node* bit_or();
-static Node* logical_and();
-static Node* logical_or();
-static Node* assign();
-static Node* statement();
-static Node* declarator(Type* ty);
+static int is_typename(Token *t);
+static Node *variable();
+static Node *expr();
+static Node *term();
+static Node *integer();
+static Node *string();
+static Node *add();
+static Node *mul();
+static Node *cast();
+static Node *unary();
+static Node *equality();
+static Node *relational();
+static Node *bit_and();
+static Node *bit_xor();
+static Node *bit_or();
+static Node *logical_and();
+static Node *logical_or();
+static Node *assign();
+static Node *statement();
+static Node *declarator(Type *ty);
 
-static void set_field_offset(Type* t) {
+static void set_field_offset(Type *t) {
   size_t offset = 0;
-  for (Field* f = t->fields; f != NULL; f = f->next) {
+  for (Field *f = t->fields; f != NULL; f = f->next) {
     offset = roundup(offset, f->type->align);
     f->offset = offset;
     offset += size_of(f->type);
@@ -245,30 +243,29 @@ static void set_field_offset(Type* t) {
   t->size = roundup(offset, t->align);
 }
 
-static Type* type_specifier();
+static Type *type_specifier();
 
-static Field* read_field() {
+static Field *read_field() {
   match(";");
   if (match("}")) {
     return NULL;
   }
 
-  Node* def = declarator(type_specifier());
-  Field* field = calloc(1, sizeof(Field));
+  Node *def = declarator(type_specifier());
+  Field *field = calloc(1, sizeof(Field));
   field->name = def->name;
   field->type = def->type;
   field->next = read_field();
-
   return field;
 }
 
-static Type* type_specifier() {
+static Type *type_specifier() {
   /* Type* ty; */
 
-  Token* tok;
+  Token *tok;
   if ((tok = match("struct"))) {
-    Type* ty;
-    char* tag = "(noname)";
+    Type *ty;
+    char *tag = "(noname)";
 
     if (peek_tag(0) == TIDENT) {
       tag = peek(0)->ident;
@@ -276,7 +273,7 @@ static Type* type_specifier() {
       if (!ty) {
         ty = new_type(TY_STRUCT, 0);
         ty->tag = tag;
-        Tag* new_tag = calloc(sizeof(Tag), 1);
+        Tag *new_tag = calloc(sizeof(Tag), 1);
         new_tag->type = ty;
         new_tag->next = tag_env;
         tag_env = new_tag;
@@ -306,7 +303,7 @@ static Type* type_specifier() {
     if (match("{")) {
       int val = 0;
       while (true) {
-        char* name = read_ident();
+        char *name = read_ident();
         add_enum(name, val);
         val++;
 
@@ -324,8 +321,9 @@ static Type* type_specifier() {
     }
 
     return int_type();
-  } else if ((peek_tag(0) == TIDENT || peek_tag(0) == TRESERVED) && find_type(peek(0)->ident)) {
-    Type* ty = find_type(peek(0)->ident);
+  } else if ((peek_tag(0) == TIDENT || peek_tag(0) == TRESERVED) &&
+             find_type(peek(0)->ident)) {
+    Type *ty = find_type(peek(0)->ident);
     consume();
     return ty;
   } else {
@@ -333,19 +331,19 @@ static Type* type_specifier() {
   }
 }
 
-static Node* term() {
+static Node *term() {
   if (eq_reserved(peek(0), "(") && !is_typename(peek(1))) {
     consume();
-    Node* node = expr();
+    Node *node = expr();
     if (!match(")")) {
       parse_error(")", peek(0));
     }
     return node;
   } else if (peek_tag(0) == TIDENT && !eq_reserved(peek(1), "(")) {
-    Node* node = variable();
+    Node *node = variable();
     return node;
   } else if (peek_tag(0) == TIDENT) {
-    Node* node = new_node(NCALL, peek(0));
+    Node *node = new_node(NCALL, peek(0));
     node->name = peek(0)->ident;
     node->args = new_vec();
     consume();
@@ -371,27 +369,27 @@ static Node* term() {
   }
 }
 
-static Node* postfix() {
-  Node* node = term();
-  Token* tok;
+static Node *postfix() {
+  Node *node = term();
+  Token *tok;
 
   for (;;) {
     if ((tok = match("."))) {
-      char* name = read_ident();
-      Node* e = new_node(NMEMBER, tok);
+      char *name = read_ident();
+      Node *e = new_node(NMEMBER, tok);
       e->expr = node;
       e->name = name;
       node = e;
     } else if ((tok = match("->"))) {
-      char* name = read_ident();
-      Node* deref = new_node(NDEREF, tok);
+      char *name = read_ident();
+      Node *deref = new_node(NDEREF, tok);
       deref->expr = node;
-      Node* e = new_node(NMEMBER, tok);
+      Node *e = new_node(NMEMBER, tok);
       e->expr = deref;
       e->name = name;
       node = e;
     } else if ((tok = match("["))) {
-      Node* offset = expr();
+      Node *offset = expr();
       if (!match("]")) {
         parse_error("]", peek(0));
       }
@@ -400,9 +398,9 @@ static Node* postfix() {
       /*
        * a++ -> (a = a + 1, a - 1)
        */
-      Node* one = new_int_node(tok, 1);
-      Node* assign = new_assign_node(tok, NADD, node, one);
-      Node* value = new_node(NSUB, tok);
+      Node *one = new_int_node(tok, 1);
+      Node *assign = new_assign_node(tok, NADD, node, one);
+      Node *value = new_node(NSUB, tok);
       value->lhs = node;
       value->rhs = one;
       node = new_node(NCOMMA, tok);
@@ -412,9 +410,9 @@ static Node* postfix() {
       /*
        * a-- -> (a = a - 1, a + 1)
        */
-      Node* one = new_int_node(tok, 1);
-      Node* assign = new_assign_node(tok, NSUB, node, one);
-      Node* value = new_node(NADD, tok);
+      Node *one = new_int_node(tok, 1);
+      Node *assign = new_assign_node(tok, NSUB, node, one);
+      Node *value = new_node(NADD, tok);
       value->lhs = node;
       value->rhs = one;
       node = new_node(NCOMMA, tok);
@@ -426,16 +424,16 @@ static Node* postfix() {
   }
 }
 
-static Node* unary() {
-  Token* tok;
+static Node *unary() {
+  Token *tok;
   if ((tok = match("sizeof"))) {
     if (!match("(")) {
       parse_error("(", peek(0));
     }
-    Node* node;
+    Node *node;
     if (is_typename(peek(0))) {
       // sizeof(type)は計算してしまってNINTノードにする
-      Type* type = type_specifier();
+      Type *type = type_specifier();
       while (match("*")) {
         type = ptr_to(type);
       }
@@ -452,66 +450,70 @@ static Node* unary() {
   } else if (match("+")) {
     return cast();
   } else if ((tok = match("-"))) {
-    Node* node = new_node(NSUB, tok);
+    Node *node = new_node(NSUB, tok);
     node->lhs = new_int_node(tok, 0);
     node->rhs = cast();
     return node;
   } else if ((tok = match("&"))) {
-    Node* node = new_node(NADDR, tok);
+    Node *node = new_node(NADDR, tok);
     node->expr = cast();
     return node;
   } else if ((tok = match("*"))) {
-    Node* node = new_node(NDEREF, tok);
+    Node *node = new_node(NDEREF, tok);
     node->expr = cast();
     return node;
   } else if ((tok = match("!"))) {
-    Node* node = new_node(NLOGNOT, tok);
+    Node *node = new_node(NLOGNOT, tok);
     node->expr = cast();
     return node;
   } else if ((tok = match("~"))) {
-    Node* node = new_node(NNOT, tok);
+    Node *node = new_node(NNOT, tok);
     node->expr = cast();
     return node;
   } else {
-    Node* node = postfix();
+    Node *node = postfix();
     return node;
   }
 }
 
-static Node* variable() {
-  Node* node = find_var(peek(0), read_ident());
+static Node *variable() {
+  Node *node = find_var(peek(0), read_ident());
   return node;
 }
 
-static Node* integer() {
-  Node* node = new_node(NINT, peek(0));
+static Node *integer() {
+  Node *node = new_node(NINT, peek(0));
   node->integer = expect(TINT, "integer")->integer;
   node->type = int_type();
   return node;
 }
 
-static Node* string() {
-  Token* token = peek(0);
+static Node *string() {
+  Token *token = peek(0);
 
-  char* str = expect(TSTRING, "string")->str;
-  Vector* str_vec = new_vec();
-  char* str_label = format("Lstring%zu", str_count++); // TODO: -iオプションが渡されているかいないかでラベル名を変える
+  char *str = expect(TSTRING, "string")->str;
+  Vector *str_vec = new_vec();
+  char *str_label = format(
+      "Lstring%zu",
+      str_count++); // TODO:
+                    // -iオプションが渡されているかいないかでラベル名を変える
 
-  for (char* c = str; *c != '\0'; c++) {
+  for (char *c = str; *c != '\0'; c++) {
     vec_push(str_vec, new_int_node(token, *c));
   }
   vec_push(str_vec, new_int_node(token, 0));
 
-  add_gvar(token, str_label, array_of(char_type(), strlen(str) + 1), NULL, str_vec);
+  add_gvar(token, str_label, array_of(char_type(), strlen(str) + 1), NULL,
+           str_vec);
   return find_var(token, str_label);
 }
 
-static Node* logical_or() {
-  Node* lhs = logical_and();
-  Token* tok;
+static Node *logical_or() {
+  Node *lhs = logical_and();
+  Token *tok;
   for (;;) {
     if ((tok = match("||"))) {
-      Node* node = new_node(NLOGOR, tok);
+      Node *node = new_node(NLOGOR, tok);
       node->lhs = lhs;
       node->rhs = logical_and();
       lhs = node;
@@ -521,12 +523,12 @@ static Node* logical_or() {
   }
 }
 
-static Node* logical_and() {
-  Node* lhs = bit_or();
-  Token* tok;
+static Node *logical_and() {
+  Node *lhs = bit_or();
+  Token *tok;
   for (;;) {
     if ((tok = match("&&"))) {
-      Node* node = new_node(NLOGAND, tok);
+      Node *node = new_node(NLOGAND, tok);
       node->lhs = lhs;
       node->rhs = bit_or();
       lhs = node;
@@ -536,12 +538,12 @@ static Node* logical_and() {
   }
 }
 
-static Node* bit_or() {
-  Node* lhs = bit_xor();
-  Token* token;
+static Node *bit_or() {
+  Node *lhs = bit_xor();
+  Token *token;
   for (;;) {
     if ((token = match("|"))) {
-      Node* node = new_node(NOR, token);
+      Node *node = new_node(NOR, token);
       node->lhs = lhs;
       node->rhs = bit_xor();
       lhs = node;
@@ -551,12 +553,12 @@ static Node* bit_or() {
   }
 }
 
-static Node* bit_xor() {
-  Node* lhs = bit_and();
-  Token* token;
+static Node *bit_xor() {
+  Node *lhs = bit_and();
+  Token *token;
   for (;;) {
     if ((token = match("^"))) {
-      Node* node = new_node(NXOR, token);
+      Node *node = new_node(NXOR, token);
       node->lhs = lhs;
       node->rhs = bit_and();
       lhs = node;
@@ -566,12 +568,12 @@ static Node* bit_xor() {
   }
 }
 
-static Node* bit_and() {
-  Node* lhs = equality();
-  Token* token;
+static Node *bit_and() {
+  Node *lhs = equality();
+  Token *token;
   for (;;) {
     if ((token = match("&"))) {
-      Node* node = new_node(NAND, token);
+      Node *node = new_node(NAND, token);
       node->lhs = lhs;
       node->rhs = equality();
       lhs = node;
@@ -581,17 +583,17 @@ static Node* bit_and() {
   }
 }
 
-static Node* equality() {
-  Node* lhs = relational();
-  Token* tok;
+static Node *equality() {
+  Node *lhs = relational();
+  Token *tok;
   for (;;) {
     if ((tok = match("=="))) {
-      Node* node = new_node(NEQ, tok);
+      Node *node = new_node(NEQ, tok);
       node->lhs = lhs;
       node->rhs = relational();
       lhs = node;
     } else if ((tok = match("!="))) {
-      Node* node = new_node(NNE, tok);
+      Node *node = new_node(NNE, tok);
       node->lhs = lhs;
       node->rhs = relational();
       lhs = node;
@@ -601,27 +603,27 @@ static Node* equality() {
   }
 }
 
-static Node* relational() {
-  Node* lhs = add();
-  Token* tok;
+static Node *relational() {
+  Node *lhs = add();
+  Token *tok;
   for (;;) {
     if ((tok = match("<"))) {
-      Node* node = new_node(NLT, tok);
+      Node *node = new_node(NLT, tok);
       node->lhs = lhs;
       node->rhs = add();
       lhs = node;
     } else if ((tok = match("<="))) {
-      Node* node = new_node(NLE, tok);
+      Node *node = new_node(NLE, tok);
       node->lhs = lhs;
       node->rhs = add();
       lhs = node;
     } else if ((tok = match(">"))) {
-      Node* node = new_node(NGT, tok);
+      Node *node = new_node(NGT, tok);
       node->lhs = lhs;
       node->rhs = add();
       lhs = node;
     } else if ((tok = match(">="))) {
-      Node* node = new_node(NGE, tok);
+      Node *node = new_node(NGE, tok);
       node->lhs = lhs;
       node->rhs = add();
       lhs = node;
@@ -631,18 +633,18 @@ static Node* relational() {
   }
 }
 
-static Node* cast() {
+static Node *cast() {
   if (eq_reserved(peek(0), "(") && is_typename(peek(1))) {
-    Token* token = peek(0);
+    Token *token = peek(0);
     consume();
-    Type* type = type_specifier();
+    Type *type = type_specifier();
     while (match("*")) {
       type = ptr_to(type);
     }
     if (!match(")")) {
       parse_error(")", peek(0));
     }
-    Node* node = new_node(NCAST, token);
+    Node *node = new_node(NCAST, token);
     node->type = type;
     node->expr = cast();
     return node;
@@ -651,22 +653,22 @@ static Node* cast() {
   }
 }
 
-static Node* mul() {
-  Node* lhs = cast();
-  Token* tok;
+static Node *mul() {
+  Node *lhs = cast();
+  Token *tok;
   for (;;) {
     if ((tok = match("*"))) {
-      Node* node = new_node(NMUL, tok);
+      Node *node = new_node(NMUL, tok);
       node->lhs = lhs;
       node->rhs = cast();
       lhs = node;
     } else if ((tok = match("/"))) {
-      Node* node = new_node(NDIV, tok);
+      Node *node = new_node(NDIV, tok);
       node->lhs = lhs;
       node->rhs = cast();
       lhs = node;
     } else if ((tok = match("%"))) {
-      Node* node = new_node(NMOD, tok);
+      Node *node = new_node(NMOD, tok);
       node->lhs = lhs;
       node->rhs = cast();
       lhs = node;
@@ -676,17 +678,17 @@ static Node* mul() {
   }
 }
 
-static Node* add() {
-  Node* lhs = mul();
-  Token* tok;
+static Node *add() {
+  Node *lhs = mul();
+  Token *tok;
   for (;;) {
     if ((tok = match("+"))) {
-      Node* node = new_node(NADD, tok);
+      Node *node = new_node(NADD, tok);
       node->lhs = lhs;
       node->rhs = mul();
       lhs = node;
     } else if ((tok = match("-"))) {
-      Node* node = new_node(NSUB, tok);
+      Node *node = new_node(NSUB, tok);
       node->lhs = lhs;
       node->rhs = mul();
       lhs = node;
@@ -696,9 +698,9 @@ static Node* add() {
   }
 }
 
-static Node* assign() {
-  Node* node = logical_or();
-  Token* token;
+static Node *assign() {
+  Node *node = logical_or();
+  Token *token;
 
   if ((token = match("="))) {
     node = new_assign_node(token, 0, node, assign());
@@ -713,13 +715,13 @@ static Node* assign() {
   return node;
 }
 
-static Node* comma() {
-  Node* lhs = assign();
+static Node *comma() {
+  Node *lhs = assign();
 
-  Token* tok;
+  Token *tok;
   for (;;) {
     if ((tok = match(","))) {
-      Node* node = new_node(NCOMMA, tok);
+      Node *node = new_node(NCOMMA, tok);
       node->lhs = lhs;
       node->rhs = assign();
       lhs = node;
@@ -729,11 +731,9 @@ static Node* comma() {
   }
 }
 
-static Node* expr() {
-  return comma();
-}
+static Node *expr() { return comma(); }
 
-static int is_typename(Token* t) {
+static int is_typename(Token *t) {
   if (eq_reserved(t, "struct")) {
     return 1;
   }
@@ -743,7 +743,7 @@ static int is_typename(Token* t) {
   }
 
   if (t->tag == TIDENT || t->tag == TRESERVED) {
-    for (TypeDef* td = typedefs; td != NULL; td = td->next) {
+    for (TypeDef *td = typedefs; td != NULL; td = td->next) {
       if (streq(t->ident, td->name)) {
         return 1;
       }
@@ -752,7 +752,7 @@ static int is_typename(Token* t) {
   return 0;
 }
 
-static Type* read_type_suffix(Type* base) {
+static Type *read_type_suffix(Type *base) {
   if (!match("[")) {
     return base;
   }
@@ -764,15 +764,17 @@ static Type* read_type_suffix(Type* base) {
   return array_of(base, size);
 }
 
-static Node* direct_decl(Type* ty) {
+static Node *direct_decl(Type *ty) {
   if (peek_tag(0) != TIDENT) {
     parse_error("ident", peek(0));
   }
-  Node* node = new_node(NDEFVAR, peek(0));
+  Node *node = new_node(NDEFVAR, peek(0));
   node->name = peek(0)->ident;
+  /*
   if (find_type(node->name)) {
     bad_token(peek(0), format("%s is a type name.", node->name));
   }
+  */
 
   consume();
 
@@ -781,20 +783,19 @@ static Node* direct_decl(Type* ty) {
   return node;
 }
 
-static Node* declarator(Type* ty) {
+static Node *declarator(Type *ty) {
   while (match("*")) {
     ty = ptr_to(ty);
   }
   return direct_decl(ty);
 }
 
-static Node* read_initializer(Token* token, Node* var);
-static Node* read_init_list(Token* token, Node* var, int i) {
-  Node* node = new_assign_node(token, 0,
-                               new_subscript(token, var, new_int_node(token,i)),
-                               assign());
+static Node *read_initializer(Token *token, Node *var);
+static Node *read_init_list(Token *token, Node *var, int i) {
+  Node *node = new_assign_node(
+      token, 0, new_subscript(token, var, new_int_node(token, i)), assign());
   if (eq_reserved(peek(0), "}")) {
-    Node* comma = new_node(NCOMMA, token);
+    Node *comma = new_node(NCOMMA, token);
     comma->lhs = node;
     comma->rhs = var;
     return comma;
@@ -802,15 +803,15 @@ static Node* read_init_list(Token* token, Node* var, int i) {
   if (!match(",")) {
     parse_error(",", peek(0));
   }
-  Node* comma = new_node(NCOMMA, token);
+  Node *comma = new_node(NCOMMA, token);
   comma->lhs = node;
   comma->rhs = read_init_list(token, var, i + 1);
   return comma;
 }
 
-static Node* read_initializer(Token* token, Node* var) {
+static Node *read_initializer(Token *token, Node *var) {
   if (match("{")) {
-    Node* init = read_init_list(token, var, 0);
+    Node *init = read_init_list(token, var, 0);
     if (!match("}")) {
       parse_error("}", peek(0));
     }
@@ -820,14 +821,14 @@ static Node* read_initializer(Token* token, Node* var) {
   }
 }
 
-static Node* declaration() {
+static Node *declaration() {
   // variable definition
-  Node* decl = declarator(type_specifier());
+  Node *decl = declarator(type_specifier());
   add_lvar(decl->token, decl->name, decl->type);
 
-  Token* tok;
+  Token *tok;
   if ((tok = match("="))) {
-    Node* comma = new_node(NCOMMA, tok);
+    Node *comma = new_node(NCOMMA, tok);
     comma->lhs = decl;
     comma->rhs = read_initializer(tok, find_var(tok, decl->name));
     return comma;
@@ -836,8 +837,8 @@ static Node* declaration() {
   return decl;
 };
 
-static Node* expr_stmt() {
-  Node* node = new_node(NEXPR_STMT, peek(0));
+static Node *expr_stmt() {
+  Node *node = new_node(NEXPR_STMT, peek(0));
   node->expr = expr();
   if (!match(";")) {
     parse_error("expr stmt: ;", peek(0));
@@ -845,16 +846,16 @@ static Node* expr_stmt() {
   return node;
 };
 
-static Node* statement() {
-  Token* tok;
+static Node *statement() {
+  Token *tok;
   if (is_typename(peek(0))) {
-    Node* node = declaration();
+    Node *node = declaration();
     if (!match(";")) {
       parse_error("local variable declaration: ;", peek(0));
     }
     return node;
   } else if ((tok = match("return"))) {
-    Node* node = new_node(NRETURN, tok);
+    Node *node = new_node(NRETURN, tok);
     if (!eq_reserved(peek(0), ";")) {
       node->expr = expr();
     }
@@ -863,7 +864,7 @@ static Node* statement() {
     }
     return node;
   } else if ((tok = match("break"))) {
-    Node* node = new_node(NBREAK, tok);
+    Node *node = new_node(NBREAK, tok);
     if (!match(";")) {
       parse_error("break: ;", peek(0));
     }
@@ -872,28 +873,28 @@ static Node* statement() {
     if (!match("(")) {
       parse_error("(", peek(0));
     }
-    Node* cond = expr();
+    Node *cond = expr();
     if (!match(")")) {
       parse_error(")", peek(0));
     }
 
-    Node* then = statement();
+    Node *then = statement();
 
     if (match("else")) {
-      Node* els = statement();
-      Node* node = new_node(NIFELSE, tok);
+      Node *els = statement();
+      Node *node = new_node(NIFELSE, tok);
       node->cond = cond;
       node->then = then;
       node->els = els;
       return node;
     } else {
-      Node* node = new_node(NIF, tok);
+      Node *node = new_node(NIF, tok);
       node->cond = cond;
       node->then = then;
       return node;
     }
   } else if ((tok = match("while"))) {
-    Node* node = new_node(NWHILE, tok);
+    Node *node = new_node(NWHILE, tok);
 
     if (!match("(")) {
       parse_error("(", peek(0));
@@ -907,9 +908,9 @@ static Node* statement() {
 
     return node;
   } else if ((tok = match("for"))) {
-    Node* node = new_node(NFOR, tok);
+    Node *node = new_node(NFOR, tok);
 
-    LVar* tmp = local_env;
+    LVar *tmp = local_env;
     if (!match("(")) {
       parse_error("(", peek(0));
     }
@@ -934,11 +935,10 @@ static Node* statement() {
       parse_error("for cond: ;", peek(0));
     }
 
-    if (!(eq_reserved(peek(0), ")"))){
+    if (!(eq_reserved(peek(0), ")"))) {
       node->step = expr();
-
     }
-    if(!match(")")) {
+    if (!match(")")) {
       parse_error(")", peek(0));
     }
 
@@ -948,7 +948,7 @@ static Node* statement() {
 
     return node;
   } else if ((tok = match("switch"))) {
-    Node* node = new_node(NSWITCH, tok);
+    Node *node = new_node(NSWITCH, tok);
 
     if (!match("(")) {
       parse_error("(", tok);
@@ -962,7 +962,7 @@ static Node* statement() {
 
     return node;
   } else if ((tok = match("case"))) {
-    Node* node = new_node(NCASE, tok);
+    Node *node = new_node(NCASE, tok);
     node->expr = logical_or(); // TODO: support conditional expression
     if (!match(":")) {
       parse_error(":", tok);
@@ -970,17 +970,17 @@ static Node* statement() {
     node->body = statement();
     return node;
   } else if ((tok = match("default"))) {
-    Node* node = new_node(NDEFAULT, tok);
+    Node *node = new_node(NDEFAULT, tok);
     if (!match(":")) {
       parse_error(":", tok);
     }
     node->body = statement();
     return node;
   } else if ((tok = match("{"))) {
-    Node* node = new_node(NBLOCK, tok);
+    Node *node = new_node(NBLOCK, tok);
     node->stmts = new_vec();
 
-    LVar* tmp = local_env; // start scope
+    LVar *tmp = local_env; // start scope
 
     while (!eq_reserved(peek(0), "}")) {
       vec_push(node->stmts, statement());
@@ -1000,15 +1000,15 @@ static Node* statement() {
 
 static void global_var(void);
 
-static Function* funcdef(bool is_static) {
-  Token* back = peek(0);
-  Type* ret_type = type_specifier();
+static Function *funcdef(bool is_static) {
+  Token *back = peek(0);
+  Type *ret_type = type_specifier();
 
   while (match("*")) {
     ret_type = ptr_to(ret_type);
   }
 
-  char* name = peek(0)->ident;
+  char *name = peek(0)->ident;
 
   if (peek_tag(0) != TIDENT) {
     if (match(";")) {
@@ -1026,8 +1026,8 @@ static Function* funcdef(bool is_static) {
     return NULL;
   }
 
-  Vector* params = new_vec();
-  LVar* tmp = local_env; // start scope
+  Vector *params = new_vec();
+  LVar *tmp = local_env; // start scope
   bool has_va_arg = false;
   local_size = 0;
 
@@ -1037,9 +1037,9 @@ static Function* funcdef(bool is_static) {
   } else {
     for (;;) {
       if (is_typename(peek(0))) {
-        Node* param_decl = declarator(type_specifier()); // NDEFVAR
+        Node *param_decl = declarator(type_specifier()); // NDEFVAR
         add_lvar(param_decl->token, param_decl->name, param_decl->type);
-        Node* param = find_var(param_decl->token, param_decl->name);
+        Node *param = find_var(param_decl->token, param_decl->name);
 
         vec_push(params, param);
         if (match(")"))
@@ -1058,11 +1058,10 @@ static Function* funcdef(bool is_static) {
     }
   }
 
-
   if (match(";")) {
     local_env = tmp; // end scope
 
-    Function* func = calloc(1, sizeof(Function));
+    Function *func = calloc(1, sizeof(Function));
     func->name = name;
     func->ret_type = ret_type;
     func->body = NULL;
@@ -1073,11 +1072,11 @@ static Function* funcdef(bool is_static) {
     return func;
   }
 
-  Node* body = statement();
+  Node *body = statement();
 
   local_env = tmp; // end scope
 
-  Function* func = calloc(1, sizeof(Function));
+  Function *func = calloc(1, sizeof(Function));
   func->name = name;
   func->ret_type = ret_type;
   func->body = body;
@@ -1090,11 +1089,11 @@ static Function* funcdef(bool is_static) {
 }
 
 static void type_alias_def(void) {
-  Type* ty = type_specifier();
+  Type *ty = type_specifier();
   if (peek_tag(0) != TIDENT) {
     parse_error("ident", peek(0));
   }
-  char* tag = peek(0)->ident;
+  char *tag = peek(0)->ident;
   consume();
   ty = read_type_suffix(ty);
   add_typedef(tag, ty);
@@ -1104,21 +1103,21 @@ static void type_alias_def(void) {
 }
 
 static void global_var(void) {
-  Type* type = type_specifier();
+  Type *type = type_specifier();
 
   while (match("*")) {
     type = ptr_to(type);
   }
 
-  Token* tok = peek(0);
-  char* name = read_ident();
+  Token *tok = peek(0);
+  char *name = read_ident();
 
   type = read_type_suffix(type);
 
   if (match("=")) {
     if (match("{")) {
       /* リスト初期化 */
-      Vector* inits = new_vec();
+      Vector *inits = new_vec();
       vec_push(inits, assign());
       while (match(",")) {
         vec_push(inits, assign());
@@ -1139,7 +1138,7 @@ static void global_var(void) {
   }
 }
 
-static Function* toplevel() {
+static Function *toplevel() {
   if (match("typedef")) {
     type_alias_def();
     return NULL;
@@ -1154,16 +1153,16 @@ static Function* toplevel() {
   }
 }
 
-Program* parse(Token* t) {
+Program *parse(Token *t) {
   tokens = t;
 
   init_typedef();
 
-  Program* prog = calloc(1, sizeof(Program));
+  Program *prog = calloc(1, sizeof(Program));
   prog->funcs = new_vec();
 
   while (tokens) {
-    Function* func = toplevel();
+    Function *func = toplevel();
     if (func) {
       vec_push(prog->funcs, func);
     }
