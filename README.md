@@ -3,6 +3,8 @@
 A toy c compiler.
 Tested on Arch Linux.
 
+Based on https://www.sigbus.info/compilerbook
+
 # Build
 
 Run make to build by gcc:
