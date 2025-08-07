@@ -178,7 +178,14 @@ static Token *peek(size_t i) {
   return t;
 }
 
-static enum TokenTag peek_tag(size_t i) { return peek(i)->tag; }
+static enum TokenTag peek_tag(size_t i) { 
+  Token* t = peek(i);
+  if (t) {
+    return t->tag;
+  } else {
+    return -1; // Return -1 for NULL tokens (invalid tag)
+  }
+}
 
 static void parse_error(char *expected, Token *actual) {
   bad_token(actual, format("%s expected", expected));
@@ -734,6 +741,10 @@ static Node *comma() {
 static Node *expr() { return comma(); }
 
 static int is_typename(Token *t) {
+  if (t == NULL) {
+    return 0;
+  }
+
   if (eq_reserved(t, "struct")) {
     return 1;
   }

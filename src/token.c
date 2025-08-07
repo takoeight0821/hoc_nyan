@@ -41,8 +41,12 @@ static void print_line(char* start, char* pos) {
 }
 
 void warn_token(Token* tok, char* msg) {
-  print_line(tok->source, tok->start);
-  eprintf("%s\n", msg);
+  if (tok == NULL) {
+    eprintf("Error at end of file: %s\n", msg);
+  } else {
+    print_line(tok->source, tok->start);
+    eprintf("%s\n", msg);
+  }
 }
 
 void bad_token(Token* tok, char* msg) {

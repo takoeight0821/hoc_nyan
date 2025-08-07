@@ -83,7 +83,7 @@ void sb_destory(StringBuilder* sb) {
 }
 
 bool eq_reserved(Token* token, char* name) {
-  return (token->tag == TRESERVED && streq(token->ident, name));
+  return (token != NULL && token->tag == TRESERVED && streq(token->ident, name));
 }
 
 void dump_token(Token* tok) {
